@@ -1,5 +1,0 @@
-Warning: VLLM API key not found in environment variable 'VLLM_API_KEY' or file '/home/orion/research/agent_memory_paper/ATM-Bench/api_keys/.vllm_key'.
-Warning: VLLM API key not found in environment variable 'VLLM_API_KEY' or file '/home/orion/research/agent_memory_paper/ATM-Bench/api_keys/.vllm_key'.
-Deterministic eval:   0%|          | 0/31 [00:00<?, ?qa/s]Deterministic eval: 100%|██████████| 31/31 [00:00<00:00, 1319.45qa/s]
-ATM (cached 0, failed 0, det 18, llm cached 0, llm failed 0, llm new 13, rerun 13):   0%|          | 0/31 [00:00<?, ?qa/s]ATM (cached 0, failed 0, det 18, llm cached 0, llm failed 0, llm new 13, rerun 13): 100%|██████████| 31/31 [00:00<00:00, 824.90qa/s]
-LLM Judge gpt-5-mini (cached 0, failed 0, new 13, rerun 13):   0%|          | 0/13 [00:00<?, ?qa/s]

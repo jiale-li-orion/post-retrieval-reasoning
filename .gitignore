@@ -1,0 +1,96 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+dist/
+build/
+*.so
+*.o
+
+# --- Virtual environments ---
+.venv/
+.venv*/
+venv/
+venv*/
+*.venv/
+**/.venv/
+
+# --- IDE / editor ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# --- Tool configs ---
+.agents/
+.codex/
+.opencode/
+
+# --- Data (large, not code) ---
+data/
+output/
+**/data/
+**/output/
+
+# --- Third-party repo clones (each has its own git) ---
+ATM-Bench/
+Mnemis/
+OpenViking/
+OpenViking_analysis_report.md
+STALE/
+VerbalR3/
+WritingAIPaper/
+
+# --- AAAI oral example (reference material, not part of this paper) ---
+AAAI_oral_example/
+
+# --- LaTeX build artifacts ---
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+*.lof
+*.lot
+*.dvi
+
+# --- Compiled PDFs ---
+*.pdf
+
+# --- Binary / media ---
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.mp4
+*.avi
+*.docx
+
+# --- Shell / OS ---
+*.bak
+*.tmp
+
+# --- Node / JS ---
+node_modules/
+*.tgz
+
+# --- Experiment run outputs (reproducible from scripts) ---
+**/runs/
+**/logs/
+
+# --- Session / notes ---
+session_log.md
+*.Zone.Identifier
+
+# --- API keys / secrets ---
+api_keys/
+**/api_keys/
+.env
+.env.*
