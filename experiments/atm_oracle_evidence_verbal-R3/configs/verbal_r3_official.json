@@ -1,0 +1,33 @@
+{
+  "protocol_version": "2026-07-05",
+  "reranker": {
+    "model": "0k9d0h1/reranker3b-sft",
+    "revision": "cdf46c85892ebb715cbd6a0b582af35ad5caa96b",
+    "prompt_source": "VerbalR3/utils/reranker_server.py:SplitRAGReranker._process_with_vllm",
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "max_new_tokens": 1024,
+    "seed": 0,
+    "max_parse_retries": 3
+  },
+  "answerer": {
+    "temperature": 0.2,
+    "max_tokens": 1000,
+    "timeout": 180,
+    "max_retries": 3,
+    "request_delay": 1.0,
+    "request_body": {}
+  },
+  "evidence": {
+    "batch_fields": [
+      "type",
+      "timestamp",
+      "location",
+      "short_caption",
+      "caption",
+      "ocr",
+      "tags"
+    ],
+    "niah_field": "niah_evidence_ids"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "count": 31,
+  "correct": 12,
+  "accuracy": 0.3870967741935484,
+  "by_qtype": {
+    "number": {
+      "count": 6,
+      "correct": 1.0,
+      "accuracy": 0.16666666666666666
+    },
+    "list_recall": {
+      "count": 12,
+      "correct": 9.0,
+      "accuracy": 0.75
+    },
+    "open_end": {
+      "count": 13,
+      "correct": 2.0,
+      "accuracy": 0.15384615384615385
+    }
+  }
+}

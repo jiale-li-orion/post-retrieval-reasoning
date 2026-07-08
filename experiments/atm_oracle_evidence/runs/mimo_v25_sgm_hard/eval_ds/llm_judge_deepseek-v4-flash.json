@@ -1,0 +1,145 @@
+[
+  {
+    "id": "de07dd6e-ac2f-4517-a084-e193a3d93601",
+    "question": "During my NeurIPS 2023 North America trip (prior to returning home), list all cities I visited along with the specific dates associated with each location, and provide the total number of cities visited.",
+    "ground_truth": "During your NeurIPS 2023 North America trip (before returning home on 2024-01-01), you visited 5 cities in total: Houston (layovers on 2023-12-09 and 2023-12-15), New Orleans (2023-12-09 to 2023-12-15), Boston (2023-12-15 to 2023-12-19), Cambridge, MA (2023-12-15 to 2023-12-19), and Toronto (2023-12-19 to 2023-12-31).",
+    "prediction": "London: 2023-12-09, New Orleans: 2023-12-09, Houston: 2023-12-15, Boston: 2023-12-15, Cambridge: 2023-12-15, Toronto: 2023-12-19, Mississauga: 2023-12-31. Total cities: 7.",
+    "qtype": "open_end",
+    "accuracy": false,
+    "explanation": "The prediction includes cities (London, Mississauga) not in ground truth, omits some dates/ranges, and states total 7 vs 5. This conflicts with ground truth, so accuracy is false.",
+    "raw_response": "{\n  \"explanation\": \"The prediction includes cities (London, Mississauga) not in ground truth, omits some dates/ranges, and states total 7 vs 5. This conflicts with ground truth, so accuracy is false.\",\n  \"accuracy\": \"false\"\n}",
+    "judge_model": "deepseek-v4-flash"
+  },
+  {
+    "id": "a294b202-3353-4fc4-be18-7abd2a36962c",
+    "question": "How many nights have I stayed in Glasgow during my visits, and in which specific years did those stays occur?",
+    "ground_truth": "6 nights in total. 1 night in 2022, 5 nights in 2024.",
+    "prediction": "3 nights in 2022, 4 nights in 2024",
+    "qtype": "open_end",
+    "accuracy": false,
+    "explanation": "Ground truth states 6 nights total: 1 in 2022, 5 in 2024. Prediction says 3 nights in 2022 and 4 in 2024, totaling 7 nights. Numbers do not match exactly, so accuracy is false.",
+    "raw_response": "{\n  \"explanation\": \"Ground truth states 6 nights total: 1 in 2022, 5 in 2024. Prediction says 3 nights in 2022 and 4 in 2024, totaling 7 nights. Numbers do not match exactly, so accuracy is false.\",\n  \"accuracy\": \"false\"\n}",
+    "judge_model": "deepseek-v4-flash"
+  },
+  {
+    "id": "bb50a272-b5c8-4f0e-8fb5-530b16d73cd9",
+    "question": "During my NeurIPS 2023 trip, I travelled for a period of time. What were the start and end dates of the trip, and what was the total duration from departure until returning home?",
+    "ground_truth": "You departed on 9 December 2023 and returned on 1 January 2024, making the total duration of your NeurIPS 2023 trip 24 days (inclusive).",
+    "prediction": "Start date: 2023-12-09, End date: 2024-01-01, Total duration: 24 days.",
+    "qtype": "open_end",
+    "accuracy": true,
+    "explanation": "The prediction exactly matches the ground truth: start and end dates are identical, and the total duration is correctly stated as 24 days. No conflicts or errors.",
+    "raw_response": "{\n  \"explanation\": \"The prediction exactly matches the ground truth: start and end dates are identical, and the total duration is correctly stated as 24 days. No conflicts or errors.\",\n  \"accuracy\": \"true\"\n}",
+    "judge_model": "deepseek-v4-flash"
+  },
+  {
+    "id": "429b218c-086e-4f77-905e-2951ad92f5d8",
+    "question": "Which hotels have I stayed at in Glasgow, and on what dates?",
+    "ground_truth": "Z Hotel Glasgow: June 23–24, 2022\n\nDoubleTree by Hilton Glasgow Central: November 23–24, 2024\n\nHilton Glasgow: November 24–28, 2024",
+    "prediction": "The Z Hotel Glasgow (June 23-24, 2022), Hilton Glasgow (November 24-27, 2024), DoubleTree by Hilton Glasgow Central (November 23-24, 2024)",
+    "qtype": "open_end",
+    "accuracy": false,
+    "explanation": "The prediction lists the correct hotels but has an incorrect end date for Hilton Glasgow (Nov 24-27 vs Nov 24-28). According to guidelines, numbers must match exactly for math/dates. The mismatch makes accuracy false.",
+    "raw_response": "{\n  \"explanation\": \"The prediction lists the correct hotels but has an incorrect end date for Hilton Glasgow (Nov 24-27 vs Nov 24-28). According to guidelines, numbers must match exactly for math/dates. The mismatch makes accuracy false.\",\n  \"accuracy\": \"false\"\n}",
+    "judge_model": "deepseek-v4-flash"
+  },
+  {
+    "id": "30ad0a48-89ef-46c4-a388-a3c872bd16b8",
+    "question": "Today is July, 1 2025, Help me recall all the acadamic conference I went to in the past two years. (Leave out one-day seminars/workshops)",
+    "ground_truth": "NeurIPS 2023, UKIS 2024, ACL 2024, ECCV 2024, ECAI 2024, BMVC 2024, ROBOVIS 2025, WWW 2025",
+    "prediction": "20231210_111815, 20240701_120945, 20240811_150248, 20240930_132654, 20241021_153837, 20241127_193516, 20250223_100830, 20250428_114056",
+    "qtype": "open_end",
+    "accuracy": false,
+    "explanation": "The prediction consists of timestamps, not conference names as requested. It does not meaningfully answer the question, so it does not match the ground truth.",
+    "raw_response": "{\n  \"explanation\": \"The prediction consists of timestamps, not conference names as requested. It does not meaningfully answer the question, so it does not match the ground truth.\",\n  \"accuracy\": \"false\"\n}",
+    "judge_model": "deepseek-v4-flash"
+  },
+  {
+    "id": "62e3fe3f-f301-47f1-9773-396920861220",
+    "question": "How many times have I visited Newcastle?",
+    "ground_truth": "Only one time.",
+    "prediction": "2",
+    "qtype": "open_end",
+    "accuracy": false,
+    "explanation": "The prediction states 2 visits, but the ground truth says only one time. Numbers must match exactly for accuracy; they do not, so accuracy is false.",
+    "raw_response": "{\n  \"explanation\": \"The prediction states 2 visits, but the ground truth says only one time. Numbers must match exactly for accuracy; they do not, so accuracy is false.\",\n  \"accuracy\": \"false\"\n}",
+    "judge_model": "deepseek-v4-flash"
+  },
+  {
+    "id": "92e4edaa-5b26-44a5-80d2-91acf53b3b9c",
+    "question": "Which Portuguese restaurant did I really like during my visit, and why?",
+    "ground_truth": "Abadia do Porto, you went there twice during your visit.",
+    "prediction": "Abadia do Porto, for its warm, intimate atmosphere and traditional Portuguese cuisine.",
+    "qtype": "open_end",
+    "accuracy": true,
+    "explanation": "The prediction correctly names the restaurant 'Abadia do Porto' matching the ground truth. The additional reason provided does not conflict with the ground truth, so accuracy is true.",
+    "raw_response": "{\n  \"explanation\": \"The prediction correctly names the restaurant 'Abadia do Porto' matching the ground truth. The additional reason provided does not conflict with the ground truth, so accuracy is true.\",\n  \"accuracy\": \"true\"\n}",
+    "judge_model": "deepseek-v4-flash"
+  },
+  {
+    "id": "b6b46633-47a1-4fd6-88c4-42a7677d7fc5",
+    "question": "Which hotels did I stay at in Greater Cairo during my most recent visit?",
+    "ground_truth": "Novotel Cairo Airport, Conrad Cairo and Hilton Pyramids Golf",
+    "prediction": "Novotel Cairo Airport, Sofitel Cairo",
+    "qtype": "open_end",
+    "accuracy": false,
+    "explanation": "Ground truth lists three hotels; prediction lists only one correct (Novotel Cairo Airport) and one incorrect (Sofitel Cairo). Missing two hotels and includes an extra not in ground truth, so fails to cover most objects. Accuracy is false.",
+    "raw_response": "{\n  \"explanation\": \"Ground truth lists three hotels; prediction lists only one correct (Novotel Cairo Airport) and one incorrect (Sofitel Cairo). Missing two hotels and includes an extra not in ground truth, so fails to cover most objects. Accuracy is false.\",\n  \"accuracy\": \"false\"\n}",
+    "judge_model": "deepseek-v4-flash"
+  },
+  {
+    "id": "7665e37d-29a0-4450-8d03-6539122a6b3f",
+    "question": "I recall visiting a dessert shop in Guangzhou on multiple occasions. The shop had an extensive menu, with several hundred items available. On what exact dates did I last visit this dessert shop? What is the name of the shop?",
+    "ground_truth": "The dessert shop is 百花传统甜品店.\nThe most recent visit dates were 27 March 2023 and 19 August 2024.",
+    "prediction": "Unknown",
+    "qtype": "open_end",
+    "accuracy": false,
+    "explanation": "The prediction states 'Unknown', which does not provide any meaningful answer to the question about the shop name and exact dates. The ground truth contains specific information. Since the prediction fails to answer the question, accuracy is false.",
+    "raw_response": "{\n  \"explanation\": \"The prediction states 'Unknown', which does not provide any meaningful answer to the question about the shop name and exact dates. The ground truth contains specific information. Since the prediction fails to answer the question, accuracy is false.\",\n  \"accuracy\": \"false\"\n}",
+    "judge_model": "deepseek-v4-flash"
+  },
+  {
+    "id": "7b24dbf3-dbe0-4382-9e9c-996cf614657e",
+    "question": "Which European countries have I visted?",
+    "ground_truth": "United Kingdom, Spain, Portugal, Hungary, France, Italy.",
+    "prediction": "England, Italy, Spain, France, Portugal, Hungary",
+    "qtype": "open_end",
+    "accuracy": false,
+    "explanation": "The ground truth lists United Kingdom, but the prediction lists England instead. England is not the same sovereign country as the United Kingdom, so the prediction does not cover the ground truth. Therefore accuracy is false.",
+    "raw_response": "{\n  \"explanation\": \"The ground truth lists United Kingdom, but the prediction lists England instead. England is not the same sovereign country as the United Kingdom, so the prediction does not cover the ground truth. Therefore accuracy is false.\",\n  \"accuracy\": \"false\"\n}",
+    "judge_model": "deepseek-v4-flash"
+  },
+  {
+    "id": "0f7fcf11-8516-4756-b791-6e76e8065b14",
+    "question": "Which cities have I visited in France?",
+    "ground_truth": "Marseille, Apt, Pertuis, La Seyne-sur-Mer, Cassis, Toulon, Aubagne, Marignane, Istres, Paris",
+    "prediction": "Marignane, Puyvert, Pertuis, La Seyne-sur-Mer, Cassis, Aubagne, Paris",
+    "qtype": "open_end",
+    "accuracy": true,
+    "explanation": "{\n  \"explanation\": \"Ground truth lists 10 cities visited; prediction includes 6 correct ones (Marignane",
+    "raw_response": "{\n  \"explanation\": \"Ground truth lists 10 cities visited; prediction includes 6 correct ones (Marignane",
+    "judge_model": "deepseek-v4-flash"
+  },
+  {
+    "id": "17b8b612-213a-4ab3-87f9-356b8cf0d7e5",
+    "question": "During my recent trip to Egypt, I remember staying at some Sofitel-branded hotels and having a very good experience. Could you remind me which hotels these were?\nI also recall taking a nice timelapse at one of the hotels, could you help me identify which hotel it was taken at and the ID of that timelapse?",
+    "ground_truth": "The Sofitel hotels you stayed at were Sofitel Winter Palace Luxor and Sofitel Legend Old Cataract Aswan.\nThe timelapse was taken at Sofitel Winter Palace Luxor, and the ID of the timelapse is 20240801_201540.",
+    "prediction": "Sofitel Legend Winter Palace Hotel, Sofitel Legend Old Cataract Aswan Hotel; 20240801_201540",
+    "qtype": "open_end",
+    "accuracy": false,
+    "explanation": "The prediction correctly lists the timelapse ID but fails to identify which hotel the timelapse was taken at, as required by the question. The ground truth specifies it was at Sofitel Winter Palace Luxor, but the prediction only lists hotels and then the ID without association. Therefore, the prediction does not fully cover the ground truth information.",
+    "raw_response": "{\n  \"explanation\": \"The prediction correctly lists the timelapse ID but fails to identify which hotel the timelapse was taken at, as required by the question. The ground truth specifies it was at Sofitel Winter Palace Luxor, but the prediction only lists hotels and then the ID without association. Therefore, the prediction does not fully cover the ground truth information.\",\n  \"accuracy\": \"false\"\n}",
+    "judge_model": "deepseek-v4-flash"
+  },
+  {
+    "id": "361fef09-dbcc-4a68-aed2-187f9728b792",
+    "question": "I just returned from the first day of ECCV 2024. Help me gather all the interesting papers I discovered today and list their titles.",
+    "ground_truth": "Safe-CLIP removing NSFW Concepts from VLM,  Towards Surprising Video Comprehension, Learning Anomalies with Normality Prior for Unsupervised Video Anomaly Detection, 3x2: 3D Object Part Segmentation by 2D Semantic Correspondences, Camera Calibration using a Collimator System, DSMix: Distortion-Induced Sensitivity Map Based Pre-training for No-Reference Image Quality Assessment, EA-VTR: Event-Aware Video-Text Retrieval, PosterLlama: Bridging Design Ability of Language Model to Contents-Aware Layout Generation, CTRLorALTer: Conditional LoRAdapter for Efficient 0-Shot Control & Altering of T2I Models, PreciseControl: Enhancing Text-To-Image Diffusion Models with Fine-Grained Attribute Control, Efficient Pre-Training for Localized Instruction Generation of Videos, Commonly Interesting Images",
+    "prediction": "Safe-CLIP: Removing NSFW Concepts from Vision-and-Language Models, Learning Anomalies with Normality Prior for Unsupervised Video Anomaly Detection, Towards Surprising Video Comprehension, 3x2: 3D Object Part Segmentation by 2D Semantic Correspondences, Camera Calibration using a Collimator System, DSMix: Distortion-Induced Sensitivity Map Based Pre-training for No-Reference Image Quality Assessment, EA-VTR: Event-Aware Video-Text Retrieval, PosterLlama: Bridging Design Ability of Language Model to Contents-Aware Layout Generation, CTRLorAltEr: Conditional LoRA Adapter for Efficient 0-Shot Control & Altering of T2I Models, PreciseControl: Enhancing Text-To-Image Diffusion Models with Fine-Grained Attribute Control, Efficient Pre-Training For Localized Instruction Generation Of Videos, Commonly Interesting Images",
+    "qtype": "open_end",
+    "accuracy": false,
+    "explanation": "{\n  \"explanation\": \"",
+    "raw_response": "{\n  \"explanation\": \"",
+    "judge_model": "deepseek-v4-flash"
+  }
+]

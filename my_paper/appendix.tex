@@ -1,0 +1,154 @@
+\section*{Appendix}
+
+The appendix is organized to keep reproducibility and diagnostic detail outside the main narrative:
+\begin{enumerate}[leftmargin=*]
+    \item Appendix \ref{app:sec:formal-details}: formal details and notation.
+    \item Appendix \ref{app:sec:atm-details}: ATM-Bench data, prompts, evidence views, and evaluation details.
+    \item Appendix \ref{app:sec:stale-details}: STALE data, primitive-role mapping, and evaluation details.
+    \item Appendix \ref{app:sec:error-analysis}: qualitative error taxonomy.
+    \item Appendix \ref{app:sec:additional-results}: additional tables and robustness checks.
+\end{enumerate}
+
+\clearpage
+
+\setcounter{secnumdepth}{1}
+\renewcommand{\thesection}{\Alph{section}}
+\setcounter{section}{0}
+
+\section{Formal Details}
+\label{app:sec:formal-details}
+
+This appendix gives the full proofs for the two formal claims in Section~\ref{sec:framework}.
+
+\subsection{Proof of View Collapse Impossibility}
+\label{app:proof-view-collapse}
+
+Let $D$ be any decoder whose input is only the view $V_q(\mathcal A)$.
+Suppose
+\[
+V_q(\mathcal A_1)=V_q(\mathcal A_2)
+\]
+and
+\[
+\mathcal Z_q(\mathcal A_1)\cap\mathcal Z_q(\mathcal A_2)=\emptyset .
+\]
+For a deterministic decoder, the identical view implies that the decoder outputs the same response $y$ in both evidence worlds.
+If $y$ is evidence-valid for $\mathcal A_1$, then
+\[
+\eta(y)\in \mathcal Z_q(\mathcal A_1).
+\]
+If the same $y$ is evidence-valid for $\mathcal A_2$, then
+\[
+\eta(y)\in \mathcal Z_q(\mathcal A_2).
+\]
+Thus $\eta(y)\in \mathcal Z_q(\mathcal A_1)\cap\mathcal Z_q(\mathcal A_2)$, contradicting the disjointness assumption.
+Therefore, no deterministic view-only decoder can be evidence-valid on both worlds.
+
+For a randomized decoder, the same view induces the same output distribution $p(y\mid V_q)$ in both worlds.
+To be evidence-valid with probability one on $\mathcal A_1$, its support must be contained in
+\[
+\{y:\eta(y)\in\mathcal Z_q(\mathcal A_1)\}.
+\]
+To be evidence-valid with probability one on $\mathcal A_2$, the same support must be contained in
+\[
+\{y:\eta(y)\in\mathcal Z_q(\mathcal A_2)\}.
+\]
+Because $\eta$ is single-valued where defined and the semantic answer sets are disjoint, these two valid-output sets are disjoint.
+No nonempty probability distribution can have support contained in both.
+Hence a randomized view-only decoder also cannot be evidence-valid on both worlds with probability one.
+
+\subsection{Proof of Dynamic Propagation of Binding Error}
+\label{app:proof-dynamic-binding}
+
+We first bound the one-step binding perturbation.
+Since all values in $S_t$ equal $v_t^\star$,
+\[
+\tilde v_t
+=
+\sum_{i\in S_t}\alpha_{ti}v_i
++
+\sum_{i\notin S_t}\alpha_{ti}v_i
+=
+B_t v_t^\star
++
+\sum_{i\notin S_t}\alpha_{ti}v_i .
+\]
+Using $\sum_i\alpha_{ti}=1$, we have
+\[
+\tilde v_t-v_t^\star
+=
+\sum_{i\notin S_t}\alpha_{ti}(v_i-v_t^\star).
+\]
+Taking norms and applying the triangle inequality gives
+\[
+\lVert\tilde v_t-v_t^\star\rVert_2
+\le
+\sum_{i\notin S_t}\alpha_{ti}\lVert v_i-v_t^\star\rVert_2 .
+\]
+By the definition of $D_t$, $\lVert v_i-v_t^\star\rVert_2\le D_t$ for all $i$.
+Hence
+\[
+\lVert\tilde v_t-v_t^\star\rVert_2
+\le
+\sum_{i\notin S_t}\alpha_{ti}D_t
+=
+(1-B_t)D_t .
+\]
+
+Now consider the evaluation-state error:
+\[
+e_{t+1}
+=
+\lVert h_{t+1}-h_{t+1}^\star\rVert_2
+=
+\lVert T_t(h_t,\tilde v_t)-T_t(h_t^\star,v_t^\star)\rVert_2 .
+\]
+By the local Lipschitz condition,
+\[
+e_{t+1}
+\le
+\rho_t\lVert h_t-h_t^\star\rVert_2
++
+\beta_t\lVert\tilde v_t-v_t^\star\rVert_2 .
+\]
+Substituting $e_t=\lVert h_t-h_t^\star\rVert_2$ and the binding perturbation bound yields
+\[
+e_{t+1}
+\le
+\rho_t e_t+\beta_t(1-B_t)D_t .
+\]
+
+It remains to unroll the recurrence.
+Repeated substitution gives
+\[
+\begin{aligned}
+e_T
+\le&
+\left(\prod_{t=0}^{T-1}\rho_t\right)e_0\\
+&+
+\sum_{s=0}^{T-1}
+\left(\prod_{u=s+1}^{T-1}\rho_u\right)
+\beta_s(1-B_s)D_s ,
+\end{aligned}
+\]
+which proves the claim.
+
+\section{ATM-Bench Details}
+\label{app:sec:atm-details}
+
+This appendix will document the ATM-Bench splits, memory processors, answer models, judge models, evidence conditions, prompts, and scoring scripts used in the final experiments.
+
+\section{STALE Details}
+\label{app:sec:stale-details}
+
+This appendix will document the STALE scenario types, probe dimensions, state-validity roles, primitive-stack implementation, and scoring protocol.
+
+\section{Error Analysis}
+\label{app:sec:error-analysis}
+
+This appendix will contain qualitative examples grouped by substrate failure, access failure, selection failure, view-construction failure, and decoder failure.
+
+\section{Additional Results}
+\label{app:sec:additional-results}
+
+This appendix will contain additional tables, robustness checks, judge agreement analyses, and ablations.

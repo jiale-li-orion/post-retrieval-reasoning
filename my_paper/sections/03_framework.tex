@@ -1,0 +1,192 @@
+\section{Post-Recall Evidence Evaluation}
+\label{sec:framework}
+
+We study memory-based question answering after the relevant evidence has been recalled.
+The point is not that retrieval is unimportant: retrieval determines whether the needed evidence is available.
+Our focus is the next stage.
+Once evidence is available, the system must expose a decision-sufficient view, bind the relevant variables, execute the required operations, and produce an answer whose denotation is valid under the evidence.
+We refer to retrieval-side mechanisms as \emph{access geometry} and post-recall reasoning mechanisms as \emph{evaluation algebra}.
+
+\subsection{Evidence-Defined Validity}
+\label{subsec:evidence-validity}
+
+Let memory be a finite typed evidence structure $\mathcal A=(E,R_1,\ldots,R_m)$, where $E$ is a set of evidence items and the relations $R_j$ range over items, entities, timestamps, sources, amounts, statuses, locations, events, and states.
+Relations may include attributes such as $\mathsf{amount}(e,a)$, $\mathsf{status}(e,s)$, and $\mathsf{time}(e,t)$, as well as structural edges such as $\mathsf{newer\text{-}than}(e_i,e_j)$, $\mathsf{overrides}(e_i,e_j)$, $\mathsf{same\text{-}event}(e_i,e_j)$, and $\mathsf{contradicts}(e_i,e_j)$.
+
+A query $q$ induces a semantic answer relation $\varphi_q$.
+The evidence-defined answer set is
+\begin{equation}
+\mathcal Z_q(\mathcal A)=\{z\in\mathcal Z:\mathcal A\models\varphi_q(z)\},
+\label{eq:semantic-answer-set}
+\end{equation}
+where $\mathcal Z$ may contain entities, numbers, records, lists, state decisions, claim sets, or structured tuples.
+A natural-language response $y\in\Sigma^\ast$ is evaluated through a partial semantic projection $\eta:\Sigma^\ast\rightharpoonup\mathcal Z$.
+The answer is evidence-valid iff
+\begin{equation}
+\eta(y)\in\mathcal Z_q(\mathcal A).
+\label{eq:evidence-valid}
+\end{equation}
+This target is independent of surface fluency: the model is correct only when its output denotes an element of the evidence-defined answer set.
+
+Let an access module return a query-conditioned substructure $\mathcal A_q=R_{\mathsf{access}}(q,\mathcal A)\preceq\mathcal A$.
+Let $\mathcal A_q^\star$ denote a sufficient evidence substructure for answering $q$.
+We call access oracle when $\mathcal A_q^\star\preceq \mathcal A_q$.
+Post-recall evaluation studies the conditional regime in which oracle evidence is present.
+Successful answering then requires
+\begin{equation}
+\mathsf{Success}
+=
+\mathsf{AccessOK}
+\land
+\mathsf{ViewOK}
+\land
+\mathsf{EvalOK}.
+\label{eq:success-factor}
+\end{equation}
+Our experiments condition on $\mathsf{AccessOK}$ and measure the remaining failures due to view insufficiency and evaluation error.
+
+\subsection{Decision-Sufficient Views}
+\label{subsec:decision-sufficient-views}
+
+The recalled evidence is not consumed by the model as $\mathcal A_q$.
+It is exposed through a view and a serialization,
+\begin{equation}
+\mathcal A_q
+\xrightarrow{\mathsf{View}_q}
+S_q
+\xrightarrow{\mathsf{Ser}_q}
+V_q .
+\label{eq:view-pipeline}
+\end{equation}
+The view decides which fields, timestamps, statuses, source identifiers, modality markers, and relations are exposed.
+The serialization decides whether these elements appear as flat text, source-indexed records, a table, explicit relation triples, state slots, or a tool trace.
+
+A view can include all retrieved evidence and still be insufficient for the decision.
+
+\paragraph{Definition 1 (Decision-sufficient view).}
+A view $V_q$ is decision-sufficient for query $q$ if, for any two evidence structures $\mathcal A_1,\mathcal A_2$,
+\begin{equation}
+V_q(\mathcal A_1)=V_q(\mathcal A_2)
+\Longrightarrow
+\mathcal Z_q(\mathcal A_1)=\mathcal Z_q(\mathcal A_2).
+\label{eq:view-sufficient}
+\end{equation}
+
+The contrapositive is the useful part.
+If
+\begin{equation}
+V_q(\mathcal A_1)=V_q(\mathcal A_2),
+\qquad
+\mathcal Z_q(\mathcal A_1)\cap\mathcal Z_q(\mathcal A_2)=\emptyset,
+\label{eq:view-collapse}
+\end{equation}
+then no decoder observing only $V_q$ can be correct on both worlds.
+The decoder receives the same input in two worlds that require disjoint semantic answers.
+Thus, answer-relevant distinctions lost by the view are unrecoverable from the view alone.
+
+\paragraph{Proposition 1 (View collapse impossibility).}
+If Equation~\ref{eq:view-collapse} holds, no deterministic or randomized decoder that observes only $V_q$ can be evidence-valid on both $\mathcal A_1$ and $\mathcal A_2$ with probability one.
+The proof is in Appendix~\ref{app:proof-view-collapse}.
+
+This is the first nontrivial bottleneck after recall.
+The problem is not whether the evidence exists somewhere in memory, but whether the exposed view preserves the variables and relations needed by the query.
+A flat text view may be decision-sufficient for a single-field lookup, but insufficient for temporal override, source-priority resolution, contradiction handling, or abstention under missingness.
+We therefore treat view sufficiency as a query-view property, not as a global property of a format.
+
+Operationally, our benchmark pairs each query with a gold evaluation program.
+The program specifies the fields, relations, and state variables required for the answer.
+This lets us estimate whether a view is decision-sufficient by checking whether it exposes the required variables in a usable form.
+
+\subsection{Dynamic Propagation of Binding Error}
+\label{subsec:dynamic-binding}
+
+Post-recall evaluation often requires binding multiple variables before applying an operator: a receipt to an amount, a booking to a date range, an old record to an update, a claim to its source, or a conflicting item to a priority rule.
+Attention provides soft alignment, not discrete binding.
+At evaluation step $t$, let the model read a soft-bound value with attention weights $\alpha_{ti}\ge0$ and $\sum_i\alpha_{ti}=1$:
+\begin{equation}
+\tilde v_t=\sum_i \alpha_{ti}v_i .
+\label{eq:soft-bound-value}
+\end{equation}
+Let $S_t$ be the correct support set for the variable needed at step $t$, suppose all values in $S_t$ share the target value $v_t^\star$, and define the binding mass
+\begin{equation}
+B_t=\sum_{i\in S_t}\alpha_{ti},
+\qquad
+D_t=\max_i\lVert v_i-v_t^\star\rVert_2 .
+\label{eq:binding-mass}
+\end{equation}
+
+The important question is not the static perturbation alone, but how it propagates through a multi-step evaluation trajectory.
+Let
+\begin{equation}
+h_{t+1}=T_t(h_t,\tilde v_t),
+\qquad
+h_{t+1}^{\star}=T_t(h_t^\star,v_t^\star),
+\label{eq:evaluation-dynamics}
+\end{equation}
+where $h_t$ is the actual decision state and $h_t^\star$ is the ideal state under correct binding.
+Define $e_t=\lVert h_t-h_t^\star\rVert_2$.
+Assume the local update is Lipschitz in the current state and the bound variable:
+\begin{equation}
+\lVert T_t(h,v)-T_t(h',v')\rVert_2
+\le
+\rho_t\lVert h-h'\rVert_2+\beta_t\lVert v-v'\rVert_2 .
+\label{eq:transition-lipschitz}
+\end{equation}
+
+\paragraph{Proposition 2 (Dynamic propagation of binding error).}
+Under the above conditions,
+\begin{equation}
+e_{t+1}
+\le
+\rho_t e_t+\beta_t(1-B_t)D_t .
+\label{eq:dynamic-one-step}
+\end{equation}
+Consequently,
+\begin{equation}
+\begin{aligned}
+e_T
+\le&
+\left(\prod_{t=0}^{T-1}\rho_t\right)e_0\\
+&+
+\sum_{s=0}^{T-1}
+\left(\prod_{u=s+1}^{T-1}\rho_u\right)
+\beta_s(1-B_s)D_s .
+\end{aligned}
+\label{eq:dynamic-unrolled}
+\end{equation}
+The proof is in Appendix~\ref{app:proof-dynamic-binding}.
+
+This bound is the main theoretical prediction.
+Post-recall errors should not merely depend on whether evidence was recalled.
+They should depend on the length and stability of the evaluation trajectory.
+When $\rho_t<1$, binding errors are damped; when $\rho_t\approx1$, they accumulate; when $\rho_t>1$, early binding errors may be amplified.
+Therefore, under oracle evidence, error should increase with binding count, operator count, override depth, conflict degree, and missingness decisions.
+This motivates the complexity sweeps in Section~\ref{sec:atm}.
+
+The same bound also explains why structured views and harnesses can help.
+A structured view can increase $B_t$ by making the correct support easier to identify.
+A decision-state view can reduce $T$ by exposing the operands needed for evaluation.
+An operator harness can remove unstable computation from the model trajectory and execute it externally.
+
+\subsection{Decision State and Harnessed Evaluation}
+\label{subsec:decision-state-harness}
+
+A decision state is the set of typed variables needed by the gold evaluation program.
+For lookup queries, this may be one field.
+For temporal, conflict, or aggregation queries, it may include candidate records, stale records, timestamps, source priorities, override edges, conflict flags, missingness indicators, and numeric operands.
+The purpose of a decision state is not to preserve all recalled text, but to preserve the variables needed for the answer.
+
+Language models produce proposal distributions over strings, $p_\theta(y\mid q,V_q)$.
+Evidence semantics defines which denotations are valid, $\eta(y)\in\mathcal Z_q(\mathcal A)$.
+Prompting, chain-of-thought, and scratchpads reshape the proposal distribution.
+They may improve the internal trajectory, but they do not enforce evidence validity.
+
+Harnessed evaluation changes the interface.
+Operator harnesses execute discrete operations such as $\mathsf{sum}$, $\mathsf{count}$, $\mathsf{latest}$, $\mathsf{override}$, $\mathsf{join}$, and status comparison.
+Verifier harnesses reject candidates that violate source, type, timestamp, relation, support, or missingness constraints.
+The verifier does not merely prefer correct answers; it deletes invalid ones.
+When no proposal survives, the system should abstain, not from uncertainty, but from evidence-level non-authorization.
+
+This distinction guides the empirical design.
+Prompting-only methods are tested as proposal-shaping baselines.
+Operator and verifier harnesses are tested as evaluation-centric interventions that either externalize unstable operations or restrict admissible outputs.

@@ -1,0 +1,36 @@
+\section{Introduction}
+\label{sec:introduction}
+
+Large language model (LLM) agents are moving from single-session assistants to persistent systems that act across long horizons, multiple tasks, and evolving user states.
+In such settings, future decisions depend on past interaction: user preferences, task commitments, tool outcomes, failed attempts, environmental changes, and previously learned procedures.
+Scaling the context window is an incomplete solution.
+Even when longer histories can be provided, relevant information may be buried, outdated, displaced by irrelevant context, or present but unused.
+Long-horizon agents therefore need mechanisms that make past interaction usable at decision time.
+
+Recent work has made substantial progress on this problem by externalizing interaction history into reusable substrates: user states, episodic records, relational stores, graphs, semantic workspaces, skills, rules, and compressed experience artifacts.
+Experience-compression frameworks make this trend explicit: raw interaction traces can be compressed into artifacts at different abstraction levels, trading specificity for reusability and lower context cost \cite{zhang2026experiencecompressionspectrumunifying}.
+Runtime access has also moved beyond flat top-$k$ retrieval.
+Modern systems combine retrieval with reranking, graph traversal, hierarchical selection, source reading, tool execution, workspace navigation, and trace-based attribution.
+These mechanisms improve the geometry of access: they make relevant artifacts easier to locate, select, and expose.
+
+These developments sharpen the access layer, but they also expose its limit.
+The field has become good at making evidence easier to find.
+It has not solved what happens after evidence is found.
+In long-term personalized memory QA, aggregation-heavy questions can fail under oracle-evidence conditions, where the correct evidence is already present.
+This is not a retrieval failure.
+It is a post-access failure: existing systems optimize the geometry of access, while hard memory use also requires the algebra of evaluation.
+
+We study this post-access regime.
+Access determines which evidence reaches the model; post-access evaluation determines whether that evidence is exposed in a decision-sufficient view, whether variables are stably bound across evidence items, and whether the final answer is constrained to the evidence-defined valid set.
+A flattened textual view may present a timestamp and a caption while omitting the relations, quantities, source pointers, or modality-specific structure needed for aggregation.
+The evidence is in context, but the view is not decision-sufficient.
+
+This distinction matters because language-only decoding is a weak evaluator over recalled evidence.
+Without explicit variable binding and constraint enforcement, the model can match, paraphrase, and classify fluently, but it does not reliably execute multi-evidence aggregation, conflict resolution, or discrete computation.
+Soft controls such as instruction tuning, prompting, chain-of-thought, and schema formatting can bias the model toward aggregation-like trajectories, but they do not enforce the answer set.
+
+We use Artifact Access Semantics to organize the runtime path from compressed artifacts to access operations, primitive traces, evidence views, and decisions.
+Within this path, our focus is the post-access boundary where recalled evidence must become an answerable state.
+We formalize the access--evaluation separation and instantiate it in long-term personalized memory QA under controlled evidence conditions.
+Our thesis is simple: multimodal long-term memory systems need both evidence access and evidence aggregation.
+Existing systems have advanced the first substantially; the second---view construction, variable binding, operator execution, and evidence-valid decoding---remains the bottleneck.

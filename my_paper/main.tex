@@ -1,0 +1,79 @@
+%File: main.tex
+\documentclass[letterpaper]{article} % DO NOT CHANGE THIS
+\usepackage[submission]{aaai2027}  % DO NOT CHANGE THIS
+% The serif, sans-serif, and monospaced fonts are loaded automatically by
+% aaai2027.sty (newtxtext, helvet, courier). DO NOT add \usepackage{times},
+% \usepackage{helvet}, \usepackage{courier}, or any other font package.
+\usepackage[hyphens]{url}  % DO NOT CHANGE THIS
+\usepackage{graphicx} % DO NOT CHANGE THIS
+\urlstyle{rm} % DO NOT CHANGE THIS
+\def\UrlFont{\rm}  % DO NOT CHANGE THIS
+\usepackage{natbib}  % DO NOT CHANGE THIS AND DO NOT ADD ANY OPTIONS TO IT
+\usepackage{caption} % DO NOT CHANGE THIS AND DO NOT ADD ANY OPTIONS TO IT
+\usepackage{booktabs}
+\frenchspacing  % DO NOT CHANGE THIS
+\setlength{\pdfpagewidth}{8.5in}  % DO NOT CHANGE THIS
+\setlength{\pdfpageheight}{11in}  % DO NOT CHANGE THIS
+
+% Additional packages compatible with the AAAI 2027 draft.
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{makecell}
+\usepackage{microtype}
+\usepackage{multirow}
+\usepackage{nicefrac}
+\usepackage{tabularx}
+
+\pdfinfo{
+/TemplateVersion (2027.1)
+}
+
+\setcounter{secnumdepth}{2}
+
+\newcommand{\methodname}{Evidence View Realization}
+\newcommand{\artifactstore}{\mathcal{D}}
+\newcommand{\primitiveSet}{\mathcal{P}}
+\newcommand{\accessLanguage}{\mathcal{L}}
+\newcommand{\budget}{\beta}
+\newcommand{\viewroles}{\mathcal{R}}
+
+\title{}
+
+\author{
+    Anonymous Submission
+}
+\affiliations{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Long-horizon agents must use past interaction to guide future decisions, but past interaction cannot be placed in context verbatim at every turn.
+Prior work has largely studied how experience is externalized and compressed into reusable artifacts such as episodic memories, state summaries, procedural skills, declarative rules, traces, and workspace files.
+This paper studies the complementary runtime problem: how a current intent accesses such typed artifacts and exposes them to a downstream model in a form that is sufficient for decision making.
+We introduce \methodname{}, a framework that separates compressed artifact storage from typed access primitives, primitive traces under budget, evidence-view construction, and downstream decoding.
+The framework predicts that memory failures need not be retrieval failures: a system may store or even retrieve the right artifacts while failing to expose the roles, bindings, temporal authority, aggregation structure, or conflict status needed by the current decision.
+We operationalize this view through planned diagnostics on long-term personalized memory QA and stale-state validity benchmarks, using controlled evidence settings to separate access, selection, view construction, and decoding failures.
+The final empirical contributions and quantitative claims will be filled after experiments are complete.
+\end{abstract}
+
+\input{sections/01_introduction}
+\input{sections/02_problem}
+\input{sections/03_framework}
+\input{sections/04_atm_diagnostics}
+\input{sections/05_stale_case}
+\input{sections/06_related_work}
+\input{sections/07_discussion_limitations}
+\input{sections/08_conclusion}
+
+\nocite{*}
+\bibliography{custom}
+
+\clearpage
+\input{appendix}
+
+\end{document}

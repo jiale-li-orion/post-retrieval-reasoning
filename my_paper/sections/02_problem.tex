@@ -1,0 +1,99 @@
+\section{Artifact Access Semantics}
+\label{sec:aas}
+
+The \emph{Experience Compression Spectrum} (ECS) studies how an agent's interaction trace is transformed into reusable artifacts \cite{zhang2026experiencecompressionspectrumunifying}.
+Following ECS, let an interaction trace be
+\begin{equation}
+T=\{(s_t,a_t,o_t,f_t)\}_{t=1}^{N},
+\end{equation}
+and let a level-$L$ compression function be
+\begin{equation}
+C_L:T\rightarrow K_L .
+\end{equation}
+Different choices of $L$ produce artifacts at different abstraction levels, such as raw traces, episodic memories, procedural skills, declarative rules, state summaries, or workspaces.
+This axis answers a storage-side question: what does past interaction become?
+
+We study the complementary runtime question: once past interaction has been compressed into artifacts, how does a current intent use them for a future decision?
+A compressed artifact is not only a content payload.
+It also carries usage semantics: a trace can be searched or replayed, a state can be queried, a graph can be traversed, a skill can be invoked, a rule can be injected or checked, and a workspace can be read, edited, or verified.
+We call this runtime problem \emph{Artifact Access Semantics} (AAS).
+Its core chain is
+\begin{equation}
+\begin{aligned}
+\text{compression}&\rightarrow\text{artifact}
+\rightarrow\text{usage semantics}\\
+&\rightarrow\text{access}\rightarrow\text{decision}.
+\end{aligned}
+\end{equation}
+
+\subsection{From Access Interfaces to Decision Views}
+\label{subsec:aas-map}
+
+AAS treats retrieval as one access interface rather than the general form of memory use.
+Let $\mathcal{P}$ be the set of typed access primitives exposed by a memory system.
+At runtime, a current intent $u$ induces an access trace
+\begin{equation}
+\tau_\pi(u,\mathcal{A})
+=((\rho_1,\theta_1,r_1),\ldots,(\rho_T,\theta_T,r_T)),
+\end{equation}
+where $\rho_t$ is an access primitive, $\theta_t$ its parameters, and $r_t$ its returned result.
+The trace may be a one-shot retrieval call, or a multi-step process involving graph traversal, source reading, workspace interaction, execution, or verification.
+The returned observations are then organized into a decision-facing view $v=\mathcal{V}(u,\tau_\pi)$ and passed to a downstream model.
+
+This abstraction separates three questions that are often collapsed in end-to-end memory QA: whether the relevant artifact exists, whether a budget-feasible access trace exposes it, and whether the exposed view is sufficient for the current decision.
+Table~\ref{tab:aas-system-map} sketches how common systems occupy this space.
+
+\begin{table*}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabularx}{\textwidth}{
+>{\raggedright\arraybackslash}p{0.18\textwidth}
+>{\raggedright\arraybackslash}p{0.20\textwidth}
+>{\raggedright\arraybackslash}p{0.22\textwidth}
+>{\raggedright\arraybackslash}X}
+\toprule
+Line of work & Artifact substrate & Runtime access interface & Exposed decision view \\
+\midrule
+Long-context agents
+& Raw interaction history
+& Full-context reading
+& Long prompt context; history is present but not necessarily localized or updated. \\
+RAG / memory retrieval
+& Text chunks or memory records
+& Top-$k$ retrieval and reranking
+& Ranked evidence passages. \\
+GraphRAG / hierarchical memory
+& Entity, relation, or category graphs
+& Graph traversal, neighborhood expansion, or global selection
+& Graph-selected evidence; structure guides access. \\
+Episodic / workspace memory
+& Actor-state-event workspaces
+& Entity, event, or state lookup
+& Structured episodic summaries or state-like views. \\
+Memory operating systems
+& Persistent user or task states
+& State lookup, update, and personalization hooks
+& Personalized memory context. \\
+Direct corpus / code agents
+& Raw corpora, files, repositories
+& Grep, read, shell, execution, navigation
+& Composed evidence or verified result. \\
+\bottomrule
+\end{tabularx}
+\caption{AAS view of runtime artifact access. The map distinguishes artifact substrates, access interfaces, and the decision views exposed downstream.}
+\label{tab:aas-system-map}
+\end{table*}
+
+\subsection{Diagnostic Scope}
+\label{subsec:aas-scope}
+
+The rest of the paper focuses on the boundary after relevant artifacts, or oracle evidence, are available.
+This is intentionally narrower than the full memory lifecycle.
+We do not attempt to solve how memories are written, updated, indexed, or retrieved in general.
+Instead, we ask whether available evidence is exposed in a decision-facing form and whether the decoder can use it.
+
+We distinguish two downstream failures.
+A \emph{view-use failure} occurs when needed evidence exists and can be accessed, but the exposed view omits decision-critical structure such as bindings, temporal authority, source relations, aggregation fields, modality-specific information, freshness, or conflict status.
+A \emph{decoder-use failure} occurs when the view exposes the required information, but the decoder still fails to produce an evidence-valid answer.
+This diagnostic scope motivates the theory in Section~\ref{sec:framework}: access can make evidence reachable, but post-access evaluation must make it answerable.
