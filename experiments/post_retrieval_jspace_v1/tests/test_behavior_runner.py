@@ -1,6 +1,10 @@
 import pytest
 
-from behavior.run_behavior import build_prediction_row, validate_run_selection
+from behavior.run_behavior import (
+    build_prediction_row,
+    select_ground_truth_rows,
+    validate_run_selection,
+)
 
 
 def test_gate_a_runner_rejects_unimplemented_condition() -> None:
@@ -26,3 +30,11 @@ def test_prediction_row_preserves_evidence_order() -> None:
 
     assert row["evidence_ids"] == ["e2", "e1"]
     assert row["total_tokens"] == 12
+
+
+def test_smoke_ground_truth_contains_only_selected_predictions() -> None:
+    rows = [{"id": "qa-1"}, {"id": "qa-2"}, {"id": "qa-3"}]
+
+    selected = select_ground_truth_rows(rows, ["qa-2", "qa-1"])
+
+    assert selected == [{"id": "qa-2"}, {"id": "qa-1"}]
