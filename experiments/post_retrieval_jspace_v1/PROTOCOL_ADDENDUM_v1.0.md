@@ -30,11 +30,20 @@ recorded in `official_atm_reference.yaml` before any comparison is generated.
 ## 2. Open-Weight Suite
 
 All five open-weight models rerun their required baselines and paired
-conditions. Mistral is fixed to:
+conditions. The suite is fixed to:
 
 ```text
-mistralai/Mistral-7B-Instruct-v0.3
+Qwen3-8B-ms
+DeepSeek-R1-Distill-Llama-8B
+Qwen2.5-7B-Instruct
+Qwen3-VL-2B-Instruct
+Qwen3-VL-8B-Instruct
 ```
+
+The first three entries are user-provided local snapshots under the shared
+remote model directory. Their source metadata and file hashes must be recorded
+before formal runs. The two Qwen3-VL snapshots are downloaded into the same
+directory and pinned to immutable Hugging Face revisions.
 
 GPT is not an answerer in the first-cycle matrix. Primary mechanism runs use
 BF16 full weights. Quantized runs cannot support primary mechanism claims.

@@ -9,16 +9,16 @@ protocol, generate scientific results, or start formal runs.
 ## Target Layout
 
 ```text
-/home/lab/post-retrieval-reasoning/        # project clone
+/home/lab/lab/post-retrieval-reasoning/    # project clone
 /home/lab/.cache/huggingface/              # Hugging Face cache
-/home/lab/research_data/                    # datasets
-/home/lab/research_artifacts/               # runs, VA cache, lenses, trajectories
+/home/lab/lab/research_data/               # models and datasets
+/home/lab/lab/research_artifacts/          # runs, VA cache, lenses, trajectories
 ```
 
 Use exactly one project virtual environment:
 
 ```text
-/home/lab/post-retrieval-reasoning/.venv
+/home/lab/lab/post-retrieval-reasoning/.venv
 ```
 
 Do not create virtual environments under `experiments/` or external repos.
@@ -29,7 +29,7 @@ Do not create virtual environments under `experiments/` or external repos.
 2. Configure a GitHub SSH key for `/home/lab/.ssh`.
 3. Verify `ssh -T git@github.com` authenticates successfully.
 4. Clone `git@github.com:jiale-li-orion/post-retrieval-reasoning.git` to
-   `/home/lab/post-retrieval-reasoning`.
+   `/home/lab/lab/post-retrieval-reasoning`.
 5. Check out `experiment/post-retrieval-jspace-v1`.
 6. Verify a dry Git round trip without changing scientific files: fetch,
    branch status, and remote visibility.
@@ -46,7 +46,13 @@ Record, but do not silently change:
 - Python version
 - available disk space
 
-Create `.venv` from the system Python. Install the dependencies needed by:
+Use the root `pyproject.toml` and `uv.lock` as the only Python dependency
+contract. Create/synchronize `.venv` with `uv sync`. Do not use ad-hoc `pip`
+installs. ATM-Bench is imported from its pinned source checkout rather than
+installed as a project dependency because its package metadata pulls in the
+optional vLLM serving stack.
+
+The environment must support:
 
 - ATM-Bench at its pinned commit
 - Verbal-R3 inference
@@ -57,7 +63,7 @@ Create `.venv` from the system Python. Install the dependencies needed by:
 - pytest
 
 Write the fully resolved package list to
-`/home/lab/research_artifacts/environment/pip-freeze.txt`. Do not commit it
+`/home/lab/lab/research_artifacts/environment/uv-freeze.txt`. Do not commit it
 until Codex has reviewed it for secrets and machine-local paths.
 
 Acceptance commands must prove:
@@ -84,15 +90,27 @@ status, and license path in a machine-readable setup report.
 
 ## 4. Model Checkpoints
 
-Download into the shared Hugging Face cache and record the resolved immutable
-revision for each model:
+Keep all five formal model directories together under
+`/home/lab/lab/research_data/`. Three user-provided snapshots already exist and
+must not be moved, deleted, renamed, or downloaded again:
+
+```text
+Qwen3-8B-ms
+DeepSeek-R1-Distill-Llama-8B
+Qwen2.5-7B-Instruct
+```
+
+Download the remaining formal models into the same parent directory and record
+their resolved immutable Hugging Face revisions:
 
 ```text
 Qwen/Qwen3-VL-2B-Instruct
 Qwen/Qwen3-VL-8B-Instruct
-mistralai/Mistral-7B-Instruct-v0.3
-deepseek-ai/DeepSeek-R1-Distill-Llama-8B
-Qwen/Qwen2.5-7B-Instruct
+```
+
+Download the intervention model separately under the same parent directory:
+
+```text
 0k9d0h1/reranker3b-sft
 ```
 
@@ -102,9 +120,11 @@ The reranker revision is fixed:
 cdf46c85892ebb715cbd6a0b582af35ad5caa96b
 ```
 
-For the other models, resolve the downloaded snapshot commit and report it;
-never leave `main` or `latest` as the final registry value. Download original
-weights suitable for BF16 mechanism runs. Do not substitute 4-bit weights.
+For the user-provided snapshots, record config metadata and deterministic file
+hashes as their local provenance. For downloaded models, resolve the snapshot
+commit and never leave `main` or `latest` as the final registry value. Use
+original weights suitable for BF16 mechanism runs; do not substitute 4-bit
+weights.
 
 For each checkpoint, verify tokenizer loading, chat-template availability,
 architecture class, layer count, hidden size, vocabulary size, and one-token
@@ -121,7 +141,7 @@ Prepare, without regenerating benchmark content:
 - Raw media required by Hard C2
 - WikiText-103 raw train
 
-Place canonical data under `/home/lab/research_data/` and expose paths through
+Place canonical data under `/home/lab/lab/research_data/` and expose paths through
 environment variables or symlinks expected by the pinned ATM repository. Do not
 copy datasets into Git-tracked directories.
 

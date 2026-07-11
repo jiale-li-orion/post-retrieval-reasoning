@@ -27,7 +27,7 @@ protocol.
 
 ## Machine Roles
 
-- Remote WSL `/home/lab` with RTX 4090: the only code-writing environment;
+- Remote WSL `/home/lab/lab` with RTX 4090: the only code-writing environment;
   open-weight behavior, canonical Verbal Annotation cache, J-lens fitting,
   readout, and later causal experiments.
 - Local notebook: checks out a frozen commit and runs API answerers and the
@@ -37,6 +37,10 @@ protocol.
 Large data, model weights, predictions, annotation caches, lens artifacts, and
 trajectories are not committed. Git stores configs, manifests, hashes, summary
 tables, and reports.
+
+The project uses the root `pyproject.toml` and `uv.lock`; all commands run via
+`uv run`. ATM-Bench remains a pinned source checkout and is exposed through
+`PYTHONPATH` rather than installed with its optional vLLM dependency stack.
 
 ## Stop Rule
 
