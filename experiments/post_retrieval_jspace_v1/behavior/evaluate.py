@@ -1,0 +1,154 @@
+#!/usr/bin/env python3
+"""Evaluate a frozen behavior run with ATM-Bench's official evaluator."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import subprocess
+import sys
+from datetime import datetime
+from pathlib import Path
+from typing import Any
+
+
+EXPERIMENT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = EXPERIMENT_ROOT.parents[1]
+DEFAULT_JUDGE_MODEL = "gpt-5-mini"
+DEFAULT_REASONING_EFFORT = "minimal"
+
+if str(EXPERIMENT_ROOT) not in sys.path:
+    sys.path.insert(0, str(EXPERIMENT_ROOT))
+
+from core.run_contract import create_run_directory, sanitize_manifest  # noqa: E402
+
+
+def requires_llm_judge(ground_truth: list[dict[str, Any]]) -> bool:
+    return any(str(row.get("qtype", "")).lower() == "open_end" for row in ground_truth)
+
+
+def build_evaluator_command(
+    *,
+    atm_root: Path,
+    run_dir: Path,
+    eval_dir: Path,
+    judge_model: str,
+    reasoning_effort: str,
+) -> list[str]:
+    return [
+        sys.executable,
+        str(atm_root / "memqa/utils/evaluator/evaluate_qa.py"),
+        "--ground-truth",
+        str(run_dir / "ground_truth_subset.json"),
+        "--predictions",
+        str(run_dir / "predictions.jsonl"),
+        "--output-dir",
+        str(eval_dir),
+        "--metrics",
+        "em",
+        "atm",
+        "--judge-provider",
+        "openai",
+        "--judge-model",
+        judge_model,
+        "--judge-reasoning-effort",
+        reasoning_effort,
+    ]
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--run-dir", type=Path, required=True)
+    parser.add_argument("--eval-id", required=True)
+    parser.add_argument("--judge-model", default=DEFAULT_JUDGE_MODEL)
+    parser.add_argument("--judge-reasoning-effort", default=DEFAULT_REASONING_EFFORT)
+    parser.add_argument(
+        "--atm-root",
+        type=Path,
+        default=PROJECT_ROOT / "other_repo_references/ATM-Bench",
+    )
+    return parser.parse_args()
+
+
+def main() -> int:
+    args = parse_args()
+    ground_truth_path = args.run_dir / "ground_truth_subset.json"
+    predictions_path = args.run_dir / "predictions.jsonl"
+    inference_manifest_path = args.run_dir / "manifest.json"
+    for path in (ground_truth_path, predictions_path, inference_manifest_path):
+        if not path.is_file():
+            raise FileNotFoundError(f"frozen inference artifact missing: {path}")
+
+    ground_truth = json.loads(ground_truth_path.read_text(encoding="utf-8"))
+    needs_judge = requires_llm_judge(ground_truth)
+    if needs_judge and not os.environ.get("OPENAI_API_KEY"):
+        raise RuntimeError("OPENAI_API_KEY is required only because this run contains open_end items")
+
+    eval_dir = create_run_directory(args.run_dir / "evaluations" / args.eval_id)
+    started_at = datetime.now().astimezone().isoformat()
+    command = build_evaluator_command(
+        atm_root=args.atm_root,
+        run_dir=args.run_dir,
+        eval_dir=eval_dir,
+        judge_model=args.judge_model,
+        reasoning_effort=args.judge_reasoning_effort,
+    )
+    subprocess.run(command, cwd=args.atm_root, check=True)
+
+    manifest = sanitize_manifest(
+        {
+            "eval_id": args.eval_id,
+            "status": "complete",
+            "project_commit": _git_commit(PROJECT_ROOT),
+            "atm_commit": _git_commit(args.atm_root),
+            "inference_run": str(args.run_dir.resolve()),
+            "inputs": {
+                "inference_manifest_sha256": _sha256(inference_manifest_path),
+                "ground_truth_sha256": _sha256(ground_truth_path),
+                "predictions_sha256": _sha256(predictions_path),
+            },
+            "judge": {
+                "required": needs_judge,
+                "provider": "openai",
+                "model": args.judge_model,
+                "reasoning_effort": args.judge_reasoning_effort,
+            },
+            "command": command,
+            "started_at": started_at,
+            "finished_at": datetime.now().astimezone().isoformat(),
+            "outputs": _output_hashes(eval_dir),
+        }
+    )
+    (eval_dir / "eval_manifest.json").write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    print(eval_dir)
+    return 0
+
+
+def _git_commit(root: Path) -> str:
+    return subprocess.check_output(
+        ["git", "-C", str(root), "rev-parse", "HEAD"], text=True
+    ).strip()
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _output_hashes(eval_dir: Path) -> dict[str, str]:
+    return {
+        str(path.relative_to(eval_dir)): _sha256(path)
+        for path in sorted(eval_dir.rglob("*"))
+        if path.is_file() and path.name != "eval_manifest.json"
+    }
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

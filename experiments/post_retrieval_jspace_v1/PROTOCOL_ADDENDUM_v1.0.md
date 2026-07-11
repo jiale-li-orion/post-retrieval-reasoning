@@ -59,6 +59,13 @@ ATM/QS uses the official evaluator:
 DeepSeek V4 Flash is a secondary agreement judge only. It never replaces or
 changes the primary ATM/QS score.
 
+Inference and evaluation are separate immutable stages. Inference always saves
+predictions, usage, latency, and an inference manifest without requiring judge
+credentials. Evaluation later consumes a frozen prediction artifact and writes
+its own manifest and cache. Only evaluation batches containing `open_end`
+questions require the primary judge API key. J-lens fitting, readout, and
+causal mechanism experiments do not depend on judge availability.
+
 ## 4. Failure Taxonomy
 
 The primary taxonomy contains one external and five internal labels:
