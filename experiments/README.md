@@ -7,7 +7,8 @@
 | ID | 状态 | 作用 | 是否论文主实验 | 可信度 |
 |---|---|---|---|---|
 | `atm_oracle_evidence` | 已完成 | ATM-Bench Hard 上的 SGM vs Raw oracle pilot，用来定位 view-use / decoder-use failure | 否，作为动机和误差分析素材 | 可复用，但不是正式主结果 |
-| `atm_oracle_evidence_verbal-R3` | 协议审核中 | 正式测试 `SGM` 与 `SGM + Verbal Annotation` 在受控证据条件下的差异 | 是，候选主实验线 | 代码已检查，正式结果未跑 |
+| `atm_oracle_evidence_verbal-R3` | 可复用模块 | 生成 query-conditioned Verbal Annotation；供正式实验线复用 | 否，不再独立承担主实验 | 代码已检查，尚需解耦 canonical cache |
+| `post_retrieval_jspace_v1` | Phase 0 | E1 行为图谱、J-lens/J-space tracing、bridge 与 gated causal repair | 是 | v1.0 协议已冻结，环境准备中 |
 
 ## 已完成结果
 
@@ -24,9 +25,13 @@
 - `number` 在 Raw 和 SGM 下都是 16.7%，说明一部分失败不是 evidence access，而是 decoder/evaluation 能力问题。
 - 这组结果用于形成理论假设和 failure taxonomy，不作为最终 Verbal Annotation 主实验结论。
 
-## 正在设计的正式实验
+## 当前正式实验
 
-`atm_oracle_evidence_verbal-R3` 是当前主线。实验问题是：
+`post_retrieval_jspace_v1` 是当前主线。第一实施周期按 Gate A、B、C
+推进，并在 Gate C 强制停止人工 review。旧 VA pipeline 只作为该主线的
+external evidence intervention 模块。
+
+其中 VA 子实验保持：
 
 ```text
 controlled SGM evidence
@@ -39,7 +44,9 @@ controlled SGM evidence
 - 测 post-access / post-retrieval evidence use。
 - 不测 retrieval、reranking top-k、完整 Verbal-R3 planner、generator training。
 - Oracle 与 NIAH 都使用 ATM-Bench 控制证据。
-- `PROTOCOL.md` 是用户正在审核的正式实验设计文档。
+- API answerer 只跑 Hard C1/C7-C10，官方 C0/C3-C6 aggregate 仅作参考。
+- 五个 open-weight 模型自行重跑正式 baseline。
+- Primary ATM judge 严格使用官方 `gpt-5-mini` 配置。
 
 ## 目录约定
 
@@ -98,10 +105,7 @@ controlled SGM evidence
 
 ## 下一步
 
-用户正在修改 `atm_oracle_evidence_verbal-R3/PROTOCOL.md`。协议确认后，需要同步：
-
-1. `configs/verbal_r3_official.json`
-2. `scripts/run_experiment.sh`
-3. `scripts/verbal_r3_oracle.py`
-4. 本 README 和子实验 README
-5. smoke test 与正式运行清单
+1. OpenCode 按 `post_retrieval_jspace_v1/OPENCODE_SETUP.md` 准备远程环境和资产。
+2. Codex 验收 setup report 后实现 WP0-WP3，并通过 Gate A。
+3. 生成 canonical VA cache，完成 E1 与 Gate B。
+4. 完成 target、J-lens baseline 与 Gate C review bundle 后停止。
