@@ -60,7 +60,7 @@ class HFModelAdapter:
         common = {
             "pretrained_model_name_or_path": str(path),
             "local_files_only": True,
-            "torch_dtype": dtype,
+            "dtype": dtype,
         }
         if config == "qwen3_vl":
             processor = AutoProcessor.from_pretrained(
