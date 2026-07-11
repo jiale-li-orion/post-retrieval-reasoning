@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -11,7 +12,9 @@ from typing import Any
 
 EXPERIMENT_ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = EXPERIMENT_ROOT.parents[1]
-ATM_ROOT = REPO_ROOT / "ATM-Bench"
+ATM_ROOT = Path(
+    os.environ.get("ATM_BENCH_ROOT", REPO_ROOT / "other_repo_references/ATM-Bench")
+)
 sys.path.insert(0, str(ATM_ROOT))
 
 from memqa.qa_agent_baselines.oracle.oracle_baseline import (  # noqa: E402

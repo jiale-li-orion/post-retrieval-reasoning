@@ -45,7 +45,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 EXPERIMENT_ROOT = SCRIPT_DIR.parent
 WORKSPACE_ROOT = EXPERIMENT_ROOT.parents[1]
 DEFAULT_CONFIG = EXPERIMENT_ROOT / "configs/verbal_r3_official.json"
-DEFAULT_VERBAL_R3_ROOT = WORKSPACE_ROOT / "VerbalR3"
+DEFAULT_VERBAL_R3_ROOT = WORKSPACE_ROOT / "other_repo_references/VerbalR3"
 
 
 class VerbalReranker:

@@ -2,8 +2,9 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
-ATM_DIR="${ROOT_DIR}/ATM-Bench"
+ATM_DIR="${ATM_BENCH_ROOT:-${ROOT_DIR}/other_repo_references/ATM-Bench}"
 RUN_DIR="${ROOT_DIR}/experiments/atm_oracle_evidence/runs/mimo_v25_sgm_hard"
+PYTHON="${PYTHON:-${ROOT_DIR}/.venv/bin/python3}"
 
 MODEL="${MIMO_MODEL:-mimo-v2.5}"
 TAG="${TAG:-mimo_v25_sgm_hard}"
@@ -13,6 +14,16 @@ JUDGE_MODEL="${JUDGE_MODEL:-gpt-5-mini}"
 
 if [[ -z "${MIMO_API_KEY:-}" ]]; then
   echo "ERROR: MIMO_API_KEY is required and must be supplied via environment variable." >&2
+  exit 2
+fi
+if [[ ! -x "${PYTHON}" ]]; then
+  echo "ERROR: Python interpreter not found or not executable: ${PYTHON}" >&2
+  echo "Set PYTHON=/path/to/python or create the project venv at ${ROOT_DIR}/.venv" >&2
+  exit 2
+fi
+if [[ ! -d "${ATM_DIR}/memqa" ]]; then
+  echo "ERROR: cannot find ATM-Bench repo: ${ATM_DIR}" >&2
+  echo "Set ATM_BENCH_ROOT=/path/to/ATM-Bench if it lives elsewhere." >&2
   exit 2
 fi
 
@@ -39,12 +50,13 @@ mkdir -p "${RUN_DIR}/predictions" "${RUN_DIR}/eval" "${RUN_DIR}/logs"
   echo "timeout=${TIMEOUT}"
   echo "judge_model=${JUDGE_MODEL}"
   echo "endpoint=${MIMO_ENDPOINT}"
+  echo "python=${PYTHON}"
 } > "${RUN_DIR}/manifest.env"
 
 cd "${ATM_DIR}"
 export PYTHONPATH="${ATM_DIR}${PYTHONPATH:+:${PYTHONPATH}}"
 
-python memqa/qa_agent_baselines/oracle/oracle_baseline.py \
+"${PYTHON}" memqa/qa_agent_baselines/oracle/oracle_baseline.py \
   --qa-file "./data/atm-bench/atm-bench-hard.json" \
   --media-source batch_results \
   --batch-fields "type,timestamp,location,short_caption,caption,ocr,tags" \
@@ -61,7 +73,7 @@ python memqa/qa_agent_baselines/oracle/oracle_baseline.py \
   --output-file "${RUN_DIR}/predictions/oracle_${TAG}.jsonl" \
   2>&1 | tee "${RUN_DIR}/logs/oracle.log"
 
-python memqa/utils/evaluator/evaluate_qa.py \
+"${PYTHON}" memqa/utils/evaluator/evaluate_qa.py \
   --ground-truth "./data/atm-bench/atm-bench-hard.json" \
   --predictions "${RUN_DIR}/predictions/oracle_${TAG}.jsonl" \
   --output-dir "${RUN_DIR}/eval" \

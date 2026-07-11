@@ -6,7 +6,8 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[3]
-ATM_ROOT = ROOT / "ATM-Bench"
+ATM_ROOT = ROOT / "other_repo_references/ATM-Bench"
+VERBAL_R3_ROOT = ROOT / "other_repo_references/VerbalR3"
 SCRIPTS_ROOT = ROOT / "experiments/atm_oracle_evidence_verbal-R3/scripts"
 sys.path.insert(0, str(ATM_ROOT))
 sys.path.insert(0, str(SCRIPTS_ROOT))
@@ -38,7 +39,7 @@ class VerbalR3ContractTests(unittest.TestCase):
 
     def test_official_prompt_is_loaded_from_verbal_r3_source(self):
         prompt = module.load_python_string_assignment(
-            ROOT / "VerbalR3/utils/reranker_server.py", "system_prompt"
+            VERBAL_R3_ROOT / "utils/reranker_server.py", "system_prompt"
         )
         self.assertIn("reason internally", prompt)
         self.assertIn("Score: <1-5>", prompt)

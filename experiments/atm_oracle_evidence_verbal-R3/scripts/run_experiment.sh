@@ -2,10 +2,11 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
-ATM_DIR="${ROOT_DIR}/ATM-Bench"
+ATM_DIR="${ATM_BENCH_ROOT:-${ROOT_DIR}/other_repo_references/ATM-Bench}"
+VERBAL_R3_DIR="${VERBAL_R3_ROOT:-${ROOT_DIR}/other_repo_references/VerbalR3}"
 EXP_DIR="${ROOT_DIR}/experiments/atm_oracle_evidence_verbal-R3"
 
-PYTHON="${PYTHON:-/home/orion/research/topicA/.venv/bin/python3}"
+PYTHON="${PYTHON:-${ROOT_DIR}/.venv/bin/python3}"
 CONFIG="${CONFIG:-${EXP_DIR}/configs/verbal_r3_official.json}"
 CONDITION="${CONDITION:-oracle}"
 SPLIT="${SPLIT:-hard}"
@@ -17,6 +18,22 @@ ANSWERER_API_KEY="${ANSWERER_API_KEY:?Set ANSWERER_API_KEY}"
 JUDGE_MODEL="${JUDGE_MODEL:-gpt-5-mini}"
 RUN_ID="${RUN_ID:-$(date +%Y%m%dT%H%M%S)}"
 LIMIT="${LIMIT:-}"
+
+if [[ ! -x "${PYTHON}" ]]; then
+  echo "ERROR: Python interpreter not found or not executable: ${PYTHON}" >&2
+  echo "Set PYTHON=/path/to/python or create the project venv at ${ROOT_DIR}/.venv" >&2
+  exit 2
+fi
+if [[ ! -d "${ATM_DIR}/memqa" ]]; then
+  echo "ERROR: cannot find ATM-Bench repo: ${ATM_DIR}" >&2
+  echo "Set ATM_BENCH_ROOT=/path/to/ATM-Bench if it lives elsewhere." >&2
+  exit 2
+fi
+if [[ ! -f "${VERBAL_R3_DIR}/utils/reranker_server.py" ]]; then
+  echo "ERROR: cannot find VerbalR3 repo: ${VERBAL_R3_DIR}" >&2
+  echo "Set VERBAL_R3_ROOT=/path/to/VerbalR3 if it lives elsewhere." >&2
+  exit 2
+fi
 
 case "${SPLIT}" in
   hard) GT_FILE="${ATM_DIR}/data/atm-bench/atm-bench-hard.json" ;;
@@ -64,7 +81,7 @@ STATS="${RUN_DIR}/run_stats.json"
 MANIFEST="${RUN_DIR}/manifest.json"
 
 ATM_COMMIT="$(git -C "${ATM_DIR}" rev-parse HEAD)"
-VERBAL_COMMIT="$(git -C "${ROOT_DIR}/VerbalR3" rev-parse HEAD)"
+VERBAL_COMMIT="$(git -C "${VERBAL_R3_DIR}" rev-parse HEAD)"
 RERANKER_MODEL="$("${PYTHON}" -c 'import json,sys; print(json.load(open(sys.argv[1]))["reranker"]["model"])' "${CONFIG}")"
 RERANKER_REVISION="$("${PYTHON}" -c 'import json,sys; print(json.load(open(sys.argv[1]))["reranker"]["revision"])' "${CONFIG}")"
 cat > "${MANIFEST}" <<EOF
@@ -78,8 +95,10 @@ cat > "${MANIFEST}" <<EOF
   "config_sha256": "$(sha256sum "${CONFIG}" | cut -d' ' -f1)",
   "atm_commit": "${ATM_COMMIT}",
   "verbal_r3_commit": "${VERBAL_COMMIT}",
+  "verbal_r3_root": "${VERBAL_R3_DIR}",
   "reranker_model": "${RERANKER_MODEL}",
   "reranker_revision": "${RERANKER_REVISION}",
+  "python": "${PYTHON}",
   "image_sgm_sha256": "$(sha256sum "${ATM_DIR}/output/image/qwen3vl2b/batch_results.json" | cut -d' ' -f1)",
   "video_sgm_sha256": "$(sha256sum "${ATM_DIR}/output/video/qwen3vl2b/batch_results.json" | cut -d' ' -f1)",
   "email_sha256": "$(sha256sum "${ATM_DIR}/data/raw_memory/email/emails.json" | cut -d' ' -f1)",
@@ -91,11 +110,11 @@ cat > "${MANIFEST}" <<EOF
 EOF
 
 cd "${ATM_DIR}"
-export PYTHONPATH="${ATM_DIR}:${EXP_DIR}/scripts:${HOME}/.local/lib/python3.12/site-packages${PYTHONPATH:+:${PYTHONPATH}}"
+export PYTHONPATH="${ATM_DIR}:${EXP_DIR}/scripts${PYTHONPATH:+:${PYTHONPATH}}"
 
 "${PYTHON}" "${EXP_DIR}/scripts/verbal_r3_oracle.py" \
   --config "${CONFIG}" \
-  --verbal-r3-root "${ROOT_DIR}/VerbalR3" \
+  --verbal-r3-root "${VERBAL_R3_DIR}" \
   --qa-file "${QA_FILE}" \
   --image-batch-results "${ATM_DIR}/output/image/qwen3vl2b/batch_results.json" \
   --video-batch-results "${ATM_DIR}/output/video/qwen3vl2b/batch_results.json" \

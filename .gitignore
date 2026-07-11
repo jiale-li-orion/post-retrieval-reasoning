@@ -85,9 +85,6 @@ node_modules/
 **/runs/
 **/logs/
 
-# --- Markdown docs (paper drafts, notes, references) ---
-*.md
-
 # --- Session / notes ---
 *.Zone.Identifier
 
