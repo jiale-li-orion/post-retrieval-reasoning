@@ -1,28 +1,4 @@
-\section{Related Work}
+\section{Related Work \textsl{[pending]}}
 \label{sec:related_work}
 
-\subsection{Long-Term Agent Memory}
-\label{subsec:rw-agent-memory}
-
-Long-term agent memory systems externalize past interaction into persistent records, summaries, skills, rules, and state.
-Our work is complementary to this line: it does not replace compression or storage mechanisms, but asks how their outputs are accessed and exposed at runtime.
-
-\subsection{Retrieval and Structured Memory}
-\label{subsec:rw-retrieval}
-
-Retrieval-augmented generation and graph-based memory systems provide access methods beyond full-context prompting.
-Systems such as hierarchical graph memory and direct corpus interaction suggest that access language matters: top-$k$ similarity search, graph browsing, shell-like corpus operations, and workspace interaction expose different information under different budgets.
-Our framework treats these as different primitive sets rather than as interchangeable retrieval variants \cite{tang2026mnemis}.
-
-\subsection{Benchmarks for Memory Use}
-\label{subsec:rw-benchmarks}
-
-Personalized memory QA benchmarks test whether agents can answer referential questions grounded in a user's past.
-State-invalidation benchmarks test whether agents can revise old beliefs in light of later observations.
-We use these benchmarks not only for task scores, but as controlled environments for decomposing where memory-use failures occur.
-
-\subsection{Evidence, Provenance, and Traceability}
-\label{subsec:rw-evidence}
-
-Work on evidence grounding, provenance, execution tracing, and failure attribution is closely related to our notion of evidence views.
-The distinction is that we focus on what structure must be visible to the downstream decision model, rather than only whether the system can recover a post-hoc explanation.
+\endinput

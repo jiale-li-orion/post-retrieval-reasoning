@@ -1,45 +1,4 @@
-\section{STALE as a State-Validity Case Study}
+\section{Cumulative State Validity \textsl{[pending]}}
 \label{sec:stale}
 
-STALE narrows long-term memory to a specific memory-use subtask: determining whether a later observation implicitly invalidates an earlier memory \cite{chao2026stalellmagentsknow}.
-This setting is valuable because the failure is not ordinary fact retrieval.
-The system must revise state, resist stale premises, and adapt actions to the currently authorized state.
-
-\subsection{Primitive-Role Alignment}
-\label{subsec:stale-alignment}
-
-In our terminology, stale-state validity requires a state-oriented artifact substrate and a primitive stack that can maintain and expose current authority.
-A stylized primitive set is
-\begin{align}
-\primitiveSet_{\mathrm{STALE}}=\{&
-\rho_{\mathrm{extract}}, \rho_{\mathrm{propagate}},
-\rho_{\mathrm{adjudicate}}, \nonumber\\
-&\rho_{\mathrm{authorize}}, \rho_{\mathrm{readout}}\}.
-\end{align}
-These primitives correspond to extracting state changes, propagating implications through a dependency structure, adjudicating conflicts, authorizing the current state, and reading out the evidence needed for a query.
-
-The decision-facing path is:
-\begin{equation}
-\artifactstore_t \rightarrow \artifactstore_t^{\mathrm{auth}} \rightarrow v_u^{\mathrm{state}} \rightarrow \hat{y}.
-\end{equation}
-This path makes explicit why retrieval visibility is insufficient.
-The model must know which state is current, why an older premise is stale, and how this should govern the answer.
-
-\subsection{Probe-Level Interpretation}
-\label{subsec:stale-probes}
-
-STALE uses three probe families:
-\begin{itemize}[leftmargin=*]
-    \item \textbf{State Resolution:} whether the system identifies the current state.
-    \item \textbf{Premise Resistance:} whether the system rejects or corrects a question that embeds a stale premise.
-    \item \textbf{Implicit Policy Adaptation:} whether the system adapts recommendations or actions to the updated state.
-\end{itemize}
-These probes map naturally onto evidence-view roles: current authority, stale-premise marking, dependency explanation, and action-grounding support.
-
-\subsection{Planned Reporting}
-\label{subsec:stale-reporting}
-
-The STALE section will report whether a specialized state artifact and primitive stack improves the exposure of current-validity roles, and which probe families benefit most.
-If the experiments show limited gains, this section will be reframed as a limitation analysis rather than a positive method claim.
-
-\input{Tables/stale_placeholder}
+\endinput
