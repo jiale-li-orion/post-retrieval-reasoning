@@ -61,6 +61,16 @@ def build_prediction_row(
     }
 
 
+def select_ground_truth_rows(
+    rows: list[dict[str, Any]], qa_ids: list[str]
+) -> list[dict[str, Any]]:
+    by_id = {str(row["id"]): row for row in rows}
+    missing = [qa_id for qa_id in qa_ids if qa_id not in by_id]
+    if missing:
+        raise ValueError(f"ground truth missing selected IDs: {missing}")
+    return [by_id[qa_id] for qa_id in qa_ids]
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--model-id", required=True)
@@ -102,6 +112,7 @@ def main() -> int:
     )
     manifest_path = run_dir / "manifest.json"
     predictions_path = run_dir / "predictions.jsonl"
+    ground_truth_path = run_dir / "ground_truth_subset.json"
     manifest = sanitize_manifest(
         {
             "run_id": args.run_id,
@@ -125,6 +136,13 @@ def main() -> int:
     items = atm.load_split(args.split)
     if args.limit is not None:
         items = items[: args.limit]
+    raw_ground_truth = json.loads(
+        atm.split_path(args.split).read_text(encoding="utf-8")
+    )
+    selected_ground_truth = select_ground_truth_rows(
+        raw_ground_truth, [item.qa_id for item in items]
+    )
+    _write_json_list(ground_truth_path, selected_ground_truth)
     adapter = HFModelAdapter.from_local_snapshot(
         Path(model_spec["local_path"]), model_id=args.model_id
     )
@@ -163,6 +181,14 @@ def _git_commit(root: Path) -> str:
 
 
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    temporary.replace(path)
+
+
+def _write_json_list(path: Path, payload: list[dict[str, Any]]) -> None:
     temporary = path.with_suffix(path.suffix + ".tmp")
     temporary.write_text(
         json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
