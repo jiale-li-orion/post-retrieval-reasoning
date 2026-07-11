@@ -5,7 +5,7 @@ models:
     repository: Qwen/Qwen3-8B
     revision: local
     local_path: /home/lab/lab/research_data/Qwen3-8B-ms
-    file_manifest_sha256: pending
+    file_manifest_sha256: 0f21073966e0c290cc8d3007d8c1aa295b214ddc3c1ce350c6af7ab9e0faa50b
     architecture: Qwen3ForCausalLM
     dtype: bfloat16
     reasoning_capable: true
@@ -17,7 +17,7 @@ models:
     repository: deepseek-ai/DeepSeek-R1-Distill-Llama-8B
     revision: local
     local_path: /home/lab/lab/research_data/DeepSeek-R1-Distill-Llama-8B
-    file_manifest_sha256: pending
+    file_manifest_sha256: 10d4fe55834033c798ca23b63d8625d77d89838654f0121b49721b20cfa310a9
     architecture: LlamaForCausalLM
     dtype: bfloat16
     reasoning_capable: true
@@ -29,7 +29,7 @@ models:
     repository: Qwen/Qwen2.5-7B-Instruct
     revision: local
     local_path: /home/lab/lab/research_data/Qwen2.5-7B-Instruct
-    file_manifest_sha256: pending
+    file_manifest_sha256: d2d9ab0fbeed7ab74ff3dc433209aec9b01952ccc4d88eec16c0d9aaf1fef9c8
     architecture: Qwen2ForCausalLM
     dtype: bfloat16
     reasoning_capable: false
@@ -39,8 +39,9 @@ models:
   - id: qwen3_vl_2b_instruct
     source: huggingface
     repository: Qwen/Qwen3-VL-2B-Instruct
-    revision: pending
+    revision: 89644892e4d85e24eaac8bacfd4f463576704203
     local_path: /home/lab/lab/research_data/Qwen3-VL-2B-Instruct
+    file_manifest_sha256: c0bd7f8073b7cdf6416ab9b2af9764e31db8d632ab90916372b949b6e3533069
     architecture: Qwen3VLForConditionalGeneration
     dtype: bfloat16
     reasoning_capable: false
