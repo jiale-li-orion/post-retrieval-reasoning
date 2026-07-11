@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import hashlib
+import importlib
 import json
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -32,6 +34,15 @@ class ATMAdapter:
         "full": Path("data/atm-bench/atm-bench.json"),
         "hard": Path("data/atm-bench/atm-bench-hard.json"),
     }
+    BATCH_FIELDS = (
+        "type",
+        "timestamp",
+        "location",
+        "short_caption",
+        "caption",
+        "ocr",
+        "tags",
+    )
 
     def __init__(self, root: Path) -> None:
         self.root = root.resolve()
@@ -63,6 +74,47 @@ class ATMAdapter:
         if any(item.niah_evidence_ids is None for item in items):
             raise DatasetIntegrityError(f"NIAH-{k} item is missing niah_evidence_ids")
         return items
+
+    def collect_sgm_chunks(self, evidence_ids: tuple[str, ...]) -> list[str]:
+        return self.collect_official_sgm_chunks(evidence_ids)
+
+    def collect_official_sgm_chunks(
+        self, evidence_ids: tuple[str, ...]
+    ) -> list[str]:
+        oracle = self._official_oracle_module()
+        email_rows = oracle.load_json(
+            self.root / "data/raw_memory/email/emails.json"
+        )
+        email_index = {
+            str(row["id"]): row for row in email_rows if row.get("id")
+        }
+        image_index = oracle.build_batch_index(
+            oracle.load_json(
+                self.root / "data/processed_memory/image_batch_results.json"
+            ),
+            "image_path",
+        )
+        video_index = oracle.build_batch_index(
+            oracle.load_json(
+                self.root / "data/processed_memory/video_batch_results.json"
+            ),
+            "video_path",
+        )
+        return oracle.collect_text_evidence(
+            list(evidence_ids),
+            email_index,
+            image_index,
+            video_index,
+            list(self.BATCH_FIELDS),
+        )
+
+    def _official_oracle_module(self) -> Any:
+        root_text = str(self.root)
+        if root_text not in sys.path:
+            sys.path.insert(0, root_text)
+        return importlib.import_module(
+            "memqa.qa_agent_baselines.oracle.oracle_baseline"
+        )
 
 
 def _sha256(path: Path) -> str:
