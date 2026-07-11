@@ -39,6 +39,20 @@ def test_niah_pool_contains_all_gold_evidence(k: int) -> None:
         assert len(item.niah_evidence_ids) >= len(item.evidence_ids)
 
 
+@pytest.mark.skipif(not ATM_ROOT.exists(), reason="pinned ATM-Bench checkout absent")
+def test_sgm_chunks_preserve_official_bytes_and_order() -> None:
+    adapter = ATMAdapter(ATM_ROOT)
+    item = adapter.load_split("hard")[0]
+
+    chunks = adapter.collect_sgm_chunks(item.evidence_ids)
+
+    assert len(chunks) == len(item.evidence_ids)
+    assert [chunk.splitlines()[0] for chunk in chunks] == [
+        f"ID: {evidence_id}" for evidence_id in item.evidence_ids
+    ]
+    assert chunks == adapter.collect_official_sgm_chunks(item.evidence_ids)
+
+
 def test_split_hash_mismatch_is_fatal(tmp_path: Path) -> None:
     root = tmp_path / "ATM-Bench"
     qa_dir = root / "data" / "atm-bench"
