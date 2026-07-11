@@ -59,6 +59,7 @@ explicit = true
 [tool.pytest.ini_options]
 testpaths = ["experiments"]
 python_files = ["test_*.py"]
+pythonpath = ["experiments/post_retrieval_jspace_v1"]
 
 [tool.ruff]
 line-length = 88
