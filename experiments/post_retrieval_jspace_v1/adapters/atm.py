@@ -78,6 +78,13 @@ class ATMAdapter:
     def collect_sgm_chunks(self, evidence_ids: tuple[str, ...]) -> list[str]:
         return self.collect_official_sgm_chunks(evidence_ids)
 
+    def build_text_messages(
+        self, question: str, evidence_chunks: list[str]
+    ) -> list[dict[str, Any]]:
+        return self._official_oracle_module().build_text_messages(
+            question, evidence_chunks
+        )
+
     def collect_official_sgm_chunks(
         self, evidence_ids: tuple[str, ...]
     ) -> list[str]:

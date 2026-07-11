@@ -1,0 +1,174 @@
+#!/usr/bin/env python3
+"""Run immutable open-weight ATM behavior jobs."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import platform
+import subprocess
+import sys
+from datetime import datetime
+from pathlib import Path
+from typing import Any
+
+
+EXPERIMENT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = EXPERIMENT_ROOT.parents[1]
+if str(EXPERIMENT_ROOT) not in sys.path:
+    sys.path.insert(0, str(EXPERIMENT_ROOT))
+
+from adapters.atm import ATMAdapter  # noqa: E402
+from adapters.hf_model import HFModelAdapter  # noqa: E402
+from core.registry import load_condition_registry, load_model_registry  # noqa: E402
+from core.run_contract import create_run_directory, sanitize_manifest  # noqa: E402
+
+
+def validate_run_selection(
+    condition_id: str,
+    split: str,
+    conditions: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    condition = conditions[condition_id]
+    if condition_id != "C0":
+        raise NotImplementedError("Gate A runner accepts C0 only")
+    if split not in condition["split"]:
+        raise ValueError(f"{condition_id} does not support split {split}")
+    return condition
+
+
+def build_prediction_row(
+    *,
+    qa_id: str,
+    qtype: str,
+    evidence_ids: tuple[str, ...],
+    answer: str,
+    prompt_tokens: int,
+    completion_tokens: int,
+    model_id: str,
+) -> dict[str, Any]:
+    return {
+        "id": qa_id,
+        "qa_id": qa_id,
+        "qtype": qtype,
+        "evidence_ids": list(evidence_ids),
+        "answer": answer,
+        "prompt_tokens": prompt_tokens,
+        "completion_tokens": completion_tokens,
+        "total_tokens": prompt_tokens + completion_tokens,
+        "requested_model": model_id,
+        "returned_model": model_id,
+    }
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--model-id", required=True)
+    parser.add_argument("--condition", default="C0")
+    parser.add_argument("--split", choices=["full", "hard"], default="hard")
+    parser.add_argument("--limit", type=int)
+    parser.add_argument("--max-new-tokens", type=int, default=1000)
+    parser.add_argument("--run-id", required=True)
+    parser.add_argument(
+        "--run-root",
+        type=Path,
+        default=Path("/home/lab/lab/research_artifacts/runs"),
+    )
+    parser.add_argument(
+        "--atm-root",
+        type=Path,
+        default=PROJECT_ROOT / "other_repo_references/ATM-Bench",
+    )
+    return parser.parse_args()
+
+
+def main() -> int:
+    args = parse_args()
+    if args.limit is not None and args.limit <= 0:
+        raise ValueError("--limit must be positive")
+    conditions = load_condition_registry(
+        EXPERIMENT_ROOT / "registry/condition_registry.yaml"
+    )
+    validate_run_selection(args.condition, args.split, conditions)
+    models = load_model_registry(EXPERIMENT_ROOT / "registry/model_registry.yaml")
+    model_spec = models[args.model_id]
+    if model_spec["revision"] in {"pending", "main", "latest"}:
+        raise ValueError(f"model {args.model_id} is not revision-frozen")
+    if model_spec.get("file_manifest_sha256") in {None, "pending"}:
+        raise ValueError(f"model {args.model_id} is missing snapshot provenance")
+
+    run_dir = create_run_directory(
+        args.run_root / args.condition / args.split / args.model_id / args.run_id
+    )
+    manifest_path = run_dir / "manifest.json"
+    predictions_path = run_dir / "predictions.jsonl"
+    manifest = sanitize_manifest(
+        {
+            "run_id": args.run_id,
+            "status": "running",
+            "project_commit": _git_commit(PROJECT_ROOT),
+            "condition": args.condition,
+            "split": args.split,
+            "limit": args.limit,
+            "model": model_spec,
+            "generation": {
+                "max_new_tokens": args.max_new_tokens,
+                "temperature": 0.0,
+            },
+            "python": sys.version,
+            "platform": platform.platform(),
+            "started_at": datetime.now().astimezone().isoformat(),
+        }
+    )
+    _write_json(manifest_path, manifest)
+    atm = ATMAdapter(args.atm_root)
+    items = atm.load_split(args.split)
+    if args.limit is not None:
+        items = items[: args.limit]
+    adapter = HFModelAdapter.from_local_snapshot(
+        Path(model_spec["local_path"]), model_id=args.model_id
+    )
+
+    with predictions_path.open("x", encoding="utf-8") as handle:
+        for item in items:
+            chunks = atm.collect_sgm_chunks(item.evidence_ids)
+            messages = atm.build_text_messages(item.question, chunks)
+            result = adapter.generate(
+                messages, max_new_tokens=args.max_new_tokens, temperature=0.0
+            )
+            row = build_prediction_row(
+                qa_id=item.qa_id,
+                qtype=item.qtype,
+                evidence_ids=item.evidence_ids,
+                answer=result.text,
+                prompt_tokens=result.prompt_tokens,
+                completion_tokens=result.completion_tokens,
+                model_id=args.model_id,
+            )
+            handle.write(json.dumps(row, ensure_ascii=False) + "\n")
+            handle.flush()
+
+    manifest["status"] = "complete"
+    manifest["finished_at"] = datetime.now().astimezone().isoformat()
+    manifest["prediction_count"] = len(items)
+    _write_json(manifest_path, manifest)
+    print(run_dir)
+    return 0
+
+
+def _git_commit(root: Path) -> str:
+    return subprocess.check_output(
+        ["git", "-C", str(root), "rev-parse", "HEAD"], text=True
+    ).strip()
+
+
+def _write_json(path: Path, payload: dict[str, Any]) -> None:
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    temporary.replace(path)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
