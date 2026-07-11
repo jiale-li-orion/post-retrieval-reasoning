@@ -1,0 +1,97 @@
+schema_version: 1
+conditions:
+  - id: C0
+    name: ORACLE_SGM
+    split: [full, hard]
+    evidence: sgm
+    evidence_selector: evidence_ids
+    annotation: none
+    evidence_order: preserve
+
+  - id: C1
+    name: ORACLE_SGM_VA
+    split: [full, hard]
+    evidence: sgm
+    evidence_selector: evidence_ids
+    annotation: verbal_r3
+    evidence_order: preserve
+
+  - id: C2
+    name: ORACLE_RAW
+    split: [hard]
+    evidence: raw
+    evidence_selector: evidence_ids
+    annotation: none
+    evidence_order: preserve
+
+  - id: C3
+    name: NIAH25_SGM
+    split: [hard]
+    evidence: sgm
+    evidence_selector: niah_evidence_ids
+    niah_k: 25
+    annotation: none
+    evidence_order: preserve
+
+  - id: C4
+    name: NIAH50_SGM
+    split: [hard]
+    evidence: sgm
+    evidence_selector: niah_evidence_ids
+    niah_k: 50
+    annotation: none
+    evidence_order: preserve
+
+  - id: C5
+    name: NIAH100_SGM
+    split: [hard]
+    evidence: sgm
+    evidence_selector: niah_evidence_ids
+    niah_k: 100
+    annotation: none
+    evidence_order: preserve
+
+  - id: C6
+    name: NIAH200_SGM
+    split: [hard]
+    evidence: sgm
+    evidence_selector: niah_evidence_ids
+    niah_k: 200
+    annotation: none
+    evidence_order: preserve
+
+  - id: C7
+    name: NIAH25_SGM_VA
+    split: [hard]
+    evidence: sgm
+    evidence_selector: niah_evidence_ids
+    niah_k: 25
+    annotation: verbal_r3
+    evidence_order: preserve
+
+  - id: C8
+    name: NIAH50_SGM_VA
+    split: [hard]
+    evidence: sgm
+    evidence_selector: niah_evidence_ids
+    niah_k: 50
+    annotation: verbal_r3
+    evidence_order: preserve
+
+  - id: C9
+    name: NIAH100_SGM_VA
+    split: [hard]
+    evidence: sgm
+    evidence_selector: niah_evidence_ids
+    niah_k: 100
+    annotation: verbal_r3
+    evidence_order: preserve
+
+  - id: C10
+    name: NIAH200_SGM_VA
+    split: [hard]
+    evidence: sgm
+    evidence_selector: niah_evidence_ids
+    niah_k: 200
+    annotation: verbal_r3
+    evidence_order: preserve

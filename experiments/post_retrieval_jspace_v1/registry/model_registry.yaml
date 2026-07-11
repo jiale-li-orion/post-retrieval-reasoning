@@ -1,0 +1,59 @@
+schema_version: 1
+models:
+  - id: qwen3_8b_ms
+    source: local_snapshot
+    repository: Qwen/Qwen3-8B
+    revision: local
+    local_path: /home/lab/lab/research_data/Qwen3-8B-ms
+    file_manifest_sha256: pending
+    architecture: Qwen3ForCausalLM
+    dtype: bfloat16
+    reasoning_capable: true
+    slot_protocol: dual
+    quantized: false
+
+  - id: deepseek_r1_distill_llama_8b
+    source: local_snapshot
+    repository: deepseek-ai/DeepSeek-R1-Distill-Llama-8B
+    revision: local
+    local_path: /home/lab/lab/research_data/DeepSeek-R1-Distill-Llama-8B
+    file_manifest_sha256: pending
+    architecture: LlamaForCausalLM
+    dtype: bfloat16
+    reasoning_capable: true
+    slot_protocol: dual
+    quantized: false
+
+  - id: qwen2_5_7b_instruct
+    source: local_snapshot
+    repository: Qwen/Qwen2.5-7B-Instruct
+    revision: local
+    local_path: /home/lab/lab/research_data/Qwen2.5-7B-Instruct
+    file_manifest_sha256: pending
+    architecture: Qwen2ForCausalLM
+    dtype: bfloat16
+    reasoning_capable: false
+    slot_protocol: direct
+    quantized: false
+
+  - id: qwen3_vl_2b_instruct
+    source: huggingface
+    repository: Qwen/Qwen3-VL-2B-Instruct
+    revision: pending
+    local_path: /home/lab/lab/research_data/Qwen3-VL-2B-Instruct
+    architecture: Qwen3VLForConditionalGeneration
+    dtype: bfloat16
+    reasoning_capable: false
+    slot_protocol: direct
+    quantized: false
+
+  - id: qwen3_vl_8b_instruct
+    source: huggingface
+    repository: Qwen/Qwen3-VL-8B-Instruct
+    revision: pending
+    local_path: /home/lab/lab/research_data/Qwen3-VL-8B-Instruct
+    architecture: Qwen3VLForConditionalGeneration
+    dtype: bfloat16
+    reasoning_capable: false
+    slot_protocol: direct
+    quantized: false

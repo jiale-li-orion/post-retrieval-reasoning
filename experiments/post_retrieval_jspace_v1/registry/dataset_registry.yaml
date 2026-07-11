@@ -1,0 +1,35 @@
+schema_version: 1
+atm_bench:
+  repository: https://github.com/JingbiaoMei/ATM-Bench
+  commit: 3a1a606b872c4502e5efc632dcd1c076a220ed4a
+  root: other_repo_references/ATM-Bench
+  assets:
+    full:
+      path: data/atm-bench/atm-bench.json
+      count: 1013
+      sha256: ab6eaa9df62fb4162e0f5eecd98768a7e3ae721e32d2db2cf227ff41e3295762
+    hard:
+      path: data/atm-bench/atm-bench-hard.json
+      count: 31
+      sha256: acd35f2a172a9741d970d2cf21184ff0af8d79a8bf59967fc8aa33d619f6af4a
+    niah25:
+      path: data/atm-bench/niah/atm-bench-hard-niah25.json
+      sha256: 9819a0e1b648b5314aa61c9a54d29247e63a223b76e553b4e35a7dd010b124b5
+    niah50:
+      path: data/atm-bench/niah/atm-bench-hard-niah50.json
+      sha256: a605b3323bdc05c38b1505e7bbb0edd89e6c1f49f93bd2ea87746e8f3831b92c
+    niah100:
+      path: data/atm-bench/niah/atm-bench-hard-niah100.json
+      sha256: d02815decc5f989a51c653d7cf5203aafa8704f93537740321600bd0f70dec33
+    niah200:
+      path: data/atm-bench/niah/atm-bench-hard-niah200.json
+      sha256: 2c6a2d8a8681f84b87acd4851e68ec691c6f45e5cd22f4accf37be929e0d9645
+    image_sgm:
+      path: data/processed_memory/image_batch_results.json
+      sha256: 7204e8b4ab1a0fea97f2003058213742d47589e09636941f8d83b2e77c33e0a1
+    video_sgm:
+      path: data/processed_memory/video_batch_results.json
+      sha256: 88ed14ce32afde1a4d54d5b77a0e7f84305b543186307be6c9bc34119342727a
+    emails:
+      path: data/raw_memory/email/emails.json
+      sha256: 5c82c38e7f18923a9eba3af321663a8a5bd70e94e0d5e59e987141c71219a8af

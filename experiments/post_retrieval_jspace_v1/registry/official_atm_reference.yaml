@@ -1,0 +1,41 @@
+schema_version: 1
+source:
+  url: https://atmbench.github.io/leaderboard.html
+  retrieved_at: "2026-07-11T20:05:32+08:00"
+  page_sha256: 3d4b756eef01033046754d084174e70129f21dfad9b8acc0f54ee7ecf0d69459
+  authority: live_leaderboard
+split: hard
+evidence_view: sgm
+judge:
+  model: gpt-5-mini
+  reasoning_effort: minimal
+metric: ATM/QS
+units: percent
+conditions:
+  C0: Oracle
+  C3: NIAH-25
+  C4: NIAH-50
+  C5: NIAH-100
+  C6: NIAH-200
+results:
+  minimax_m3:
+    display_name: MiniMax M3
+    C0: 60.5
+    C3: 45.9
+    C4: 55.1
+    C5: 43.4
+    C6: 50.6
+  mimo_v2_5:
+    display_name: MiMo V2.5
+    C0: 44.6
+    C3: 39.1
+    C4: 34.5
+    C5: 31.8
+    C6: 26.8
+  kimi_k2_5:
+    display_name: Kimi K2.5
+    C0: 44.5
+    C3: 47.91
+    C4: 39.6
+    C5: 33.5
+    C6: 37.7
