@@ -2,7 +2,12 @@ from pathlib import Path
 
 import pytest
 
-from core.run_contract import ManifestError, create_run_directory, sanitize_manifest
+from core.run_contract import (
+    ManifestError,
+    create_run_directory,
+    sanitize_manifest,
+    validate_manifest_completeness,
+)
 
 
 def test_run_directory_refuses_existing_output(tmp_path: Path) -> None:
@@ -24,3 +29,23 @@ def test_manifest_allows_environment_variable_names() -> None:
     )
 
     assert manifest["provider"]["api_key_env"] == "MIMO_API_KEY"
+
+
+def test_complete_manifest_requires_reproducibility_fields() -> None:
+    with pytest.raises(ManifestError, match="config_hashes"):
+        validate_manifest_completeness(
+            {
+                "run_id": "run",
+                "status": "complete",
+                "project_commit": "abc",
+                "git_dirty": False,
+                "condition": "C0",
+                "split": "hard",
+                "model": {},
+                "generation": {},
+                "dataset": {},
+                "environment": {},
+                "started_at": "time",
+                "finished_at": "time",
+            }
+        )
