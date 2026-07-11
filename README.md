@@ -40,7 +40,7 @@
 - Exp 2: 代码就绪，未跑
 - 论文: Sections 1-3 已写，4-8 待写
 
-## GPT 阅读顺序
+## 阅读顺序
 1. 本文件（README）
 2. `experiments/README.md`
 3. `my_paper/sections/01_introduction.tex`
@@ -51,3 +51,4 @@
 8. `human-reading-doc/现状.md`
 9. `PROTOCOL.md`
 10. `0710_j-space讨论/J-Space_README.md`
+11. 后续其他文件的完整阅读（重要，因为各个文件信息密度都够高，不能随便压缩摘要替代）
