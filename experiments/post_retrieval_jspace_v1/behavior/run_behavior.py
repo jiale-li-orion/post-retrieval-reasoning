@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import platform
 import subprocess
@@ -11,6 +12,9 @@ import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any
+
+import torch
+import transformers
 
 
 EXPERIMENT_ROOT = Path(__file__).resolve().parents[1]
@@ -21,7 +25,11 @@ if str(EXPERIMENT_ROOT) not in sys.path:
 from adapters.atm import ATMAdapter  # noqa: E402
 from adapters.hf_model import HFModelAdapter  # noqa: E402
 from core.registry import load_condition_registry, load_model_registry  # noqa: E402
-from core.run_contract import create_run_directory, sanitize_manifest  # noqa: E402
+from core.run_contract import (  # noqa: E402
+    create_run_directory,
+    sanitize_manifest,
+    validate_manifest_completeness,
+)
 
 
 def validate_run_selection(
@@ -118,6 +126,7 @@ def main() -> int:
             "run_id": args.run_id,
             "status": "running",
             "project_commit": _git_commit(PROJECT_ROOT),
+            "git_dirty": _git_dirty(PROJECT_ROOT),
             "condition": args.condition,
             "split": args.split,
             "limit": args.limit,
@@ -126,8 +135,32 @@ def main() -> int:
                 "max_new_tokens": args.max_new_tokens,
                 "temperature": 0.0,
             },
-            "python": sys.version,
-            "platform": platform.platform(),
+            "dataset": {
+                "atm_commit": _git_commit(args.atm_root),
+                "split_sha256": ATMAdapter(args.atm_root).split_sha256(args.split),
+                "prompt_contract_sha256": _file_sha256(
+                    args.atm_root / "memqa/qa_agent_baselines/oracle/config.py"
+                ),
+            },
+            "config_hashes": {
+                "models": _file_sha256(
+                    EXPERIMENT_ROOT / "registry/model_registry.yaml"
+                ),
+                "conditions": _file_sha256(
+                    EXPERIMENT_ROOT / "registry/condition_registry.yaml"
+                ),
+                "datasets": _file_sha256(
+                    EXPERIMENT_ROOT / "registry/dataset_registry.yaml"
+                ),
+            },
+            "environment": {
+                "python": sys.version,
+                "platform": platform.platform(),
+                "torch": torch.__version__,
+                "transformers": transformers.__version__,
+                "cuda": torch.version.cuda,
+                "gpu": torch.cuda.get_device_name(0),
+            },
             "started_at": datetime.now().astimezone().isoformat(),
         }
     )
@@ -143,6 +176,9 @@ def main() -> int:
         raw_ground_truth, [item.qa_id for item in items]
     )
     _write_json_list(ground_truth_path, selected_ground_truth)
+    manifest["dataset"]["ground_truth_subset_sha256"] = _file_sha256(
+        ground_truth_path
+    )
     adapter = HFModelAdapter.from_local_snapshot(
         Path(model_spec["local_path"]), model_id=args.model_id
     )
@@ -169,6 +205,7 @@ def main() -> int:
     manifest["status"] = "complete"
     manifest["finished_at"] = datetime.now().astimezone().isoformat()
     manifest["prediction_count"] = len(items)
+    validate_manifest_completeness(manifest)
     _write_json(manifest_path, manifest)
     print(run_dir)
     return 0
@@ -178,6 +215,21 @@ def _git_commit(root: Path) -> str:
     return subprocess.check_output(
         ["git", "-C", str(root), "rev-parse", "HEAD"], text=True
     ).strip()
+
+
+def _git_dirty(root: Path) -> bool:
+    output = subprocess.check_output(
+        ["git", "-C", str(root), "status", "--porcelain"], text=True
+    )
+    return bool(output.strip())
+
+
+def _file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def _write_json(path: Path, payload: dict[str, Any]) -> None:

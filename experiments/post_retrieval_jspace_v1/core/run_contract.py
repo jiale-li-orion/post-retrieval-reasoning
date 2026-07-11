@@ -18,6 +18,22 @@ _SECRET_KEYS = {
     "token",
 }
 
+_COMPLETE_MANIFEST_FIELDS = {
+    "run_id",
+    "status",
+    "project_commit",
+    "git_dirty",
+    "condition",
+    "split",
+    "model",
+    "generation",
+    "dataset",
+    "config_hashes",
+    "environment",
+    "started_at",
+    "finished_at",
+}
+
 
 def create_run_directory(path: Path) -> Path:
     try:
@@ -39,3 +55,12 @@ def sanitize_manifest(value: Any, *, _path: str = "manifest") -> Any:
     if isinstance(value, list):
         return [sanitize_manifest(item, _path=f"{_path}[]") for item in value]
     return value
+
+
+def validate_manifest_completeness(manifest: dict[str, Any]) -> None:
+    clean = sanitize_manifest(manifest)
+    missing = sorted(_COMPLETE_MANIFEST_FIELDS - clean.keys())
+    if missing:
+        raise ManifestError(f"complete manifest missing fields: {missing}")
+    if clean["status"] != "complete":
+        raise ManifestError("manifest status must be complete")
