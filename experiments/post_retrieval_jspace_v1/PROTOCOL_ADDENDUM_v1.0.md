@@ -121,3 +121,12 @@ decode/re-tokenize token-ID round trip are excluded. The first 512 valid
 windows in shuffled-record order are frozen for each model; the first 256 are
 the nested stability subset. Every row records its source record index,
 within-document window index, token count, and token-ID hash.
+
+The reference fitter targets the final residual layer and jointly fits every
+preceding source layer. The final layer itself uses the identity readout. A
+Qwen3-VL-2B resource probe showed that fitting all 27 source layers jointly
+costs approximately the same GPU time as fitting one layer, so layer-wise
+repeated fits are not used. Primary settings are BF16 model weights,
+`dim_batch=8`, `max_seq_len=256`, `skip_first=16`, and an atomic checkpoint
+every eight prompts. Completed fits retain the lens and manifest and remove the
+redundant running-sum checkpoint.

@@ -1,0 +1,14 @@
+schema_version: 1
+weights_dtype: bfloat16
+target_layer: final
+source_layers: all_before_target
+final_layer_readout: identity
+dim_batch: 8
+max_seq_len: 256
+skip_first: 16
+checkpoint_every: 8
+artifact_dtype: float16
+stability:
+  nested_counts: [256, 512]
+  matrix_cosine_median_min: 0.98
+  top25_overlap_median_min: 0.90

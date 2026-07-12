@@ -78,3 +78,16 @@ def test_jlens_calibration_registry_freezes_nested_256_512_contract() -> None:
     assert all(
         len(row["windows_sha256"]) == 64 for row in payload["corpora"].values()
     )
+
+
+def test_jlens_fit_registry_matches_reference_semantics() -> None:
+    payload = yaml.safe_load(
+        (ROOT / "registry/jlens_fit.yaml").read_text(encoding="utf-8")
+    )
+
+    assert payload["weights_dtype"] == "bfloat16"
+    assert payload["source_layers"] == "all_before_target"
+    assert payload["final_layer_readout"] == "identity"
+    assert payload["max_seq_len"] == 256
+    assert payload["skip_first"] == 16
+    assert payload["stability"]["nested_counts"] == [256, 512]
