@@ -51,8 +51,9 @@ models:
   - id: qwen3_vl_8b_instruct
     source: huggingface
     repository: Qwen/Qwen3-VL-8B-Instruct
-    revision: pending
+    revision: 0c351dd01ed87e9c1b53cbc748cba10e6187ff3b
     local_path: /home/lab/lab/research_data/Qwen3-VL-8B-Instruct
+    file_manifest_sha256: c37cd4285c6cb9089b0ab8a8c27cce3bfedfd4b680061a5403cdb42f8b965b96
     architecture: Qwen3VLForConditionalGeneration
     dtype: bfloat16
     reasoning_capable: false

@@ -1,0 +1,17 @@
+schema_version: 1
+model:
+  repository: 0k9d0h1/reranker3b-sft
+  revision: cdf46c85892ebb715cbd6a0b582af35ad5caa96b
+  local_path: /home/lab/lab/research_data/reranker3b-sft
+  file_manifest_sha256: f15bbf00b6800800cd769b97b55c03dd5af7adc3f544a51d92e1248ab58926ee
+prompt_source: other_repo_references/VerbalR3/utils/reranker_server.py
+prompt_contract: server
+decoding:
+  temperature: 0.6
+  top_p: 0.95
+  max_new_tokens: 1024
+output:
+  comment_prefix: "Comment:"
+  score_prefix: "Score:"
+  score_min: 1
+  score_max: 5

@@ -40,3 +40,20 @@ def test_official_api_reference_is_hard_sgm_only() -> None:
     assert payload["results"]["kimi_k2_5"]["C0"] == 44.5
     assert payload["results"]["mimo_v2_5"]["C6"] == 26.8
     assert payload["results"]["minimax_m3"]["C6"] == 50.6
+
+
+def test_verbal_annotation_registry_is_fully_frozen() -> None:
+    payload = yaml.safe_load(
+        (ROOT / "registry/verbal_annotation.yaml").read_text(encoding="utf-8")
+    )
+    model = payload["model"]
+
+    assert model["repository"] == "0k9d0h1/reranker3b-sft"
+    assert model["revision"] == "cdf46c85892ebb715cbd6a0b582af35ad5caa96b"
+    assert len(model["file_manifest_sha256"]) == 64
+    assert payload["prompt_source"].endswith("utils/reranker_server.py")
+    assert payload["decoding"] == {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "max_new_tokens": 1024,
+    }
