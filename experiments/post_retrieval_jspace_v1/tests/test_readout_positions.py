@@ -15,6 +15,13 @@ class CharacterTokenizer:
         }
 
 
+class BrokenOffsetTokenizer(CharacterTokenizer):
+    def __call__(self, text, **kwargs):
+        encoded = super().__call__(text, **kwargs)
+        encoded["offset_mapping"] = [(0, 0)] * len(text)
+        return encoded
+
+
 def test_positions_resolve_question_evidence_ends_and_answer_boundary() -> None:
     question = "What total?"
     chunks = ["ID: e1\nValue: 2", "ID: e2\nValue: 3"]
@@ -57,3 +64,17 @@ def test_position_resolution_requires_unique_question() -> None:
             tokenizer=CharacterTokenizer(),
             actual_input_ids=[ord(char) for char in "Question: q Question: q"],
         )
+
+
+def test_position_resolution_uses_verified_prefix_fallback_for_offset_holes() -> None:
+    rendered = "Question: q"
+
+    positions = resolve_text_positions(
+        rendered,
+        question="q",
+        evidence_chunks=[],
+        tokenizer=BrokenOffsetTokenizer(),
+        actual_input_ids=[ord(char) for char in rendered],
+    )
+
+    assert positions.p_q == len(rendered) - 1
