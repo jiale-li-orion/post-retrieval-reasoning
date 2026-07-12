@@ -6,8 +6,11 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import logging
+import platform
 import subprocess
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -71,6 +74,7 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     models = load_model_registry(EXPERIMENT_ROOT / "registry/model_registry.yaml")
     model_spec = models[args.model_id]
     calibration = _load_yaml(EXPERIMENT_ROOT / "registry/jlens_calibration.yaml")
@@ -79,6 +83,7 @@ def main() -> int:
         args.corpus_root / args.model_id / calibration["corpus_id"]
     )
     windows_path = corpus_dir / "windows.jsonl"
+    corpus_manifest_path = corpus_dir / "manifest.json"
     prompts = load_frozen_prompts(
         windows_path,
         expected_sha256=calibration["corpora"][args.model_id]["windows_sha256"],
@@ -97,20 +102,37 @@ def main() -> int:
     checkpoint_path = output_dir / "fit.ckpt"
     lens_path = output_dir / "lens.pt"
     manifest_path = output_dir / "manifest.json"
-    started_at = datetime.now().astimezone().isoformat()
+    started_at = (
+        state["started_at"]
+        if args.resume
+        else datetime.now().astimezone().isoformat()
+    )
+    wall_start = time.perf_counter()
     running_manifest = sanitize_manifest(
         {
             "fit_id": args.fit_id,
             "status": "running",
             "project_commit": _git_commit(PROJECT_ROOT),
+            "project_dirty": _git_dirty(PROJECT_ROOT),
+            "jlens_commit": _git_commit(
+                PROJECT_ROOT / "other_repo_references/jacobian-lens"
+            ),
             "model": model_spec,
             "sample_count": args.sample_count,
             "corpus_sha256": _file_sha256(windows_path),
+            "corpus_manifest_sha256": _file_sha256(corpus_manifest_path),
             "fit_config": fit_config,
             "fit_config_sha256": _file_sha256(
                 EXPERIMENT_ROOT / "registry/jlens_fit.yaml"
             ),
             "started_at": started_at,
+            "environment": {
+                "python": sys.version,
+                "platform": platform.platform(),
+                "torch": torch.__version__,
+                "cuda": torch.version.cuda,
+                "gpu": torch.cuda.get_device_name(0),
+            },
         }
     )
     _write_json(manifest_path, running_manifest)
@@ -143,6 +165,7 @@ def main() -> int:
         "n_prompts": lens.n_prompts,
         "d_model": lens.d_model,
         "lens_sha256": _file_sha256(lens_path),
+        "elapsed_seconds": time.perf_counter() - wall_start,
         "finished_at": datetime.now().astimezone().isoformat(),
     }
     _write_json(manifest_path, complete_manifest)
@@ -172,6 +195,14 @@ def _git_commit(root: Path) -> str:
     return subprocess.check_output(
         ["git", "-C", str(root), "rev-parse", "HEAD"], text=True
     ).strip()
+
+
+def _git_dirty(root: Path) -> bool:
+    return bool(
+        subprocess.check_output(
+            ["git", "-C", str(root), "status", "--porcelain"], text=True
+        ).strip()
+    )
 
 
 if __name__ == "__main__":
