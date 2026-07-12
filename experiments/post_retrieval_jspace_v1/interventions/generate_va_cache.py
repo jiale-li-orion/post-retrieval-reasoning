@@ -35,7 +35,12 @@ from interventions.verbal_annotation import (  # noqa: E402
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--split", choices=["full", "hard"], required=True)
+    source = parser.add_mutually_exclusive_group(required=True)
+    source.add_argument("--split", choices=["full", "hard"])
+    source.add_argument(
+        "--scope",
+        choices=["oracle-full", "oracle-hard", "canonical-e1"],
+    )
     parser.add_argument("--cache-id", required=True)
     parser.add_argument("--limit", type=int)
     parser.add_argument("--seed", type=int, default=0)
@@ -61,7 +66,8 @@ def main() -> int:
     config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
     model_spec = config["model"]
     model_path = Path(model_spec["local_path"])
-    output_dir = create_run_directory(args.cache_root / args.split / args.cache_id)
+    scope = args.scope or f"oracle-{args.split}"
+    output_dir = create_run_directory(args.cache_root / scope / args.cache_id)
     records_path = output_dir / "annotations.jsonl"
     started_at = datetime.now().astimezone().isoformat()
 
@@ -75,42 +81,39 @@ def main() -> int:
     ).to("cuda").eval()
 
     atm = ATMAdapter(args.atm_root)
-    items = atm.load_split(args.split)
+    work = build_annotation_work(atm, scope)
     if args.limit is not None:
-        items = items[: args.limit]
+        work = work[: args.limit]
     record_count = 0
     with records_path.open("x", encoding="utf-8") as handle:
-        for item in items:
-            chunks = atm.collect_sgm_chunks(item.evidence_ids)
-            for index, (evidence_id, chunk) in enumerate(
-                zip(item.evidence_ids, chunks, strict=True)
-            ):
-                row = _annotate(
-                    model=model,
-                    tokenizer=tokenizer,
-                    question=item.question,
-                    document=chunk,
-                    max_retries=args.max_retries,
-                    decoding=config["decoding"],
-                )
-                row.update(
-                    {
-                        "qa_id": item.qa_id,
-                        "evidence_id": evidence_id,
-                        "evidence_index": index,
-                        "sgm_sha256": _text_sha256(chunk),
-                    }
-                )
-                handle.write(json.dumps(row, ensure_ascii=False) + "\n")
-                handle.flush()
-                record_count += 1
+        for work_row in work:
+            row = _annotate(
+                model=model,
+                tokenizer=tokenizer,
+                question=work_row["question"],
+                document=work_row["sgm_chunk"],
+                max_retries=args.max_retries,
+                decoding=config["decoding"],
+            )
+            row.update(
+                {
+                    "qa_id": work_row["qa_id"],
+                    "evidence_id": work_row["evidence_id"],
+                    "sgm_sha256": work_row["sgm_sha256"],
+                    "source_conditions": work_row["source_conditions"],
+                    "source_positions": work_row["source_positions"],
+                }
+            )
+            handle.write(json.dumps(row, ensure_ascii=False) + "\n")
+            handle.flush()
+            record_count += 1
 
     manifest = sanitize_manifest(
         {
             "cache_id": args.cache_id,
             "status": "complete",
             "project_commit": _git_commit(PROJECT_ROOT),
-            "split": args.split,
+            "scope": scope,
             "limit": args.limit,
             "seed": args.seed,
             "record_count": record_count,
@@ -119,7 +122,23 @@ def main() -> int:
             "prompt_source": config["prompt_source"],
             "prompt_sha256": _text_sha256(VERBAL_R3_SYSTEM_PROMPT),
             "config_sha256": _file_sha256(config_path),
-            "dataset_sha256": atm.split_sha256(args.split),
+            "dataset_sha256": {
+                split: atm.split_sha256(split) for split in ("full", "hard")
+            },
+            "work_sha256": _text_sha256(
+                json.dumps(
+                    [
+                        {
+                            key: value
+                            for key, value in row.items()
+                            if key != "sgm_chunk"
+                        }
+                        for row in work
+                    ],
+                    sort_keys=True,
+                    separators=(",", ":"),
+                )
+            ),
             "annotations_sha256": _file_sha256(records_path),
             "started_at": started_at,
             "finished_at": datetime.now().astimezone().isoformat(),
@@ -130,6 +149,54 @@ def main() -> int:
     )
     print(output_dir)
     return 0
+
+
+def build_annotation_work(atm: ATMAdapter, scope: str) -> list[dict[str, Any]]:
+    sources: list[tuple[str, list[Any], str]] = []
+    if scope in {"oracle-full", "canonical-e1"}:
+        sources.append(("C1", atm.load_split("full"), "evidence_ids"))
+    if scope == "oracle-hard":
+        sources.append(("C1", atm.load_split("hard"), "evidence_ids"))
+    if scope == "canonical-e1":
+        for condition_id, k in (("C7", 25), ("C8", 50), ("C9", 100), ("C10", 200)):
+            sources.append((condition_id, atm.load_niah(k), "niah_evidence_ids"))
+    if not sources:
+        raise ValueError(f"unsupported annotation scope: {scope}")
+
+    by_key: dict[tuple[str, str], dict[str, Any]] = {}
+    order: list[tuple[str, str]] = []
+    for condition_id, items, evidence_field in sources:
+        for item in items:
+            evidence_ids = getattr(item, evidence_field)
+            if evidence_ids is None:
+                raise ValueError(
+                    f"{condition_id} item {item.qa_id} lacks {evidence_field}"
+                )
+            chunks = atm.collect_sgm_chunks(evidence_ids)
+            for index, (evidence_id, chunk) in enumerate(
+                zip(evidence_ids, chunks, strict=True)
+            ):
+                key = (item.qa_id, evidence_id)
+                if key not in by_key:
+                    by_key[key] = {
+                        "qa_id": item.qa_id,
+                        "question": item.question,
+                        "evidence_id": evidence_id,
+                        "sgm_chunk": chunk,
+                        "sgm_sha256": _text_sha256(chunk),
+                        "source_conditions": [],
+                        "source_positions": [],
+                    }
+                    order.append(key)
+                row = by_key[key]
+                if row["question"] != item.question or row["sgm_chunk"] != chunk:
+                    raise ValueError(f"canonical annotation key changed content: {key}")
+                if condition_id not in row["source_conditions"]:
+                    row["source_conditions"].append(condition_id)
+                row["source_positions"].append(
+                    {"condition": condition_id, "index": index}
+                )
+    return [by_key[key] for key in order]
 
 
 @torch.inference_mode()
