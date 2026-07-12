@@ -76,6 +76,8 @@ def build_prediction_row(
     prompt_tokens: int,
     completion_tokens: int,
     model_id: str,
+    evidence_chunks: tuple[str, ...],
+    prompt_payload: str,
 ) -> dict[str, Any]:
     return {
         "id": qa_id,
@@ -88,6 +90,9 @@ def build_prediction_row(
         "total_tokens": prompt_tokens + completion_tokens,
         "requested_model": model_id,
         "returned_model": model_id,
+        "evidence_sha256": [_text_sha256(chunk) for chunk in evidence_chunks],
+        "prompt": prompt_payload,
+        "prompt_sha256": _text_sha256(prompt_payload),
     }
 
 
@@ -231,6 +236,9 @@ def main() -> int:
                     annotation_rows,
                 )
             messages = atm.build_text_messages(item.question, chunks)
+            prompt_payload = adapter.processor.apply_chat_template(
+                messages, tokenize=False, add_generation_prompt=True
+            )
             result = adapter.generate(
                 messages, max_new_tokens=args.max_new_tokens, temperature=0.0
             )
@@ -242,6 +250,8 @@ def main() -> int:
                 prompt_tokens=result.prompt_tokens,
                 completion_tokens=result.completion_tokens,
                 model_id=args.model_id,
+                evidence_chunks=tuple(chunks),
+                prompt_payload=prompt_payload,
             )
             handle.write(json.dumps(row, ensure_ascii=False) + "\n")
             handle.flush()
@@ -271,6 +281,10 @@ def _load_jsonl(path: Path) -> list[dict[str, Any]]:
                 except json.JSONDecodeError as exc:
                     raise ValueError(f"invalid JSONL at {path}:{line_number}") from exc
     return rows
+
+
+def _text_sha256(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
 def _git_dirty(root: Path) -> bool:

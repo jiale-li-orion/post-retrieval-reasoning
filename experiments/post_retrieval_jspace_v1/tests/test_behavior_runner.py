@@ -32,10 +32,14 @@ def test_prediction_row_preserves_evidence_order() -> None:
         prompt_tokens=10,
         completion_tokens=2,
         model_id="model",
+        evidence_chunks=("chunk-2", "chunk-1"),
+        prompt_payload="rendered prompt",
     )
 
     assert row["evidence_ids"] == ["e2", "e1"]
     assert row["total_tokens"] == 12
+    assert len(row["prompt_sha256"]) == 64
+    assert len(row["evidence_sha256"]) == 2
 
 
 def test_smoke_ground_truth_contains_only_selected_predictions() -> None:
