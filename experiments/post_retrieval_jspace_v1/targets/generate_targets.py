@@ -46,7 +46,7 @@ def main() -> int:
     }
     atm = ATMAdapter(args.atm_root)
     full = atm.load_split("full")
-    hard_ids = {item.qa_id for item in atm.load_split("hard")}
+    hard = atm.load_split("hard")
     output = create_run_directory(args.output_root / args.target_id)
     targets_path = output / "targets.jsonl"
     programs_path = output / "hard_decision_programs.draft.jsonl"
@@ -73,16 +73,24 @@ def main() -> int:
             }
             target_handle.write(json.dumps(row, ensure_ascii=False) + "\n")
             target_count += 1
-            if item.qa_id in hard_ids:
-                program = build_decision_program_draft(
-                    qa_id=item.qa_id,
-                    qtype=item.qtype,
-                    gold_answer=item.gold_answer,
-                    evidence_ids=item.evidence_ids,
-                    targets=targets,
-                )
-                program_handle.write(json.dumps(program, ensure_ascii=False) + "\n")
-                program_count += 1
+        for item in hard:
+            chunks = atm.collect_sgm_chunks(item.evidence_ids)
+            targets = build_target_rows(
+                gold_answer=item.gold_answer,
+                qtype=item.qtype,
+                evidence_chunks=chunks,
+                tokenizers=tokenizers,
+            )
+            program = build_decision_program_draft(
+                qa_id=item.qa_id,
+                qtype=item.qtype,
+                gold_answer=item.gold_answer,
+                evidence_ids=item.evidence_ids,
+                targets=targets,
+            )
+            program["targets"] = targets
+            program_handle.write(json.dumps(program, ensure_ascii=False) + "\n")
+            program_count += 1
 
     if target_count != 1013 or program_count != 31:
         raise ValueError(
