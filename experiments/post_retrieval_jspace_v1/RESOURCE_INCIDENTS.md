@@ -48,3 +48,9 @@ prompt than 4 while retaining about 2.8 GiB more allocator headroom. At the
 observed rate, an n256 fit is expected to take approximately 10.7 hours. This
 is a model-specific resource override; all other models retain the default
 `dim_batch=8` unless they independently fail their own resource probe.
+
+The formal n256 fit was restarted from a clean artifact at commit `7b0821d`.
+Its first prompt completed in 150 seconds, matching the `dim_batch=2` probe,
+while the process used approximately 19.3 GiB according to `nvidia-smi` and
+drew approximately 406 W. This first-prompt parity is the operational gate that
+distinguishes the recovered run from the failed residency-thrashing run.
