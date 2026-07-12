@@ -52,7 +52,15 @@ def resolve_text_positions(
         start = rendered_prompt.find(chunk, cursor)
         if start < 0:
             raise PositionError(f"evidence span {index} was not found after prior span")
-        evidence_ends.append(_token_at_char(offsets, _last_content_char(rendered_prompt, start, start + len(chunk))))
+        evidence_ends.append(
+            _token_at_char(
+                offsets,
+                _last_content_char(rendered_prompt, start, start + len(chunk)),
+                text=rendered_prompt,
+                tokenizer=tokenizer,
+                actual_ids=actual_ids,
+            )
+        )
         cursor = start + len(chunk)
 
     return ReadoutPositions(
@@ -62,6 +70,9 @@ def resolve_text_positions(
             _last_content_char(
                 rendered_prompt, question_starts[0], question_end
             ),
+            text=rendered_prompt,
+            tokenizer=tokenizer,
+            actual_ids=actual_ids,
         ),
         p_a0=len(actual_ids) - 1,
     )
@@ -96,8 +107,22 @@ def _last_content_char(text: str, start: int, end: int) -> int:
     return end - 1
 
 
-def _token_at_char(offsets: Sequence[tuple[int, int]], char_index: int) -> int:
+def _token_at_char(
+    offsets: Sequence[tuple[int, int]],
+    char_index: int,
+    *,
+    text: str,
+    tokenizer: Any,
+    actual_ids: Sequence[int],
+) -> int:
     for token_index, (start, end) in enumerate(offsets):
         if start <= char_index < end:
             return token_index
-    raise PositionError(f"no model token covers character index {char_index}")
+    prefix_ids = _flat_ids(
+        tokenizer(text[: char_index + 1], add_special_tokens=False)["input_ids"]
+    )
+    if prefix_ids and list(actual_ids[: len(prefix_ids)]) == prefix_ids:
+        return len(prefix_ids) - 1
+    raise PositionError(
+        f"no model token covers character index {char_index}; prefix fallback mismatched"
+    )

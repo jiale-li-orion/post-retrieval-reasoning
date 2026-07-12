@@ -8,11 +8,14 @@ from readout.positions import PositionError, resolve_text_positions
 class CharacterTokenizer:
     def __call__(self, text, **kwargs):
         assert kwargs["add_special_tokens"] is False
-        assert kwargs["return_offsets_mapping"] is True
-        return {
+        encoded = {
             "input_ids": [ord(char) for char in text],
-            "offset_mapping": [(index, index + 1) for index in range(len(text))],
         }
+        if kwargs.get("return_offsets_mapping"):
+            encoded["offset_mapping"] = [
+                (index, index + 1) for index in range(len(text))
+            ]
+        return encoded
 
 
 class BrokenOffsetTokenizer(CharacterTokenizer):
