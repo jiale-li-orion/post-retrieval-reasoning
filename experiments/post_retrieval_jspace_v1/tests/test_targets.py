@@ -1,5 +1,6 @@
 from targets.builder import (
     build_decision_program_draft,
+    build_target_rows,
     build_target_strings,
     tokenize_aliases,
 )
@@ -44,3 +45,16 @@ def test_decision_program_is_explicitly_unreviewed() -> None:
     assert draft["review_status"] == "draft"
     assert draft["required_evidence_ids"] == ["e1"]
     assert draft["derived_targets"] == ["answer_0"]
+
+
+def test_target_rows_record_copyability_and_each_model_tokenization() -> None:
+    rows = build_target_rows(
+        gold_answer="42",
+        qtype="number",
+        evidence_chunks=["Price: 42"],
+        tokenizers={"model-a": FakeTokenizer(), "model-b": FakeTokenizer()},
+    )
+
+    assert rows[0]["copyable"] is True
+    assert rows[0]["derived_candidate"] is False
+    assert set(rows[0]["tokenization"]) == {"model-a", "model-b"}
