@@ -1,4 +1,12 @@
-from jlens.build_calibration_corpus import shuffled_document_windows, take_windows
+from jlens.build_calibration_corpus import (
+    WIKITEXT_REVISION,
+    shuffled_document_windows,
+    take_windows,
+)
+
+
+def test_wikitext_source_revision_is_immutable() -> None:
+    assert len(WIKITEXT_REVISION) == 40
 
 
 class _Tokenizer:

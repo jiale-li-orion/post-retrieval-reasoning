@@ -19,6 +19,7 @@ from transformers import AutoTokenizer
 
 EXPERIMENT_ROOT = Path(__file__).resolve().parents[1]
 PROJECT_ROOT = EXPERIMENT_ROOT.parents[1]
+WIKITEXT_REVISION = "b08601e04326c79dfdd32d625aee71d232d685c3"
 if str(EXPERIMENT_ROOT) not in sys.path:
     sys.path.insert(0, str(EXPERIMENT_ROOT))
 
@@ -94,7 +95,10 @@ def main() -> int:
         model_spec["local_path"], local_files_only=True
     )
     dataset = load_dataset(
-        "Salesforce/wikitext", "wikitext-103-raw-v1", split="train"
+        "Salesforce/wikitext",
+        "wikitext-103-raw-v1",
+        split="train",
+        revision=WIKITEXT_REVISION,
     )
     records = [{"text": text} for text in dataset["text"]]
     selected = take_windows(
@@ -125,8 +129,10 @@ def main() -> int:
             "dataset": {
                 "repository": "Salesforce/wikitext",
                 "configuration": "wikitext-103-raw-v1",
+                "revision": WIKITEXT_REVISION,
                 "split": "train",
                 "record_count": len(records),
+                "fingerprint": dataset._fingerprint,
             },
             "model_id": args.model_id,
             "model_revision": model_spec["revision"],
