@@ -77,6 +77,13 @@ def select_shard(items: list[Any], shard_index: int, num_shards: int) -> list[An
     return items[start : start + size]
 
 
+def validate_resume_prefix(
+    existing_ids: list[str], canonical_ids: list[str]
+) -> None:
+    if canonical_ids[: len(existing_ids)] != existing_ids:
+        raise ValueError("existing predictions are not a canonical prefix")
+
+
 def build_prediction_row(
     *,
     qa_id: str,
@@ -130,6 +137,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--shard-index", type=int, default=0)
     parser.add_argument("--num-shards", type=int, default=1)
     parser.add_argument(
+        "--resume",
+        action="store_true",
+        help="Continue an interrupted run whose predictions form a canonical prefix",
+    )
+    parser.add_argument(
         "--run-root",
         type=Path,
         default=Path("/home/lab/lab/research_artifacts/runs"),
@@ -163,13 +175,16 @@ def main() -> int:
     if model_spec.get("file_manifest_sha256") in {None, "pending"}:
         raise ValueError(f"model {args.model_id} is missing snapshot provenance")
 
-    run_dir = create_run_directory(
-        args.run_root / args.condition / args.split / args.model_id / args.run_id
-    )
+    run_dir = args.run_root / args.condition / args.split / args.model_id / args.run_id
+    if args.resume:
+        if not run_dir.is_dir():
+            raise FileNotFoundError(f"resume run does not exist: {run_dir}")
+    else:
+        run_dir = create_run_directory(run_dir)
     manifest_path = run_dir / "manifest.json"
     predictions_path = run_dir / "predictions.jsonl"
     ground_truth_path = run_dir / "ground_truth_subset.json"
-    manifest = sanitize_manifest(
+    expected_manifest = sanitize_manifest(
         {
             "run_id": args.run_id,
             "status": "running",
@@ -217,7 +232,6 @@ def main() -> int:
             "started_at": datetime.now().astimezone().isoformat(),
         }
     )
-    _write_json(manifest_path, manifest)
     atm = ATMAdapter(args.atm_root)
     items = select_condition_items(atm, args.split, condition)
     if args.limit is not None:
@@ -229,24 +243,48 @@ def main() -> int:
     selected_ground_truth = select_ground_truth_rows(
         raw_ground_truth, [item.qa_id for item in items]
     )
-    _write_json_list(ground_truth_path, selected_ground_truth)
-    manifest["dataset"]["ground_truth_subset_sha256"] = _file_sha256(
-        ground_truth_path
-    )
-    adapter = HFModelAdapter.from_local_snapshot(
-        Path(model_spec["local_path"]), model_id=args.model_id
-    )
+    if args.resume:
+        manifest = _load_resume_manifest(manifest_path, expected_manifest)
+        if not ground_truth_path.is_file() or not predictions_path.is_file():
+            raise FileNotFoundError("resume requires ground truth and predictions")
+        if _file_sha256(ground_truth_path) != manifest["dataset"].get(
+            "ground_truth_subset_sha256"
+        ):
+            raise ValueError("resume ground truth hash mismatch")
+        existing_rows = _load_jsonl(predictions_path)
+        validate_resume_prefix(
+            [str(row["qa_id"]) for row in existing_rows],
+            [item.qa_id for item in items],
+        )
+    else:
+        manifest = expected_manifest
+        _write_json_list(ground_truth_path, selected_ground_truth)
+        manifest["dataset"]["ground_truth_subset_sha256"] = _file_sha256(
+            ground_truth_path
+        )
+        existing_rows = []
     annotation_rows = (
         _load_jsonl(args.annotation_cache) if args.annotation_cache else []
     )
     if args.annotation_cache:
-        manifest["annotation_cache"] = {
+        annotation_contract = {
             "path": str(args.annotation_cache.resolve()),
             "sha256": _file_sha256(args.annotation_cache),
         }
+        if args.resume and manifest.get("annotation_cache") != annotation_contract:
+            raise ValueError("resume annotation cache contract mismatch")
+        manifest["annotation_cache"] = annotation_contract
 
-    with predictions_path.open("x", encoding="utf-8") as handle:
-        for item in items:
+    if not args.resume:
+        _write_json(manifest_path, manifest)
+        predictions_path.touch(exist_ok=False)
+
+    adapter = HFModelAdapter.from_local_snapshot(
+        Path(model_spec["local_path"]), model_id=args.model_id
+    )
+
+    with predictions_path.open("a", encoding="utf-8") as handle:
+        for item in items[len(existing_rows) :]:
             evidence_ids = evidence_ids_for_condition(item, condition)
             chunks = atm.collect_sgm_chunks(evidence_ids)
             if condition["annotation"] == "verbal_r3":
@@ -305,6 +343,33 @@ def _load_jsonl(path: Path) -> list[dict[str, Any]]:
                 except json.JSONDecodeError as exc:
                     raise ValueError(f"invalid JSONL at {path}:{line_number}") from exc
     return rows
+
+
+def _load_resume_manifest(
+    path: Path, expected: dict[str, Any]
+) -> dict[str, Any]:
+    if not path.is_file():
+        raise FileNotFoundError(f"resume manifest does not exist: {path}")
+    manifest = json.loads(path.read_text(encoding="utf-8"))
+    if manifest.get("status") != "running":
+        raise ValueError("only interrupted running manifests can be resumed")
+    for key in (
+        "run_id",
+        "condition",
+        "condition_spec",
+        "split",
+        "limit",
+        "shard",
+        "model",
+        "generation",
+        "config_hashes",
+    ):
+        if manifest.get(key) != expected.get(key):
+            raise ValueError(f"resume manifest contract mismatch: {key}")
+    for key in ("atm_commit", "split_sha256", "prompt_contract_sha256"):
+        if manifest.get("dataset", {}).get(key) != expected["dataset"].get(key):
+            raise ValueError(f"resume dataset contract mismatch: {key}")
+    return sanitize_manifest(manifest)
 
 
 def _text_sha256(text: str) -> str:
