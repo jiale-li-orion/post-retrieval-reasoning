@@ -42,7 +42,7 @@ Gate A verified state as of 2026-07-12:
   order and a rendered-prompt diff containing only the annotation blocks.
 - Inference and deterministic ATM evaluation run as separate immutable stages
   without judge credentials; both stages wrote complete manifests.
-- The remote test suite passes 42 tests; warnings are limited to third-party
+- The remote test suite passes 54 tests; warnings are limited to third-party
   SWIG deprecation messages.
 - The five-model suite is `Qwen3-8B-ms`, `DeepSeek-R1-Distill-Llama-8B`,
   `Qwen2.5-7B-Instruct`, `Qwen3-VL-2B-Instruct`, and
@@ -87,3 +87,40 @@ The project uses the root `pyproject.toml` and `uv.lock`; all commands run via
 The first implementation cycle ends at Gate C. Do not start E2, E3, E4, or an
 adaptive extension until the Gate C review bundle has been inspected and the
 user explicitly approves continuation.
+
+## J-lens Operations
+
+Run these commands only on the remote project checkout. Each fit wrapper
+refuses to overlap another known GPU experiment and writes an immutable fit
+directory plus a persistent log.
+
+```bash
+cd /home/lab/lab/post-retrieval-reasoning
+
+# Read-only status.
+experiments/post_retrieval_jspace_v1/scripts/check_jlens_status.sh
+
+# After both Qwen3-VL-2B fits are complete.
+experiments/post_retrieval_jspace_v1/scripts/run_jlens_stability.sh \
+  qwen3_vl_2b_instruct wikitext103-n256-v2 wikitext103-n512-v1 \
+  stability-n256-n512-v1
+```
+
+The stability report decides whether the remaining models use 256 or 512
+prompts. Substitute the approved count for `N` below and run one command at a
+time:
+
+```bash
+experiments/post_retrieval_jspace_v1/scripts/run_jlens_fit.sh \
+  qwen3_8b_ms N wikitext103-nN-v1
+experiments/post_retrieval_jspace_v1/scripts/run_jlens_fit.sh \
+  deepseek_r1_distill_llama_8b N wikitext103-nN-v1
+experiments/post_retrieval_jspace_v1/scripts/run_jlens_fit.sh \
+  qwen2_5_7b_instruct N wikitext103-nN-v1
+experiments/post_retrieval_jspace_v1/scripts/run_jlens_fit.sh \
+  qwen3_vl_8b_instruct N wikitext103-nN-v1
+```
+
+To resume an interrupted running fit, repeat its exact command with
+`--resume` as the fourth argument. A completed or differently configured fit
+cannot be resumed or overwritten.
