@@ -41,7 +41,7 @@ def merge_prediction_rows(
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--shard-dir", type=Path, action="append", required=True)
-    parser.add_argument("--canonical-ground-truth", type=Path, required=True)
+    parser.add_argument("--canonical-ground-truth", type=Path)
     parser.add_argument("--output-dir", type=Path, required=True)
     return parser.parse_args()
 
@@ -50,7 +50,11 @@ def main() -> int:
     args = parse_args()
     manifests = [_load_json(path / "manifest.json") for path in args.shard_dir]
     _validate_manifests(manifests, len(args.shard_dir))
-    canonical_ground_truth = _load_json(args.canonical_ground_truth)
+    canonical_ground_truth = (
+        _load_json(args.canonical_ground_truth)
+        if args.canonical_ground_truth
+        else _ground_truth_from_shards(args.shard_dir)
+    )
     canonical_ids = [str(row["id"]) for row in canonical_ground_truth]
     shard_rows = [_load_jsonl(path / "predictions.jsonl") for path in args.shard_dir]
     predictions = merge_prediction_rows(shard_rows, canonical_ids)
@@ -112,6 +116,22 @@ def _validate_manifests(manifests: list[dict[str, Any]], expected_count: int) ->
     shard_counts = {int(row["shard"]["count"]) for row in manifests}
     if shard_counts != {expected_count} or shard_indices != list(range(expected_count)):
         raise ValueError("shard index/count contract is incomplete")
+
+
+def _ground_truth_from_shards(shard_dirs: list[Path]) -> list[dict[str, Any]]:
+    ordered = sorted(
+        shard_dirs,
+        key=lambda path: int(_load_json(path / "manifest.json")["shard"]["index"]),
+    )
+    rows = [
+        row
+        for path in ordered
+        for row in _load_json(path / "ground_truth_subset.json")
+    ]
+    ids = [str(row["id"]) for row in rows]
+    if len(ids) != len(set(ids)):
+        raise ValueError("duplicate ground-truth rows across shards")
+    return rows
 
 
 def _load_json(path: Path) -> Any:
