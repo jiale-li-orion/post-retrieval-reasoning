@@ -69,9 +69,7 @@ def apply_annotation_cache(
         by_key[(str(row["qa_id"]), str(row["evidence_id"]))].append(row)
 
     annotated: list[str] = []
-    for index, (evidence_id, chunk) in enumerate(
-        zip(evidence_ids, sgm_chunks, strict=True)
-    ):
+    for evidence_id, chunk in zip(evidence_ids, sgm_chunks, strict=True):
         matches = by_key[(qa_id, evidence_id)]
         if not matches:
             raise AnnotationCacheError(
@@ -85,10 +83,6 @@ def apply_annotation_cache(
         if row.get("parse_ok") is not True:
             raise AnnotationCacheError(
                 f"unparsed annotation for qa={qa_id}, evidence={evidence_id}"
-            )
-        if int(row["evidence_index"]) != index:
-            raise AnnotationCacheError(
-                f"evidence index mismatch for qa={qa_id}, evidence={evidence_id}"
             )
         actual_hash = hashlib.sha256(chunk.encode("utf-8")).hexdigest()
         if row.get("sgm_sha256") != actual_hash:
