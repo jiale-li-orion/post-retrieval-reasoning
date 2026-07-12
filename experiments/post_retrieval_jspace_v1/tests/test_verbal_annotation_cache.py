@@ -2,6 +2,9 @@ import hashlib
 
 import pytest
 
+from adapters.atm import ATMItem
+from interventions.generate_va_cache import build_annotation_work
+
 from interventions.verbal_annotation import (
     AnnotationCacheError,
     apply_annotation_cache,
@@ -98,3 +101,34 @@ def test_verbal_r3_parser_requires_exact_comment_and_score() -> None:
 
     with pytest.raises(AnnotationCacheError, match="outside 1-5"):
         parse_verbal_r3_output("Comment: relevant\nScore: 6")
+
+
+class _FakeATM:
+    def load_split(self, split):
+        assert split == "full"
+        return [ATMItem("qa", "question", "number", "2", ("e1",))]
+
+    def load_niah(self, k):
+        return [
+            ATMItem(
+                "qa",
+                "question",
+                "number",
+                "2",
+                ("e1",),
+                ("e2", "e1"),
+            )
+        ]
+
+    def collect_sgm_chunks(self, evidence_ids):
+        return [f"ID: {evidence_id}\n" for evidence_id in evidence_ids]
+
+
+def test_canonical_work_deduplicates_full_and_all_niah_conditions() -> None:
+    work = build_annotation_work(_FakeATM(), "canonical-e1")
+
+    assert [(row["qa_id"], row["evidence_id"]) for row in work] == [
+        ("qa", "e1"),
+        ("qa", "e2"),
+    ]
+    assert work[0]["source_conditions"] == ["C1", "C7", "C8", "C9", "C10"]
