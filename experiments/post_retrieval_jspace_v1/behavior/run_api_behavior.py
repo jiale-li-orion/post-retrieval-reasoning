@@ -27,6 +27,7 @@ from behavior.run_behavior import (  # noqa: E402
     evidence_ids_for_condition,
     select_condition_items,
     select_ground_truth_rows,
+    validate_resume_prefix,
 )
 from core.registry import load_condition_registry  # noqa: E402
 from core.run_contract import create_run_directory, sanitize_manifest  # noqa: E402
@@ -68,6 +69,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--annotation-cache", type=Path, required=True)
     parser.add_argument("--limit", type=int)
     parser.add_argument("--max-tokens", type=int, default=1000)
+    parser.add_argument("--resume", action="store_true")
     parser.add_argument("--run-root", type=Path, required=True)
     parser.add_argument(
         "--atm-root",
@@ -109,19 +111,60 @@ def main() -> int:
         [item.qa_id for item in items],
     )
 
-    run_dir = create_run_directory(
-        args.run_root / args.condition / "hard" / args.provider / args.run_id
-    )
+    run_dir = args.run_root / args.condition / "hard" / args.provider / args.run_id
+    if args.resume:
+        if not run_dir.is_dir():
+            raise FileNotFoundError(f"resume run does not exist: {run_dir}")
+    else:
+        run_dir = create_run_directory(run_dir)
     ground_truth_path = run_dir / "ground_truth_subset.json"
-    ground_truth_path.write_text(
-        json.dumps(ground_truth, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
     predictions_path = run_dir / "predictions.jsonl"
-    started_at = datetime.now().astimezone().isoformat()
+    manifest_path = run_dir / "manifest.json"
+    expected_contract = {
+        "run_id": args.run_id,
+        "condition": args.condition,
+        "split": "hard",
+        "provider": provider.manifest_view(),
+        "generation": {"max_tokens": args.max_tokens, "temperature": 0.0},
+        "annotation_cache_sha256": _file_sha256(args.annotation_cache),
+        "provider_registry_sha256": _file_sha256(provider_path),
+    }
+    if args.resume:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        if manifest.get("status") != "running":
+            raise ValueError("only interrupted running API runs can be resumed")
+        for key, value in expected_contract.items():
+            if manifest.get(key) != value:
+                raise ValueError(f"resume API contract mismatch: {key}")
+        if _file_sha256(ground_truth_path) != manifest.get("ground_truth_sha256"):
+            raise ValueError("resume API ground truth hash mismatch")
+        existing_rows = _load_jsonl(predictions_path)
+        validate_resume_prefix(
+            [str(row["qa_id"]) for row in existing_rows],
+            [item.qa_id for item in items],
+        )
+    else:
+        ground_truth_path.write_text(
+            json.dumps(ground_truth, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        predictions_path.touch(exist_ok=False)
+        manifest = sanitize_manifest(
+            {
+                **expected_contract,
+                "status": "running",
+                "artifact_kind": "api_inference",
+                "project_commit": _git_commit(PROJECT_ROOT),
+                "ground_truth_sha256": _file_sha256(ground_truth_path),
+                "started_at": datetime.now().astimezone().isoformat(),
+            }
+        )
+        _write_json(manifest_path, manifest)
+        existing_rows = []
+
     adapter = APIChatAdapter(provider)
-    with predictions_path.open("x", encoding="utf-8") as handle:
-        for item in items:
+    with predictions_path.open("a", encoding="utf-8") as handle:
+        for item in items[len(existing_rows) :]:
             evidence_ids = evidence_ids_for_condition(item, condition)
             original_chunks = atm.collect_sgm_chunks(evidence_ids)
             chunks = apply_annotation_cache(
@@ -152,28 +195,11 @@ def main() -> int:
             handle.write(json.dumps(row, ensure_ascii=False) + "\n")
             handle.flush()
 
-    manifest = sanitize_manifest(
-        {
-            "run_id": args.run_id,
-            "status": "complete",
-            "artifact_kind": "api_inference",
-            "project_commit": _git_commit(PROJECT_ROOT),
-            "condition": args.condition,
-            "split": "hard",
-            "provider": provider.manifest_view(),
-            "generation": {"max_tokens": args.max_tokens, "temperature": 0.0},
-            "prediction_count": len(items),
-            "annotation_cache_sha256": _file_sha256(args.annotation_cache),
-            "predictions_sha256": _file_sha256(predictions_path),
-            "ground_truth_sha256": _file_sha256(ground_truth_path),
-            "provider_registry_sha256": _file_sha256(provider_path),
-            "started_at": started_at,
-            "finished_at": datetime.now().astimezone().isoformat(),
-        }
-    )
-    (run_dir / "manifest.json").write_text(
-        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-    )
+    manifest["status"] = "complete"
+    manifest["prediction_count"] = len(items)
+    manifest["predictions_sha256"] = _file_sha256(predictions_path)
+    manifest["finished_at"] = datetime.now().astimezone().isoformat()
+    _write_json(manifest_path, sanitize_manifest(manifest))
     print(run_dir)
     return 0
 
@@ -196,6 +222,13 @@ def _git_commit(root: Path) -> str:
     ).strip()
 
 
+def _write_json(path: Path, payload: dict[str, Any]) -> None:
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    temporary.replace(path)
+
+
 if __name__ == "__main__":
     raise SystemExit(main())
-

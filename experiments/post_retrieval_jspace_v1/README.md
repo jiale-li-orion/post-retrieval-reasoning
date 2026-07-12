@@ -57,6 +57,14 @@ Gate A verified state as of 2026-07-12:
 - Five model-specific sets of 32 held-out stability prompts are frozen at
   stream offset 512. The judge-free matrix-cosine and final-position top-25
   overlap evaluator is implemented and tested.
+- Immutable behavior shards now support strict-prefix recovery, guarded GPU
+  queues, and deterministic shard merging. Canonical VA generation has its own
+  GPU-locked entry point.
+- Full target manifests and 31 explicitly unreviewed Hard decision-program
+  drafts are generated under the artifact root. Formal trajectories remain
+  blocked until the drafts are reviewed and frozen.
+- API inference for MiMo V2.5, MiniMax M3, and Kimi K2.5 is implemented as a
+  resumable, judge-free local stage restricted to Hard C1/C7-C10.
 
 ## Machine Roles
 
@@ -77,6 +85,50 @@ does not require judge credentials. `behavior/evaluate.py` later consumes that
 frozen run and writes a separate evaluation directory and manifest. Only a run
 containing `open_end` items requires `OPENAI_API_KEY`. J-lens fitting, readout,
 and trajectory analysis never invoke the judge.
+
+## E1 Operations
+
+These commands run on the remote 4090 only after the active stability gate
+permits E1. The wrappers hold the shared GPU lock, refuse overlapping jobs,
+and never invoke a judge.
+
+```bash
+# Generate the answerer-independent canonical Full+NIAH annotation union once.
+experiments/post_retrieval_jspace_v1/scripts/run_va_cache.sh canonical-e1-v1
+
+# Example single-condition queue; interrupted shards resume in place.
+experiments/post_retrieval_jspace_v1/scripts/run_behavior_queue.sh \
+  qwen3_vl_2b_instruct C0 hard e1-qwen3vl2b-c0-v1 1
+```
+
+Target generation is CPU-safe and can run while a fit occupies the GPU:
+
+```bash
+experiments/post_retrieval_jspace_v1/scripts/run_target_generation.sh atm-targets-v1
+```
+
+## Local API Inference
+
+Copy the frozen canonical VA `annotations.jsonl` to the notebook, check out the
+same commit, and set provider values only in the local environment. MiMo is
+fixed to `https://api.xiaomimimo.com/v1`, `mimo-v2.5`, and disabled thinking;
+only its key is required. MiniMax and Kimi aliases/endpoints are deliberately
+not guessed.
+
+```bash
+export MIMO_API_KEY=...
+# or:
+export MINIMAX_API_KEY=...
+export MINIMAX_BASE_URL=...
+export MINIMAX_MODEL=...
+# or KIMI_API_KEY, KIMI_BASE_URL, KIMI_MODEL
+
+experiments/post_retrieval_jspace_v1/scripts/run_api_behavior_queue.sh \
+  mimo_v25 /path/to/annotations.jsonl api-mimo-v25-v1
+```
+
+The API queue runs Hard C1/C7-C10, records returned model IDs and token usage,
+and stops on the first failure. It does not run C0/C3-C6 or any judge.
 
 The project uses the root `pyproject.toml` and `uv.lock`; all commands run via
 `uv run`. ATM-Bench remains a pinned source checkout and is exposed through
