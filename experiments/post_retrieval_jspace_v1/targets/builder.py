@@ -55,6 +55,32 @@ def is_copyable(target: str, evidence_chunks: Sequence[str]) -> bool:
     )
 
 
+def build_target_rows(
+    *,
+    gold_answer: str,
+    qtype: str,
+    evidence_chunks: Sequence[str],
+    tokenizers: dict[str, Any],
+) -> list[dict[str, Any]]:
+    rows = []
+    for index, text in enumerate(build_target_strings(gold_answer, qtype)):
+        copyable = is_copyable(text, evidence_chunks)
+        rows.append(
+            {
+                "target_id": f"answer_{index}",
+                "text": text,
+                "target_kind": _target_kind(text),
+                "copyable": copyable,
+                "derived_candidate": not copyable,
+                "tokenization": {
+                    model_id: tokenize_aliases(text, tokenizer)
+                    for model_id, tokenizer in tokenizers.items()
+                },
+            }
+        )
+    return rows
+
+
 def build_decision_program_draft(
     *,
     qa_id: str,
@@ -89,6 +115,14 @@ def build_decision_program_draft(
 
 def _normalize_space(text: str) -> str:
     return " ".join(str(text).split())
+
+
+def _target_kind(text: str) -> str:
+    if _DATE.fullmatch(text):
+        return "date"
+    if _NUMBER.fullmatch(text):
+        return "number"
+    return "answer"
 
 
 def _dedupe(values: Iterable[str]) -> list[str]:
