@@ -40,6 +40,10 @@ def resolve_residual_modules(model: Any) -> Sequence[Any]:
     )
 
 
+def resolve_text_tokenizer(processor: Any) -> Any:
+    return getattr(processor, "tokenizer", processor)
+
+
 class HFModelAdapter:
     def __init__(self, model: Any, processor: Any, model_id: str, device: str) -> None:
         self.model = model
@@ -117,6 +121,9 @@ class HFModelAdapter:
 
     def get_residual_modules(self) -> Sequence[Any]:
         return resolve_residual_modules(self.model)
+
+    def get_text_tokenizer(self) -> Any:
+        return resolve_text_tokenizer(self.processor)
 
     def forward_hidden(self, messages: list[dict[str, Any]]) -> Any:
         inputs = self.build_inputs(messages)

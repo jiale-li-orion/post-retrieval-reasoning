@@ -2,7 +2,11 @@ from types import SimpleNamespace
 
 import pytest
 
-from adapters.hf_model import ModelAdapterError, resolve_residual_modules
+from adapters.hf_model import (
+    ModelAdapterError,
+    resolve_residual_modules,
+    resolve_text_tokenizer,
+)
 
 
 def test_resolves_causal_lm_residual_blocks() -> None:
@@ -24,3 +28,10 @@ def test_resolves_qwen_vl_language_residual_blocks() -> None:
 def test_unknown_architecture_fails_explicitly() -> None:
     with pytest.raises(ModelAdapterError, match="residual blocks"):
         resolve_residual_modules(SimpleNamespace())
+
+
+def test_text_tokenizer_unwraps_multimodal_processor() -> None:
+    tokenizer = object()
+
+    assert resolve_text_tokenizer(SimpleNamespace(tokenizer=tokenizer)) is tokenizer
+    assert resolve_text_tokenizer(tokenizer) is tokenizer
