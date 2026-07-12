@@ -64,6 +64,18 @@ def test_annotation_cache_rejects_duplicate_record() -> None:
         apply_annotation_cache("qa-1", ("e1",), [chunk], [row, row])
 
 
+def test_canonical_annotation_is_reusable_at_a_different_pool_position() -> None:
+    first = "ID: e2\n"
+    second = "ID: e1\n"
+    row = _row("e1", second, 0)
+
+    result = apply_annotation_cache(
+        "qa-1", ("e2", "e1"), [first, second], [_row("e2", first, 4), row]
+    )
+
+    assert result[1].startswith(second)
+
+
 def test_official_server_prompt_wraps_question_and_document() -> None:
     messages = build_verbal_r3_messages("When?", "ID: e1\nTimestamp: today")
 
