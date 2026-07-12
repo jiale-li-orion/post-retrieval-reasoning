@@ -7,6 +7,7 @@ from behavior.run_behavior import (
     select_condition_items,
     select_ground_truth_rows,
     validate_run_selection,
+    validate_resume_prefix,
 )
 from adapters.atm import ATMItem
 from behavior.evaluate import (
@@ -139,3 +140,10 @@ def test_shards_are_disjoint_and_cover_canonical_order() -> None:
 
     assert shards == [rows[:4], rows[4:7], rows[7:]]
     assert [item for shard in shards for item in shard] == rows
+
+
+def test_resume_requires_existing_predictions_to_be_canonical_prefix() -> None:
+    validate_resume_prefix(["q1", "q2"], ["q1", "q2", "q3"])
+
+    with pytest.raises(ValueError, match="prefix"):
+        validate_resume_prefix(["q2"], ["q1", "q2"])
