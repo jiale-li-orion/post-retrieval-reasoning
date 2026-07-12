@@ -1,4 +1,5 @@
 import torch
+import pytest
 
 import jlens
 from jacobian_analysis.evaluate_stability import matrix_cosines, topk_set_overlap
@@ -10,7 +11,7 @@ def _lens(matrix):
 
 def test_matrix_cosine_is_one_for_identical_lenses() -> None:
     matrix = torch.eye(2)
-    assert matrix_cosines(_lens(matrix), _lens(matrix))[0] == 1.0
+    assert matrix_cosines(_lens(matrix), _lens(matrix))[0] == pytest.approx(1.0)
 
 
 def test_topk_overlap_is_intersection_fraction() -> None:
