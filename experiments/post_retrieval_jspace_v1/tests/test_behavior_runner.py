@@ -8,7 +8,11 @@ from behavior.run_behavior import (
     validate_run_selection,
 )
 from adapters.atm import ATMItem
-from behavior.evaluate import build_evaluator_command, requires_llm_judge
+from behavior.evaluate import (
+    build_evaluator_command,
+    build_evaluator_environment,
+    requires_llm_judge,
+)
 
 
 def test_gate_a_runner_rejects_unimplemented_condition() -> None:
@@ -79,6 +83,17 @@ def test_official_evaluator_command_uses_frozen_inference_inputs(tmp_path) -> No
     assert command[command.index("--output-dir") + 1] == str(eval_dir)
     assert command[command.index("--judge-model") + 1] == "gpt-5-mini"
     assert command[command.index("--judge-reasoning-effort") + 1] == "minimal"
+
+
+def test_official_evaluator_environment_exposes_atm_package(tmp_path) -> None:
+    env = build_evaluator_environment(
+        tmp_path / "ATM-Bench", {"PYTHONPATH": "/existing"}
+    )
+
+    assert env["PYTHONPATH"].split(":") == [
+        str(tmp_path / "ATM-Bench"),
+        "/existing",
+    ]
 
 
 def test_niah_conditions_use_frozen_niah_evidence() -> None:

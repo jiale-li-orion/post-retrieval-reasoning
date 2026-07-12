@@ -31,8 +31,8 @@ def test_annotation_cache_preserves_item_count_and_order() -> None:
     )
 
     assert len(result) == 2
-    assert result[0].startswith(chunks[0])
-    assert result[1].startswith(chunks[1])
+    assert result[0][: len(chunks[0])] == chunks[0]
+    assert result[1][: len(chunks[1])] == chunks[1]
     assert "comment-e2" in result[0]
     assert "comment-e1" in result[1]
 
@@ -42,6 +42,14 @@ def test_annotation_cache_rejects_sgm_hash_mismatch() -> None:
         apply_annotation_cache(
             "qa-1", ("e1",), ["ID: e1\n"], [_row("e1", "different", 0)]
         )
+
+
+def test_annotation_cache_preserves_trailing_sgm_whitespace() -> None:
+    chunk = "ID: e1\nCaption: first\n\n"
+
+    result = apply_annotation_cache("qa-1", ("e1",), [chunk], [_row("e1", chunk, 0)])
+
+    assert result[0].startswith(chunk)
 
 
 def test_annotation_cache_rejects_missing_record() -> None:

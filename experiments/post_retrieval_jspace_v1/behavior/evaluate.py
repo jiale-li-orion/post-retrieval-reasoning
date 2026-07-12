@@ -58,6 +58,16 @@ def build_evaluator_command(
     ]
 
 
+def build_evaluator_environment(
+    atm_root: Path, environ: dict[str, str] | None = None
+) -> dict[str, str]:
+    source = os.environ if environ is None else environ
+    env = dict(source)
+    existing = env.get("PYTHONPATH")
+    env["PYTHONPATH"] = str(atm_root) + (os.pathsep + existing if existing else "")
+    return env
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--run-dir", type=Path, required=True)
@@ -95,7 +105,12 @@ def main() -> int:
         judge_model=args.judge_model,
         reasoning_effort=args.judge_reasoning_effort,
     )
-    subprocess.run(command, cwd=args.atm_root, check=True)
+    subprocess.run(
+        command,
+        cwd=args.atm_root,
+        env=build_evaluator_environment(args.atm_root),
+        check=True,
+    )
 
     manifest = sanitize_manifest(
         {

@@ -101,8 +101,9 @@ def apply_annotation_cache(
             raise AnnotationCacheError(
                 f"invalid annotation payload for qa={qa_id}, evidence={evidence_id}"
             )
+        separator = "" if chunk.endswith("\n") else "\n"
         annotated.append(
-            f"{chunk.rstrip()}\n"
+            f"{chunk}{separator}"
             f"Verbal Annotation: {comment}\n"
             f"Relevance score: {score}\n"
         )
