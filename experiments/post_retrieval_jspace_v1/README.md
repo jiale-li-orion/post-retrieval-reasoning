@@ -49,7 +49,10 @@ Gate A verified state as of 2026-07-12:
   `Qwen3-VL-8B-Instruct`; it supersedes the earlier Mistral slot.
 - The WikiText-103 source revision and five model-specific 512-window corpora
   are frozen and hash-registered. Their first 256 rows are the nested stability
-  subsets. No lens has been fitted.
+  subsets. No lens fit has completed yet.
+- The first primary fit, Qwen3-VL-2B on the 256-window subset, is running from
+  code commit `1d20bda`. The 512-window fit and all other models remain gated
+  on completion and inspection of this artifact.
 
 ## Machine Roles
 
