@@ -45,6 +45,11 @@ remote model directory. Their source metadata and file hashes must be recorded
 before formal runs. The two Qwen3-VL snapshots are downloaded into the same
 directory and pinned to immutable Hugging Face revisions.
 
+This list supersedes every occurrence of `Mistral-7B-Instruct` in the original
+v1.0 protocol and execution plan. `Qwen3-8B-ms` occupies that experimental
+slot. The registry, rather than a model alias in prose, is authoritative for
+the exact snapshot and file hash.
+
 GPT is not an answerer in the first-cycle matrix. Primary mechanism runs use
 BF16 full weights. Quantized runs cannot support primary mechanism claims.
 
@@ -103,3 +108,16 @@ comparisons use the same activation, layer, and position.
   caches, predictions, lenses, and trajectories stay outside Git.
 - STALE remains a gated secondary track.
 - The first cycle stops after Gate C for human review.
+
+## 7. J-lens Calibration Corpus
+
+The calibration source is the complete WikiText-103 raw train split. Empty
+records are removed, the remaining original record indices are fully shuffled
+with seed 17, and each document is independently tokenized with the target
+model tokenizer. Each document is divided into consecutive, non-overlapping
+256-token windows. Incomplete tails are dropped and windows never cross
+document boundaries. Windows that do not survive an exact
+decode/re-tokenize token-ID round trip are excluded. The first 512 valid
+windows in shuffled-record order are frozen for each model; the first 256 are
+the nested stability subset. Every row records its source record index,
+within-document window index, token count, and token-ID hash.

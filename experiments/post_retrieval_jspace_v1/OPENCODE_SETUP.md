@@ -154,9 +154,14 @@ Hard: acd35f2a172a9741d970d2cf21184ff0af8d79a8bf59967fc8aa33d619f6af4a
 
 Run ATM's NIAH `--validate-only` command. Do not rebuild or reshuffle pools.
 
-For WikiText-103, record dataset source, revision/config, split, cache path, and
-the hash of the index list that will later define calibration windows. Do not
-fit a lens.
+For WikiText-103, use the complete raw train split. Remove empty records,
+fully shuffle original record indices with seed 17, and build model-specific,
+non-overlapping 256-token windows within each document. Do not join text across
+documents; drop incomplete tails and any window that fails an exact
+decode/re-tokenize token-ID round trip. Freeze the first 512 valid windows and
+record source indices, within-document window indices, token hashes, corpus
+manifest, and file SHA256. The first 256 windows form the nested stability
+subset. Do not fit a lens during dataset setup.
 
 ## 6. Local Notebook API Environment
 

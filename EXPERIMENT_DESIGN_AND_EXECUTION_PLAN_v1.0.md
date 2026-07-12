@@ -211,15 +211,14 @@ class ATMItem:
 
 ### 模型
 
-- Qwen3-VL-2B-Instruct；
-- Qwen3-VL-8B-Instruct；
-- Mistral-7B-Instruct exact checkpoint TBD；
+- Qwen3-8B-ms；
 - DeepSeek-R1-Distill-Llama-8B；
 - Qwen2.5-7B-Instruct；
+- Qwen3-VL-2B-Instruct；
+- Qwen3-VL-8B-Instruct；
 - MiMo V2.5；
 - MiniMax M3；
 - Kimi K2.5；
-- selected GPT。
 
 ### Adapter contract
 
@@ -590,7 +589,7 @@ Primary precision：BF16。
 ## Day 0 - Protocol review and freeze
 
 - 用户审核两份文档；
-- 冻结 Mistral checkpoint；
+- 验证五个 open-weight snapshot 的 revision、文件 hash 与 BF16 forward；
 - 决定是否立即纳入 STALE；
 - 创建 experiment branch / tag。
 
@@ -896,7 +895,7 @@ Mitigation：Frozen primary metrics、branch gates、negative gate、confirmator
 Codex 开工前，用户审核并勾选：
 
 - [ ] Protocol v1.0 overall accepted
-- [ ] Exact Mistral checkpoint frozen
+- [x] Five open-weight model snapshots frozen and BF16-validated
 - [ ] Own-rerun baseline policy accepted
 - [ ] WikiText calibration + stability gate accepted
 - [ ] Full 1013 basic readout accepted

@@ -184,11 +184,11 @@ post-retrieval failure 不是单一瓶颈。`number`、`list_recall`、`open_end
 
 以下五个模型构成 primary mechanistic suite：
 
-1. `Qwen3-VL-2B-Instruct`；
-2. `Qwen3-VL-8B-Instruct`；
-3. `Mistral-7B-Instruct`；
-4. `DeepSeek-R1-Distill-Llama-8B`；
-5. `Qwen2.5-7B-Instruct`。
+1. `Qwen3-8B-ms`；
+2. `DeepSeek-R1-Distill-Llama-8B`；
+3. `Qwen2.5-7B-Instruct`；
+4. `Qwen3-VL-2B-Instruct`；
+5. `Qwen3-VL-8B-Instruct`。
 
 原则：**五个模型运行所有适用的文本证据实验、J-lens/J-space readout、logit-lens baseline、failure analysis 与 causal intervention。** Raw multimodal condition 仅对真正能直接消费图片/视频的模型运行；其余模型不以“缺失格”解释为失败。
 
@@ -206,7 +206,7 @@ post-retrieval failure 不是单一瓶颈。`number`、`list_recall`、`open_end
 - whether reasoning/thinking is enabled；
 - quantization status。
 
-**待用户审核的唯一模型标识未决项：** `Mistral-7B-Instruct` 的 exact checkpoint 版本必须在第一次正式 run 前冻结；本协议不擅自猜测版本。
+五个模型的本地 snapshot 或 Hugging Face revision 及文件 manifest hash 均须在第一次正式 run 前冻结；当前权威值记录在 `experiments/post_retrieval_jspace_v1/registry/model_registry.yaml`。
 
 ## 3.2 API 行为模型
 
@@ -215,7 +215,6 @@ Primary behavioral generalization pool：
 - MiMo V2.5；
 - MiniMax M3；
 - Kimi K2.5；
-- selected GPT series。
 
 API 模型承担：
 
@@ -1186,13 +1185,12 @@ Exploratory 结果可以进入 analysis / appendix，但不能伪装成预注册
 在交给 Codex 开始正式实现前，用户只需审核以下事项：
 
 1. 是否接受本协议对旧 `PROTOCOL.md` 的 supersede 关系；
-2. `Mistral-7B-Instruct` exact checkpoint；
-3. 是否接受 primary baseline 全部自己重跑，而不是只复用 leaderboard aggregate；
-4. 是否接受 WikiText-103 + stability gate 作为 global J-lens calibration；
-5. 是否接受 Full 1013 做基础 readout、Hard 31 全部做人审 decision programs；
-6. 是否接受 STALE 作为 gated secondary track；
-7. 是否接受本文的五阶段 primary failure taxonomy + A-J secondary taxonomy；
-8. 是否接受 BF16 full-weight 作为 primary mechanism precision policy。
+2. 是否接受 primary baseline 全部自己重跑，而不是只复用 leaderboard aggregate；
+3. 是否接受 WikiText-103 + stability gate 作为 global J-lens calibration；
+4. 是否接受 Full 1013 做基础 readout、Hard 31 全部做人审 decision programs；
+5. 是否接受 STALE 作为 gated secondary track；
+6. 是否接受本文的五阶段 primary failure taxonomy + A-J secondary taxonomy；
+7. 是否接受 BF16 full-weight 作为 primary mechanism precision policy。
 
 审核通过后，Codex 的工作对象不是“自由发挥实现”，而是下一份《Experiment Design and Execution Plan v1.0》中定义的 work packages、acceptance tests 与 run gates。
 

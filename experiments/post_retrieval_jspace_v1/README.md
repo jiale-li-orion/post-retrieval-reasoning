@@ -19,7 +19,7 @@ protocol.
 
 ## Current Stage
 
-- Phase 0: code/model/data bootstrap complete; WikiText-103 pending for Gate C
+- Phase 0: code/model/data bootstrap complete
 - Gate A: passed on 2026-07-12
 - Phase 2 canonical VA cache: preflight passed; formal cache not generated
 - Gate B: not started
@@ -44,6 +44,11 @@ Gate A verified state as of 2026-07-12:
   without judge credentials; both stages wrote complete manifests.
 - The remote test suite passes 42 tests; warnings are limited to third-party
   SWIG deprecation messages.
+- The five-model suite is `Qwen3-8B-ms`, `DeepSeek-R1-Distill-Llama-8B`,
+  `Qwen2.5-7B-Instruct`, `Qwen3-VL-2B-Instruct`, and
+  `Qwen3-VL-8B-Instruct`; it supersedes the earlier Mistral slot.
+- The WikiText-103 calibration construction contract is frozen. Model-specific
+  512-window corpus generation is in progress; no lens has been fitted.
 
 ## Machine Roles
 
