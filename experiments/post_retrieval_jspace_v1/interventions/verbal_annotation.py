@@ -3,12 +3,57 @@
 from __future__ import annotations
 
 import hashlib
+import re
 from collections import defaultdict
 from typing import Any, Iterable, Sequence
 
 
 class AnnotationCacheError(ValueError):
     """Raised when a cache cannot preserve the frozen evidence contract."""
+
+
+VERBAL_R3_SYSTEM_PROMPT = """You are an evaluator that judges how informative a document is for answering a given question. You will receive a Question and a Document.
+
+Carefully assess relevance and usefulness (reason internally), then output only a score and a brief, evidence-based comment that supports downstream filtering (mention concrete entities/claims/dates/metrics when helpful).
+
+Scoring rubric (1-5):
+1 — Unrelated: The document has nothing to do with the question. It does not contain any potentially relevant information or an answer to the question.
+2 — Loosely related: Contains information that might potentially help or include the answer to the question, but is unlikely to do so.
+3 — Partially informative: Contains information that can potentially help answer the question in some way.
+4 — Substantively informative: Related to the question and includes information that is relevant to it.
+5 — Direct answer: Clearly related and includes key information that can be used to directly answer the question.
+
+Output format (exactly):
+Comment: <concise justification citing specific evidence from the document; e.g., “Since the document states A and B, it is relevant to the question about C.”>
+Score: <1-5>
+"""
+
+
+def build_verbal_r3_messages(question: str, document: str) -> list[dict[str, str]]:
+    return [
+        {"role": "system", "content": VERBAL_R3_SYSTEM_PROMPT},
+        {
+            "role": "user",
+            "content": f"Question: {question}\nDocument: {document}\n",
+        },
+    ]
+
+
+def parse_verbal_r3_output(text: str) -> tuple[str, int]:
+    match = re.fullmatch(
+        r"\s*Comment:\s*(?P<comment>.+?)\s*Score:\s*(?P<score>\d+)\s*",
+        text,
+        flags=re.DOTALL,
+    )
+    if match is None:
+        raise AnnotationCacheError("cannot parse Verbal-R3 Comment/Score output")
+    comment = match.group("comment").strip()
+    score = int(match.group("score"))
+    if not comment:
+        raise AnnotationCacheError("Verbal-R3 comment is empty")
+    if score not in range(1, 6):
+        raise AnnotationCacheError(f"Verbal-R3 score outside 1-5: {score}")
+    return comment, score
 
 
 def apply_annotation_cache(

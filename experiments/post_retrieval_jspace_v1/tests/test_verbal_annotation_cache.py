@@ -5,6 +5,8 @@ import pytest
 from interventions.verbal_annotation import (
     AnnotationCacheError,
     apply_annotation_cache,
+    build_verbal_r3_messages,
+    parse_verbal_r3_output,
 )
 
 
@@ -52,3 +54,27 @@ def test_annotation_cache_rejects_duplicate_record() -> None:
     row = _row("e1", chunk, 0)
     with pytest.raises(AnnotationCacheError, match="duplicate annotation"):
         apply_annotation_cache("qa-1", ("e1",), [chunk], [row, row])
+
+
+def test_official_server_prompt_wraps_question_and_document() -> None:
+    messages = build_verbal_r3_messages("When?", "ID: e1\nTimestamp: today")
+
+    assert messages[0]["role"] == "system"
+    assert "reason internally" in messages[0]["content"]
+    assert messages[1] == {
+        "role": "user",
+        "content": "Question: When?\nDocument: ID: e1\nTimestamp: today\n",
+    }
+
+
+def test_verbal_r3_parser_requires_exact_comment_and_score() -> None:
+    parsed = parse_verbal_r3_output(
+        "Comment: The document gives the requested date.\nScore: 5"
+    )
+    assert parsed == ("The document gives the requested date.", 5)
+
+    with pytest.raises(AnnotationCacheError, match="cannot parse"):
+        parse_verbal_r3_output("This seems relevant: 5")
+
+    with pytest.raises(AnnotationCacheError, match="outside 1-5"):
+        parse_verbal_r3_output("Comment: relevant\nScore: 6")
