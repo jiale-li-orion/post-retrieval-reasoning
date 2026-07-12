@@ -90,6 +90,8 @@ user explicitly approves continuation.
 
 ## J-lens Operations
 
+中文夜间运行步骤见 `EVENING_JLENS_RUNBOOK.md`。
+
 Run these commands only on the remote project checkout. Each fit wrapper
 refuses to overlap another known GPU experiment and writes an immutable fit
 directory plus a persistent log.
