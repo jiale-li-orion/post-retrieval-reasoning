@@ -16,6 +16,7 @@ class TaskSpec:
     artifact: str
     command: tuple[str, ...]
     required_outputs: tuple[str, ...] = ("manifest.json",)
+    log: str | None = None
 
 
 @dataclass(frozen=True)
