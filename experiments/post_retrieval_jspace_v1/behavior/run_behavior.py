@@ -9,6 +9,7 @@ import json
 import platform
 import subprocess
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -67,6 +68,15 @@ def evidence_ids_for_condition(
     raise ValueError(f"unsupported evidence selector: {condition['evidence_selector']}")
 
 
+def select_shard(items: list[Any], shard_index: int, num_shards: int) -> list[Any]:
+    if num_shards <= 0 or not 0 <= shard_index < num_shards:
+        raise ValueError("shard index must be within a positive shard count")
+    base, remainder = divmod(len(items), num_shards)
+    start = shard_index * base + min(shard_index, remainder)
+    size = base + (1 if shard_index < remainder else 0)
+    return items[start : start + size]
+
+
 def build_prediction_row(
     *,
     qa_id: str,
@@ -78,6 +88,7 @@ def build_prediction_row(
     model_id: str,
     evidence_chunks: tuple[str, ...],
     prompt_payload: str,
+    latency_seconds: float,
 ) -> dict[str, Any]:
     return {
         "id": qa_id,
@@ -93,6 +104,7 @@ def build_prediction_row(
         "evidence_sha256": [_text_sha256(chunk) for chunk in evidence_chunks],
         "prompt": prompt_payload,
         "prompt_sha256": _text_sha256(prompt_payload),
+        "latency_seconds": latency_seconds,
     }
 
 
@@ -115,6 +127,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-new-tokens", type=int, default=1000)
     parser.add_argument("--run-id", required=True)
     parser.add_argument("--annotation-cache", type=Path)
+    parser.add_argument("--shard-index", type=int, default=0)
+    parser.add_argument("--num-shards", type=int, default=1)
     parser.add_argument(
         "--run-root",
         type=Path,
@@ -132,6 +146,8 @@ def main() -> int:
     args = parse_args()
     if args.limit is not None and args.limit <= 0:
         raise ValueError("--limit must be positive")
+    if args.num_shards <= 0 or not 0 <= args.shard_index < args.num_shards:
+        raise ValueError("invalid shard index/count")
     conditions = load_condition_registry(
         EXPERIMENT_ROOT / "registry/condition_registry.yaml"
     )
@@ -163,6 +179,10 @@ def main() -> int:
             "condition_spec": condition,
             "split": args.split,
             "limit": args.limit,
+            "shard": {
+                "index": args.shard_index,
+                "count": args.num_shards,
+            },
             "model": model_spec,
             "generation": {
                 "max_new_tokens": args.max_new_tokens,
@@ -202,6 +222,7 @@ def main() -> int:
     items = select_condition_items(atm, args.split, condition)
     if args.limit is not None:
         items = items[: args.limit]
+    items = select_shard(items, args.shard_index, args.num_shards)
     raw_ground_truth = json.loads(
         atm.split_path(args.split).read_text(encoding="utf-8")
     )
@@ -239,9 +260,11 @@ def main() -> int:
             prompt_payload = adapter.processor.apply_chat_template(
                 messages, tokenize=False, add_generation_prompt=True
             )
+            generation_started = time.perf_counter()
             result = adapter.generate(
                 messages, max_new_tokens=args.max_new_tokens, temperature=0.0
             )
+            latency_seconds = time.perf_counter() - generation_started
             row = build_prediction_row(
                 qa_id=item.qa_id,
                 qtype=item.qtype,
@@ -252,6 +275,7 @@ def main() -> int:
                 model_id=args.model_id,
                 evidence_chunks=tuple(chunks),
                 prompt_payload=prompt_payload,
+                latency_seconds=latency_seconds,
             )
             handle.write(json.dumps(row, ensure_ascii=False) + "\n")
             handle.flush()
