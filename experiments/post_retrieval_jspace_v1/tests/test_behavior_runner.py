@@ -2,15 +2,20 @@ import pytest
 
 from behavior.run_behavior import (
     build_prediction_row,
+    evidence_ids_for_condition,
+    select_condition_items,
     select_ground_truth_rows,
     validate_run_selection,
 )
+from adapters.atm import ATMItem
 from behavior.evaluate import build_evaluator_command, requires_llm_judge
 
 
 def test_gate_a_runner_rejects_unimplemented_condition() -> None:
-    with pytest.raises(NotImplementedError, match="C0 only"):
-        validate_run_selection("C1", "hard", {"C1": {"split": ["hard"]}})
+    with pytest.raises(NotImplementedError, match="Raw"):
+        validate_run_selection(
+            "C2", "hard", {"C2": {"split": ["hard"], "evidence": "raw"}}
+        )
 
 
 def test_gate_a_runner_rejects_unsupported_split() -> None:
@@ -70,3 +75,37 @@ def test_official_evaluator_command_uses_frozen_inference_inputs(tmp_path) -> No
     assert command[command.index("--output-dir") + 1] == str(eval_dir)
     assert command[command.index("--judge-model") + 1] == "gpt-5-mini"
     assert command[command.index("--judge-reasoning-effort") + 1] == "minimal"
+
+
+def test_niah_conditions_use_frozen_niah_evidence() -> None:
+    item = ATMItem(
+        qa_id="qa",
+        question="q",
+        qtype="number",
+        gold_answer="1",
+        evidence_ids=("gold",),
+        niah_evidence_ids=("distractor", "gold"),
+    )
+
+    assert evidence_ids_for_condition(item, {"evidence_selector": "evidence_ids"}) == (
+        "gold",
+    )
+    assert evidence_ids_for_condition(
+        item, {"evidence_selector": "niah_evidence_ids"}
+    ) == ("distractor", "gold")
+
+
+class _FakeATM:
+    def load_split(self, split: str):
+        return ["oracle", split]
+
+    def load_niah(self, k: int):
+        return ["niah", k]
+
+
+def test_condition_selects_official_oracle_or_niah_dataset() -> None:
+    assert select_condition_items(_FakeATM(), "hard", {}) == ["oracle", "hard"]
+    assert select_condition_items(_FakeATM(), "hard", {"niah_k": 50}) == [
+        "niah",
+        50,
+    ]

@@ -23,6 +23,7 @@ if str(EXPERIMENT_ROOT) not in sys.path:
     sys.path.insert(0, str(EXPERIMENT_ROOT))
 
 from adapters.atm import ATMAdapter  # noqa: E402
+from adapters.atm import ATMItem  # noqa: E402
 from adapters.hf_model import HFModelAdapter  # noqa: E402
 from core.registry import load_condition_registry, load_model_registry  # noqa: E402
 from core.run_contract import (  # noqa: E402
@@ -30,6 +31,7 @@ from core.run_contract import (  # noqa: E402
     sanitize_manifest,
     validate_manifest_completeness,
 )
+from interventions.verbal_annotation import apply_annotation_cache  # noqa: E402
 
 
 def validate_run_selection(
@@ -38,11 +40,31 @@ def validate_run_selection(
     conditions: dict[str, dict[str, Any]],
 ) -> dict[str, Any]:
     condition = conditions[condition_id]
-    if condition_id != "C0":
-        raise NotImplementedError("Gate A runner accepts C0 only")
     if split not in condition["split"]:
         raise ValueError(f"{condition_id} does not support split {split}")
+    if condition["evidence"] == "raw":
+        raise NotImplementedError("Raw multimodal conditions use a separate runner")
     return condition
+
+
+def select_condition_items(
+    atm: ATMAdapter, split: str, condition: dict[str, Any]
+) -> list[ATMItem]:
+    if "niah_k" in condition:
+        return atm.load_niah(int(condition["niah_k"]))
+    return atm.load_split(split)
+
+
+def evidence_ids_for_condition(
+    item: ATMItem, condition: dict[str, Any]
+) -> tuple[str, ...]:
+    if condition["evidence_selector"] == "evidence_ids":
+        return item.evidence_ids
+    if condition["evidence_selector"] == "niah_evidence_ids":
+        if item.niah_evidence_ids is None:
+            raise ValueError(f"NIAH evidence absent for {item.qa_id}")
+        return item.niah_evidence_ids
+    raise ValueError(f"unsupported evidence selector: {condition['evidence_selector']}")
 
 
 def build_prediction_row(
@@ -87,6 +109,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--limit", type=int)
     parser.add_argument("--max-new-tokens", type=int, default=1000)
     parser.add_argument("--run-id", required=True)
+    parser.add_argument("--annotation-cache", type=Path)
     parser.add_argument(
         "--run-root",
         type=Path,
@@ -107,7 +130,11 @@ def main() -> int:
     conditions = load_condition_registry(
         EXPERIMENT_ROOT / "registry/condition_registry.yaml"
     )
-    validate_run_selection(args.condition, args.split, conditions)
+    condition = validate_run_selection(args.condition, args.split, conditions)
+    if condition["annotation"] == "verbal_r3" and args.annotation_cache is None:
+        raise ValueError(f"{args.condition} requires --annotation-cache")
+    if condition["annotation"] == "none" and args.annotation_cache is not None:
+        raise ValueError(f"{args.condition} does not accept --annotation-cache")
     models = load_model_registry(EXPERIMENT_ROOT / "registry/model_registry.yaml")
     model_spec = models[args.model_id]
     if model_spec["revision"] in {"pending", "main", "latest"}:
@@ -128,6 +155,7 @@ def main() -> int:
             "project_commit": _git_commit(PROJECT_ROOT),
             "git_dirty": _git_dirty(PROJECT_ROOT),
             "condition": args.condition,
+            "condition_spec": condition,
             "split": args.split,
             "limit": args.limit,
             "model": model_spec,
@@ -166,7 +194,7 @@ def main() -> int:
     )
     _write_json(manifest_path, manifest)
     atm = ATMAdapter(args.atm_root)
-    items = atm.load_split(args.split)
+    items = select_condition_items(atm, args.split, condition)
     if args.limit is not None:
         items = items[: args.limit]
     raw_ground_truth = json.loads(
@@ -182,10 +210,26 @@ def main() -> int:
     adapter = HFModelAdapter.from_local_snapshot(
         Path(model_spec["local_path"]), model_id=args.model_id
     )
+    annotation_rows = (
+        _load_jsonl(args.annotation_cache) if args.annotation_cache else []
+    )
+    if args.annotation_cache:
+        manifest["annotation_cache"] = {
+            "path": str(args.annotation_cache.resolve()),
+            "sha256": _file_sha256(args.annotation_cache),
+        }
 
     with predictions_path.open("x", encoding="utf-8") as handle:
         for item in items:
-            chunks = atm.collect_sgm_chunks(item.evidence_ids)
+            evidence_ids = evidence_ids_for_condition(item, condition)
+            chunks = atm.collect_sgm_chunks(evidence_ids)
+            if condition["annotation"] == "verbal_r3":
+                chunks = apply_annotation_cache(
+                    item.qa_id,
+                    evidence_ids,
+                    chunks,
+                    annotation_rows,
+                )
             messages = atm.build_text_messages(item.question, chunks)
             result = adapter.generate(
                 messages, max_new_tokens=args.max_new_tokens, temperature=0.0
@@ -193,7 +237,7 @@ def main() -> int:
             row = build_prediction_row(
                 qa_id=item.qa_id,
                 qtype=item.qtype,
-                evidence_ids=item.evidence_ids,
+                evidence_ids=evidence_ids,
                 answer=result.text,
                 prompt_tokens=result.prompt_tokens,
                 completion_tokens=result.completion_tokens,
@@ -215,6 +259,18 @@ def _git_commit(root: Path) -> str:
     return subprocess.check_output(
         ["git", "-C", str(root), "rev-parse", "HEAD"], text=True
     ).strip()
+
+
+def _load_jsonl(path: Path) -> list[dict[str, Any]]:
+    rows = []
+    with path.open(encoding="utf-8") as handle:
+        for line_number, line in enumerate(handle, start=1):
+            if line.strip():
+                try:
+                    rows.append(json.loads(line))
+                except json.JSONDecodeError as exc:
+                    raise ValueError(f"invalid JSONL at {path}:{line_number}") from exc
+    return rows
 
 
 def _git_dirty(root: Path) -> bool:
