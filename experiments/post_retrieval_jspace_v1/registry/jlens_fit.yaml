@@ -10,5 +10,8 @@ checkpoint_every: 8
 artifact_dtype: float16
 stability:
   nested_counts: [256, 512]
+  evaluation_prompt_offset: 512
+  evaluation_prompt_count: 32
+  evaluation_position: last_token
   matrix_cosine_median_min: 0.98
   top25_overlap_median_min: 0.90

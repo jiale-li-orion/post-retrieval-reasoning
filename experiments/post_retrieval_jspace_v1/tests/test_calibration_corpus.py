@@ -3,6 +3,7 @@ import jlens
 from jacobian_analysis.build_calibration_corpus import (
     WIKITEXT_REVISION,
     shuffled_document_windows,
+    take_window_slice,
     take_windows,
 )
 
@@ -54,3 +55,12 @@ def test_calibration_selection_fails_if_valid_windows_are_insufficient() -> None
         assert "required 2" in str(exc)
     else:
         raise AssertionError("insufficient calibration windows must be fatal")
+
+
+def test_stability_prompt_slice_starts_after_fit_windows() -> None:
+    rows = ({"index": index} for index in range(8))
+
+    assert take_window_slice(rows, offset=5, count=2) == [
+        {"index": 5},
+        {"index": 6},
+    ]

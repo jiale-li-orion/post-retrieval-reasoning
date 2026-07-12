@@ -70,6 +70,20 @@ def take_windows(rows: Iterable[dict[str, Any]], count: int) -> list[dict[str, A
     raise ValueError(f"only found {len(selected)} valid windows; required {count}")
 
 
+def take_window_slice(
+    rows: Iterable[dict[str, Any]], *, offset: int, count: int
+) -> list[dict[str, Any]]:
+    if offset < 0 or count <= 0:
+        raise ValueError("offset must be non-negative and count must be positive")
+    iterator = iter(rows)
+    for _ in range(offset):
+        try:
+            next(iterator)
+        except StopIteration as exc:
+            raise ValueError(f"window stream ended before offset {offset}") from exc
+    return take_windows(iterator, count)
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--model-id", required=True)

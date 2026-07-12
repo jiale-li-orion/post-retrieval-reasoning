@@ -130,3 +130,10 @@ repeated fits are not used. Primary settings are BF16 model weights,
 `dim_batch=8`, `max_seq_len=256`, `skip_first=16`, and an atomic checkpoint
 every eight prompts. Completed fits retain the lens and manifest and remove the
 redundant running-sum checkpoint.
+
+For the top-25 stability criterion, the next 32 valid windows from the same
+model-specific shuffled stream (offset 512, i.e. windows 513-544) are frozen as
+held-out prompts and never included in either fit. At every source layer, the
+n256 and n512 lenses are compared at the final token position of each held-out
+prompt. Top-25 set overlap is aggregated by the median over all
+`prompt × layer` pairs.
