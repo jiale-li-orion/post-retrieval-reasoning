@@ -47,8 +47,9 @@ Gate A verified state as of 2026-07-12:
 - The five-model suite is `Qwen3-8B-ms`, `DeepSeek-R1-Distill-Llama-8B`,
   `Qwen2.5-7B-Instruct`, `Qwen3-VL-2B-Instruct`, and
   `Qwen3-VL-8B-Instruct`; it supersedes the earlier Mistral slot.
-- The WikiText-103 calibration construction contract is frozen. Model-specific
-  512-window corpus generation is in progress; no lens has been fitted.
+- The WikiText-103 source revision and five model-specific 512-window corpora
+  are frozen and hash-registered. Their first 256 rows are the nested stability
+  subsets. No lens has been fitted.
 
 ## Machine Roles
 

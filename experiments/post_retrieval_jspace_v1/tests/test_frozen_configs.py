@@ -57,3 +57,24 @@ def test_verbal_annotation_registry_is_fully_frozen() -> None:
         "top_p": 0.95,
         "max_new_tokens": 1024,
     }
+
+
+def test_jlens_calibration_registry_freezes_nested_256_512_contract() -> None:
+    payload = yaml.safe_load(
+        (ROOT / "registry/jlens_calibration.yaml").read_text(encoding="utf-8")
+    )
+
+    assert len(payload["dataset"]["revision"]) == 40
+    assert payload["construction"]["window_tokens"] == 256
+    assert payload["construction"]["window_count"] == 512
+    assert payload["construction"]["stability_subset_count"] == 256
+    assert set(payload["corpora"]) == {
+        "qwen3_8b_ms",
+        "deepseek_r1_distill_llama_8b",
+        "qwen2_5_7b_instruct",
+        "qwen3_vl_2b_instruct",
+        "qwen3_vl_8b_instruct",
+    }
+    assert all(
+        len(row["windows_sha256"]) == 64 for row in payload["corpora"].values()
+    )

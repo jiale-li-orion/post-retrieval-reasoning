@@ -1,0 +1,27 @@
+schema_version: 1
+corpus_id: wikitext103-seed17-w256-n512-v2
+dataset:
+  repository: Salesforce/wikitext
+  configuration: wikitext-103-raw-v1
+  split: train
+  revision: b08601e04326c79dfdd32d625aee71d232d685c3
+  fingerprint: 7dabb830ac9ebb0d
+construction:
+  seed: 17
+  window_tokens: 256
+  window_count: 512
+  stability_subset_count: 256
+  cross_document_windows: false
+  drop_incomplete_windows: true
+  roundtrip_token_check: true
+corpora:
+  qwen3_8b_ms:
+    windows_sha256: e234f0402bdb03c182e41b4019a638d373a15a7878ed7126b716e4cf1e01679a
+  deepseek_r1_distill_llama_8b:
+    windows_sha256: 7ce55e95b0d9f7108c5690197fe5c17fa2c4e151e6f62c51bc12a137fa5b1038
+  qwen2_5_7b_instruct:
+    windows_sha256: e234f0402bdb03c182e41b4019a638d373a15a7878ed7126b716e4cf1e01679a
+  qwen3_vl_2b_instruct:
+    windows_sha256: e234f0402bdb03c182e41b4019a638d373a15a7878ed7126b716e4cf1e01679a
+  qwen3_vl_8b_instruct:
+    windows_sha256: e234f0402bdb03c182e41b4019a638d373a15a7878ed7126b716e4cf1e01679a
