@@ -4,6 +4,7 @@ import pytest
 
 from adapters.hf_model import (
     ModelAdapterError,
+    _contains_visual_content,
     resolve_residual_modules,
     resolve_text_tokenizer,
 )
@@ -35,3 +36,21 @@ def test_text_tokenizer_unwraps_multimodal_processor() -> None:
 
     assert resolve_text_tokenizer(SimpleNamespace(tokenizer=tokenizer)) is tokenizer
     assert resolve_text_tokenizer(tokenizer) is tokenizer
+
+
+def test_visual_content_detection_accepts_official_atm_image_url_blocks() -> None:
+    messages = [
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "Evidence"},
+                {
+                    "type": "image_url",
+                    "image_url": {"url": "data:image/jpeg;base64,x"},
+                },
+            ],
+        }
+    ]
+
+    assert _contains_visual_content(messages) is True
+    assert _contains_visual_content([{"role": "user", "content": "text"}]) is False

@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Sequence
 
 import torch
+from qwen_vl_utils import process_vision_info
 from transformers import (
     AutoModelForCausalLM,
     AutoProcessor,
@@ -86,7 +87,21 @@ class HFModelAdapter:
         rendered = self.processor.apply_chat_template(
             messages, tokenize=False, add_generation_prompt=True
         )
-        inputs = self.processor(text=[rendered], return_tensors="pt")
+        if _contains_visual_content(messages):
+            if not hasattr(self.processor, "image_processor"):
+                raise ModelAdapterError(
+                    f"{self.model_id} cannot consume visual evidence"
+                )
+            image_inputs, video_inputs = process_vision_info(messages)
+            inputs = self.processor(
+                text=[rendered],
+                images=image_inputs,
+                videos=video_inputs,
+                padding=True,
+                return_tensors="pt",
+            )
+        else:
+            inputs = self.processor(text=[rendered], return_tensors="pt")
         return {key: value.to(self.device) for key, value in inputs.items()}
 
     @torch.inference_mode()
@@ -143,3 +158,15 @@ def _read_model_type(path: Path) -> str:
         return str(json.loads(config_path.read_text(encoding="utf-8"))["model_type"])
     except (FileNotFoundError, KeyError, json.JSONDecodeError) as exc:
         raise ModelAdapterError(f"invalid model config: {config_path}") from exc
+
+
+def _contains_visual_content(messages: list[dict[str, Any]]) -> bool:
+    for message in messages:
+        content = message.get("content")
+        if isinstance(content, list) and any(
+            isinstance(item, dict)
+            and item.get("type") in {"image", "image_url", "video", "video_url"}
+            for item in content
+        ):
+            return True
+    return False
