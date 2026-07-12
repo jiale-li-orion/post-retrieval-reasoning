@@ -19,24 +19,30 @@ protocol.
 
 ## Current Stage
 
-- Phase 0: complete
-- Gate A: in progress
+- Phase 0: code/model/data bootstrap complete; WikiText-103 pending for Gate C
+- Gate A: passed on 2026-07-12
+- Phase 2 canonical VA cache: preflight passed; formal cache not generated
 - Gate B: not started
 - Gate C: not started
 - E2-E4: blocked until explicit human approval after Gate C
 
-Gate A verified state as of 2026-07-11:
+Gate A verified state as of 2026-07-12:
 
 - Remote branch and GitHub origin are synchronized.
 - Root `pyproject.toml` and `uv.lock` manage the single project environment.
 - ATM Full/Hard hashes and all four fixed NIAH pools are validated.
-- Qwen3-8B-ms, DeepSeek-R1-Distill-Llama-8B, Qwen2.5-7B-Instruct, and
-  Qwen3-VL-2B-Instruct pass BF16 CUDA load and adapter checks.
+- All five frozen open-weight models pass BF16 CUDA load and adapter checks.
+  Qwen3-VL-8B generated successfully with 36 text layers and approximately
+  16.7 GiB peak allocated GPU memory.
 - Qwen3-VL-2B completed the two-question C0 vertical smoke with the official
   SGM formatter and evaluator. This smoke is infrastructure-only.
-- Qwen3-VL-8B download/load validation remains open.
-- The canonical `reranker3b-sft` download is in progress for Phase 2.
-- The remote test suite passes 33 tests; warnings are limited to third-party
+- The canonical `reranker3b-sft` snapshot is complete, revision- and
+  hash-frozen, and passes the two-question/ten-evidence VA cache preflight.
+- A fresh paired C0/C1 two-question smoke confirms identical evidence IDs and
+  order and a rendered-prompt diff containing only the annotation blocks.
+- Inference and deterministic ATM evaluation run as separate immutable stages
+  without judge credentials; both stages wrote complete manifests.
+- The remote test suite passes 42 tests; warnings are limited to third-party
   SWIG deprecation messages.
 
 ## Machine Roles
