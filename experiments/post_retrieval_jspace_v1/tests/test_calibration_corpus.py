@@ -1,4 +1,6 @@
-from jlens.build_calibration_corpus import (
+import jlens
+
+from jacobian_analysis.build_calibration_corpus import (
     WIKITEXT_REVISION,
     shuffled_document_windows,
     take_windows,
@@ -7,6 +9,11 @@ from jlens.build_calibration_corpus import (
 
 def test_wikitext_source_revision_is_immutable() -> None:
     assert len(WIKITEXT_REVISION) == 40
+
+
+def test_external_jlens_package_is_not_shadowed() -> None:
+    assert hasattr(jlens, "from_hf")
+    assert "jacobian-lens" in str(jlens.__file__)
 
 
 class _Tokenizer:
