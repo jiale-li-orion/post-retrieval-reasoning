@@ -7,6 +7,7 @@ import importlib
 import json
 import sys
 from dataclasses import dataclass
+from functools import cached_property
 from pathlib import Path
 from typing import Any
 
@@ -89,6 +90,18 @@ class ATMAdapter:
         self, evidence_ids: tuple[str, ...]
     ) -> list[str]:
         oracle = self._official_oracle_module()
+        email_index, image_index, video_index = self._sgm_indexes
+        return oracle.collect_text_evidence(
+            list(evidence_ids),
+            email_index,
+            image_index,
+            video_index,
+            list(self.BATCH_FIELDS),
+        )
+
+    @cached_property
+    def _sgm_indexes(self) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
+        oracle = self._official_oracle_module()
         email_rows = oracle.load_json(
             self.root / "data/raw_memory/email/emails.json"
         )
@@ -107,13 +120,7 @@ class ATMAdapter:
             ),
             "video_path",
         )
-        return oracle.collect_text_evidence(
-            list(evidence_ids),
-            email_index,
-            image_index,
-            video_index,
-            list(self.BATCH_FIELDS),
-        )
+        return email_index, image_index, video_index
 
     def _official_oracle_module(self) -> Any:
         root_text = str(self.root)
