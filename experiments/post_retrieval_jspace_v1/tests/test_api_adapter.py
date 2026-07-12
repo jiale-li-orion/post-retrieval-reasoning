@@ -46,3 +46,35 @@ def test_api_provider_rejects_unknown_max_token_field() -> None:
             },
             environ={"KEY": "value"},
         )
+
+
+def test_api_provider_resolves_endpoint_and_model_from_environment() -> None:
+    spec = APIProviderSpec.from_mapping(
+        {
+            "id": "minimax",
+            "model_env": "MINIMAX_MODEL",
+            "base_url_env": "MINIMAX_BASE_URL",
+            "api_key_env": "MINIMAX_API_KEY",
+        },
+        environ={
+            "MINIMAX_MODEL": "actual-model",
+            "MINIMAX_BASE_URL": "https://provider.example/v1",
+            "MINIMAX_API_KEY": "secret",
+        },
+    )
+
+    assert spec.model == "actual-model"
+    assert spec.base_url == "https://provider.example/v1"
+
+
+def test_api_provider_fails_before_use_when_endpoint_is_unset() -> None:
+    with pytest.raises(APIAdapterError, match="MINIMAX_BASE_URL"):
+        APIProviderSpec.from_mapping(
+            {
+                "id": "minimax",
+                "model_env": "MINIMAX_MODEL",
+                "base_url_env": "MINIMAX_BASE_URL",
+                "api_key_env": "MINIMAX_API_KEY",
+            },
+            environ={"MINIMAX_MODEL": "m", "MINIMAX_API_KEY": "secret"},
+        )

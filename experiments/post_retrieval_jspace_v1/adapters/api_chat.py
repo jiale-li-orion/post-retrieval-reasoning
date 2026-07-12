@@ -38,10 +38,12 @@ class APIProviderSpec:
         token_field = str(row.get("max_token_field", "max_tokens"))
         if token_field not in {"max_tokens", "max_completion_tokens"}:
             raise APIAdapterError(f"unsupported max token field: {token_field}")
+        model = _resolve_value(row, "model", active_env)
+        base_url = _resolve_value(row, "base_url", active_env)
         return cls(
             provider_id=str(row["id"]),
-            model=str(row["model"]),
-            base_url=str(row["base_url"]),
+            model=model,
+            base_url=base_url,
             api_key_env=key_name,
             api_key=api_key,
             max_token_field=token_field,
@@ -80,3 +82,19 @@ class APIChatAdapter:
         if self.spec.extra_body:
             request["extra_body"] = dict(self.spec.extra_body)
         return self.client.chat.completions.create(**request)
+
+
+def _resolve_value(
+    row: Mapping[str, Any], name: str, environ: Mapping[str, str]
+) -> str:
+    if name in row:
+        value = str(row[name]).strip()
+        if value:
+            return value
+    env_field = f"{name}_env"
+    env_name = str(row.get(env_field, "")).strip()
+    value = environ.get(env_name, "") if env_name else ""
+    if not value:
+        requirement = env_name or name
+        raise APIAdapterError(f"required provider value is unset: {requirement}")
+    return value

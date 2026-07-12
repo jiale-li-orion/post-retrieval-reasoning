@@ -1,0 +1,23 @@
+schema_version: 1
+providers:
+  - id: mimo_v25
+    model: mimo-v2.5
+    base_url: https://api.xiaomimimo.com/v1
+    api_key_env: MIMO_API_KEY
+    max_token_field: max_completion_tokens
+    extra_body:
+      thinking:
+        type: disabled
+
+  - id: minimax_m3
+    model_env: MINIMAX_MODEL
+    base_url_env: MINIMAX_BASE_URL
+    api_key_env: MINIMAX_API_KEY
+    max_token_field: max_tokens
+
+  - id: kimi_k25
+    model_env: KIMI_MODEL
+    base_url_env: KIMI_BASE_URL
+    api_key_env: KIMI_API_KEY
+    max_token_field: max_tokens
+
