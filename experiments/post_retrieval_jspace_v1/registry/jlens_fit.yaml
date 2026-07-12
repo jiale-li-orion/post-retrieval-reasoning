@@ -8,6 +8,9 @@ max_seq_len: 256
 skip_first: 16
 checkpoint_every: 8
 artifact_dtype: float16
+model_overrides:
+  qwen3_8b_ms:
+    dim_batch: 2
 stability:
   nested_counts: [256, 512]
   evaluation_prompt_offset: 512

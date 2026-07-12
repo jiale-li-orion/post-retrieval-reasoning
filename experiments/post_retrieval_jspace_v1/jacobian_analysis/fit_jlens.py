@@ -36,6 +36,16 @@ def source_layers_for_fit(n_layers: int, target_layer: int) -> list[int]:
     return list(range(target_layer))
 
 
+def resolve_fit_config(config: dict[str, Any], model_id: str) -> dict[str, Any]:
+    resolved = {key: value for key, value in config.items() if key != "model_overrides"}
+    override = config.get("model_overrides", {}).get(model_id, {})
+    unknown = sorted(set(override) - set(resolved))
+    if unknown:
+        raise ValueError(f"unknown model fit override fields: {unknown}")
+    resolved.update(override)
+    return resolved
+
+
 def load_frozen_prompts(
     windows_path: Path, *, expected_sha256: str, count: int
 ) -> list[str]:
@@ -78,7 +88,9 @@ def main() -> int:
     models = load_model_registry(EXPERIMENT_ROOT / "registry/model_registry.yaml")
     model_spec = models[args.model_id]
     calibration = _load_yaml(EXPERIMENT_ROOT / "registry/jlens_calibration.yaml")
-    fit_config = _load_yaml(EXPERIMENT_ROOT / "registry/jlens_fit.yaml")
+    fit_config = resolve_fit_config(
+        _load_yaml(EXPERIMENT_ROOT / "registry/jlens_fit.yaml"), args.model_id
+    )
     corpus_dir = (
         args.corpus_root / args.model_id / calibration["corpus_id"]
     )

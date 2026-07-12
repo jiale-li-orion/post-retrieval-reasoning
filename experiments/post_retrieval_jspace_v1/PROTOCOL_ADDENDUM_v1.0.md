@@ -131,6 +131,12 @@ repeated fits are not used. Primary settings are BF16 model weights,
 every eight prompts. Completed fits retain the lens and manifest and remove the
 redundant running-sum checkpoint.
 
+`dim_batch` is a resource batching parameter rather than a change to the
+Jacobian estimator. A WSL residency OOM on Qwen3-8B established a
+model-specific `dim_batch=2` override through one-prompt full-layer probes;
+the incident and measurements are recorded in `RESOURCE_INCIDENTS.md`. The
+model remains BF16, full weight, all-layer, and 256-token.
+
 For the top-25 stability criterion, the next 32 valid windows from the same
 model-specific shuffled stream (offset 512, i.e. windows 513-544) are frozen as
 held-out prompts and never included in either fit. At every source layer, the

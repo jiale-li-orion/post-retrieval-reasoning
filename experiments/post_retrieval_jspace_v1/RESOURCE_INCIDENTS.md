@@ -34,3 +34,17 @@ changes batching and backward-pass count, not the Jacobian estimator. A formal
 fit may restart only after a one-prompt probe completes with recorded peak
 memory and practical throughput. The probe order is `dim_batch=4`, then 2 if
 4 is not viable. Quantization is not an admissible recovery.
+
+Both recovery probes completed with BF16 weights, all 35 source layers, and
+the same 256-token prompt:
+
+| dim_batch | elapsed | peak allocated | peak reserved | result |
+| ---: | ---: | ---: | ---: | --- |
+| 4 | 143.76 s | 20.86 GiB | 20.93 GiB | complete |
+| 2 | 149.84 s | 18.07 GiB | 18.11 GiB | complete |
+
+`dim_batch=2` is selected for Qwen3-8B. It is approximately 4.2% slower per
+prompt than 4 while retaining about 2.8 GiB more allocator headroom. At the
+observed rate, an n256 fit is expected to take approximately 10.7 hours. This
+is a model-specific resource override; all other models retain the default
+`dim_batch=8` unless they independently fail their own resource probe.

@@ -3,7 +3,11 @@ import json
 
 import pytest
 
-from jacobian_analysis.fit_jlens import load_frozen_prompts, source_layers_for_fit
+from jacobian_analysis.fit_jlens import (
+    load_frozen_prompts,
+    resolve_fit_config,
+    source_layers_for_fit,
+)
 
 
 def test_source_layers_stop_before_final_target() -> None:
@@ -25,3 +29,20 @@ def test_frozen_prompt_loader_uses_nested_prefix(tmp_path) -> None:
 
     with pytest.raises(ValueError, match="hash mismatch"):
         load_frozen_prompts(path, expected_sha256="0" * 64, count=2)
+
+
+def test_model_fit_override_changes_only_declared_resource_parameter() -> None:
+    config = {
+        "dim_batch": 8,
+        "max_seq_len": 256,
+        "model_overrides": {"large": {"dim_batch": 2}},
+    }
+
+    assert resolve_fit_config(config, "small") == {
+        "dim_batch": 8,
+        "max_seq_len": 256,
+    }
+    assert resolve_fit_config(config, "large") == {
+        "dim_batch": 2,
+        "max_seq_len": 256,
+    }
