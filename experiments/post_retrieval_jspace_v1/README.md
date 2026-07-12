@@ -50,9 +50,13 @@ Gate A verified state as of 2026-07-12:
 - The WikiText-103 source revision and five model-specific 512-window corpora
   are frozen and hash-registered. Their first 256 rows are the nested stability
   subsets. No lens fit has completed yet.
-- The first primary fit, Qwen3-VL-2B on the 256-window subset, is running from
-  code commit `1d20bda`. The 512-window fit and all other models remain gated
-  on completion and inspection of this artifact.
+- The first primary fit, Qwen3-VL-2B on the 256-window subset, completed from
+  code commit `1d20bda` with 256 prompts, 27 source layers, and a frozen lens
+  hash. Its nested 512-window fit is running; all other models remain gated on
+  the resulting stability report.
+- Five model-specific sets of 32 held-out stability prompts are frozen at
+  stream offset 512. The judge-free matrix-cosine and final-position top-25
+  overlap evaluator is implemented and tested.
 
 ## Machine Roles
 
