@@ -25,3 +25,19 @@ corpora:
     windows_sha256: e234f0402bdb03c182e41b4019a638d373a15a7878ed7126b716e4cf1e01679a
   qwen3_vl_8b_instruct:
     windows_sha256: e234f0402bdb03c182e41b4019a638d373a15a7878ed7126b716e4cf1e01679a
+stability_prompts:
+  set_id: wikitext103-heldout32-v1
+  stream_offset: 512
+  prompt_count: 32
+  position: last_token
+  corpora:
+    qwen3_8b_ms:
+      prompts_sha256: 0f3a8e11657326e58443cfc9365ba5bcb1deb12812afb108444cc20a94a077f0
+    deepseek_r1_distill_llama_8b:
+      prompts_sha256: 3a29d63a87666a4325cdfafa1d72993f8b60b4f0885d9b57ec42b79264c3bae8
+    qwen2_5_7b_instruct:
+      prompts_sha256: 0f3a8e11657326e58443cfc9365ba5bcb1deb12812afb108444cc20a94a077f0
+    qwen3_vl_2b_instruct:
+      prompts_sha256: 0f3a8e11657326e58443cfc9365ba5bcb1deb12812afb108444cc20a94a077f0
+    qwen3_vl_8b_instruct:
+      prompts_sha256: 0f3a8e11657326e58443cfc9365ba5bcb1deb12812afb108444cc20a94a077f0

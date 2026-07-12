@@ -78,6 +78,11 @@ def test_jlens_calibration_registry_freezes_nested_256_512_contract() -> None:
     assert all(
         len(row["windows_sha256"]) == 64 for row in payload["corpora"].values()
     )
+    heldout = payload["stability_prompts"]
+    assert heldout["stream_offset"] == 512
+    assert heldout["prompt_count"] == 32
+    assert heldout["position"] == "last_token"
+    assert set(heldout["corpora"]) == set(payload["corpora"])
 
 
 def test_jlens_fit_registry_matches_reference_semantics() -> None:
