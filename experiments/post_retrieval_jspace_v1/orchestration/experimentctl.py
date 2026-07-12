@@ -86,6 +86,9 @@ def parse_args() -> argparse.Namespace:
     start = subparsers.add_parser("start")
     start.add_argument("task_id")
     start.add_argument("--tmux", action="store_true")
+    queue = subparsers.add_parser("start-queue")
+    queue.add_argument("queue_id", choices=["e1-hard", "e1-full"])
+    queue.add_argument("--tmux", action="store_true")
     return parser.parse_args()
 
 
@@ -93,6 +96,8 @@ def main() -> int:
     args = parse_args()
     tasks = task_specs()
     by_id = {task.task_id: task for task in tasks}
+    if args.command == "start-queue":
+        return _start_queue(args.queue_id, args.tmux)
     if args.command == "status":
         for task in tasks:
             print(f"{task.task_id}: {derive_status(task, ARTIFACT_ROOT)} [{task.resource}]")
@@ -140,6 +145,24 @@ def main() -> int:
             return 0
         return subprocess.run(command, cwd=PROJECT_ROOT).returncode
     raise AssertionError(args.command)
+
+
+def _start_queue(queue_id: str, use_tmux: bool) -> int:
+    approval = ARTIFACT_ROOT / "approvals/gate-qwen3-vl-2b-stability/manifest.json"
+    if not approval.is_file():
+        raise SystemExit("E1 queue is blocked until the stability gate is approved")
+    scripts = EXPERIMENT_ROOT / "scripts"
+    command = [str(scripts / f"run_{queue_id.replace('-', '_')}_queue.sh")]
+    if use_tmux:
+        session = queue_id.replace("_", "-")
+        subprocess.run(
+            ["tmux", "new-session", "-d", "-s", session, shlex.join(command)],
+            cwd=PROJECT_ROOT,
+            check=True,
+        )
+        print(f"tmux session: {session}")
+        return 0
+    return subprocess.run(command, cwd=PROJECT_ROOT).returncode
 
 
 def _approve(task: TaskSpec, tasks: list[TaskSpec]) -> int:

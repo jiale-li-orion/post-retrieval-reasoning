@@ -99,7 +99,16 @@ experiments/post_retrieval_jspace_v1/scripts/run_va_cache.sh canonical-e1-v1
 # Example single-condition queue; interrupted shards resume in place.
 experiments/post_retrieval_jspace_v1/scripts/run_behavior_queue.sh \
   qwen3_vl_2b_instruct C0 hard e1-qwen3vl2b-c0-v1 1
+
+# After explicit stability approval, launch a complete text/VA queue in tmux.
+experiments/post_retrieval_jspace_v1/scripts/experimentctl \
+  start-queue e1-hard --tmux
+experiments/post_retrieval_jspace_v1/scripts/experimentctl \
+  start-queue e1-full --tmux
 ```
+
+The aggregate Hard queue covers C0/C1/C3-C10. C2 Raw is intentionally excluded
+until its dedicated multimodal runner passes official ATM parity checks.
 
 Target generation is CPU-safe and can run while a fit occupies the GPU:
 
