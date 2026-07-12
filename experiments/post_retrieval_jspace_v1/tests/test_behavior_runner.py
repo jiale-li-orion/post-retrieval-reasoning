@@ -3,6 +3,7 @@ import pytest
 from behavior.run_behavior import (
     build_prediction_row,
     evidence_ids_for_condition,
+    select_shard,
     select_condition_items,
     select_ground_truth_rows,
     validate_run_selection,
@@ -128,3 +129,11 @@ def test_condition_selects_official_oracle_or_niah_dataset() -> None:
         "niah",
         50,
     ]
+
+
+def test_shards_are_disjoint_and_cover_canonical_order() -> None:
+    rows = list(range(10))
+    shards = [select_shard(rows, index, 3) for index in range(3)]
+
+    assert shards == [rows[:4], rows[4:7], rows[7:]]
+    assert [item for shard in shards for item in shard] == rows
