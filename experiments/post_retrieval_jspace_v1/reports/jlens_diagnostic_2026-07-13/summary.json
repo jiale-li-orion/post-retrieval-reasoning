@@ -1,0 +1,31 @@
+{
+  "status": "complete_exploratory_diagnostic",
+  "scope": "Qwen3-VL-2B, ATM Hard 31, C0/C1, Unknown-known rule-frozen targets",
+  "transition_counts": {
+    "N->N": 21,
+    "N->U": 8,
+    "U->U": 2
+  },
+  "key_observations": {
+    "c1_last_evidence_layer24_margin_auc": {
+      "j_lens": 0.8523809523809524,
+      "logit_lens": 0.7523809523809524
+    },
+    "c1_minus_c0_p_a0_layer22_new_unknown_auc": {
+      "j_lens": 0.9404761904761905,
+      "logit_lens": 0.8571428571428571
+    }
+  },
+  "interpretation_boundary": [
+    "P_q precedes evidence in the ATM prompt and is a negative control.",
+    "Unknown is output-proximal; this tests diagnostic readability, not binding or reasoning correctness.",
+    "The sample has 31 questions and only eight N->U transitions.",
+    "J-lens utility must be judged against the same-activation logit-lens baseline."
+  ],
+  "inputs": {
+    "c0_readout_sha256": "447f6fc02e6d7f65e05fba7978c1beaf21bc47cae169f28535d1986640b294b2",
+    "c1_readout_sha256": "00b9dcf1bfa6664dbb3c529f4054bddf8bacf159e16dffa9ca39edf484178fb3",
+    "c0_predictions_sha256": "5904069c9c245b1ff24247c0cfcedebbb2b9c4555634c581c0adfab687ae0a7c",
+    "c1_predictions_sha256": "b9f709404a40aa8332cb47aca1d2d033eb26e1e493549e23d65ac630200f4a42"
+  }
+}

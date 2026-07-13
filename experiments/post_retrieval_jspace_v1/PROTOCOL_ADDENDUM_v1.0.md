@@ -98,6 +98,20 @@ natural silent state. Generated reasoning positions, native answer positions,
 and silent prompt positions must be tagged separately. J-lens and logit-lens
 comparisons use the same activation, layer, and position.
 
+For ATM's official answer prompt, the question precedes the evidence. The
+implemented `P_q` is therefore the question-end, **pre-evidence** state and is
+treated as a negative control, not as a primary evidence-conditioned silent
+position. Primary evidence-conditioned positions are `P_evidence_end_i` and
+`P_a0`. Reports must label this distinction explicitly; existing artifacts do
+not need to be rerun solely to rename `P_q`.
+
+C0 and C1 have different total sequence lengths. BF16 attention kernels can
+therefore introduce small numerical differences even at their causally
+identical pre-evidence prefix. Paired condition analyses use continuous concept
+margins as the primary observable, report `P_q` drift as a numerical-noise
+control, and do not interpret low-probability rank changes alone as a condition
+effect.
+
 ## 6. Execution and Storage
 
 - Remote WSL RTX 4090 is the sole code-writing environment after bootstrap.

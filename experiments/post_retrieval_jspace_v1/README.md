@@ -60,6 +60,17 @@ Gate A verified state as of 2026-07-12:
   `P_evidence_end_i`, `P_q`, and `P_a0` positions. It confirmed exact paired
   J/logit output and also confirmed that the automatic targets for those two
   questions are all multi-token; token-set coverage remains secondary.
+- A rule-frozen Hard-31 diagnostic using single-token `Unknown`/`known` aliases
+  completed for C0/C1. At C1's last evidence position and layer 24, the
+  `Unknown-known` margin predicts an eventual exact `Unknown` with AUC 0.852
+  for J-lens and 0.752 for logit lens. The paired bootstrap interval for the
+  +0.10 AUC difference crosses zero, so this establishes diagnostic
+  readability but not J-lens superiority. Full lightweight results are in
+  `reports/jlens_diagnostic_2026-07-13/`.
+- The official ATM prompt places the question before evidence. The implemented
+  `P_q` is consequently a pre-evidence negative control; evidence-conditioned
+  silent-state claims use `P_evidence_end_i` and `P_a0`. Small BF16 prefix
+  drift between unequal-length C0/C1 prompts is tracked as a numerical control.
 - ATM Full and Hard use disjoint QA identifiers. Hard C1 therefore uses the
   independently frozen 194-row `oracle-hard/local-v1` annotation cache, not
   the 1,457-row Full cache. All 194 Hard evidence pairs and SGM hashes match.
