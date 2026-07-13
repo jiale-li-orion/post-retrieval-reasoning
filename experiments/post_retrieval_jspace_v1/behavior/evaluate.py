@@ -29,6 +29,23 @@ def requires_llm_judge(ground_truth: list[dict[str, Any]]) -> bool:
     return any(str(row.get("qtype", "")).lower() == "open_end" for row in ground_truth)
 
 
+def select_deterministic_pairs(
+    ground_truth: list[dict[str, Any]], predictions: list[dict[str, Any]]
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    selected_ground_truth = [
+        row
+        for row in ground_truth
+        if str(row.get("qtype", "")).lower() in {"number", "list_recall"}
+    ]
+    selected_ids = {str(row["id"]) for row in selected_ground_truth}
+    selected_predictions = [
+        row for row in predictions if str(row.get("qa_id", row.get("id"))) in selected_ids
+    ]
+    if {str(row.get("qa_id", row.get("id"))) for row in selected_predictions} != selected_ids:
+        raise ValueError("deterministic predictions do not match ground truth IDs")
+    return selected_ground_truth, selected_predictions
+
+
 def build_evaluator_command(
     *,
     atm_root: Path,
@@ -74,6 +91,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--eval-id", required=True)
     parser.add_argument("--judge-model", default=DEFAULT_JUDGE_MODEL)
     parser.add_argument("--judge-reasoning-effort", default=DEFAULT_REASONING_EFFORT)
+    parser.add_argument("--deterministic-only", action="store_true")
     parser.add_argument(
         "--atm-root",
         type=Path,
@@ -91,16 +109,39 @@ def main() -> int:
         if not path.is_file():
             raise FileNotFoundError(f"frozen inference artifact missing: {path}")
 
+    eval_dir = create_run_directory(args.run_dir / "evaluations" / args.eval_id)
     ground_truth = json.loads(ground_truth_path.read_text(encoding="utf-8"))
+    command_run_dir = args.run_dir
+    if args.deterministic_only:
+        predictions = [
+            json.loads(line)
+            for line in predictions_path.read_text(encoding="utf-8").splitlines()
+            if line
+        ]
+        ground_truth, predictions = select_deterministic_pairs(
+            ground_truth, predictions
+        )
+        command_run_dir = eval_dir / "inputs"
+        command_run_dir.mkdir()
+        (command_run_dir / "ground_truth_subset.json").write_text(
+            json.dumps(ground_truth, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        (command_run_dir / "predictions.jsonl").write_text(
+            "\n".join(json.dumps(row, ensure_ascii=False) for row in predictions)
+            + "\n",
+            encoding="utf-8",
+        )
     needs_judge = requires_llm_judge(ground_truth)
     if needs_judge and not os.environ.get("OPENAI_API_KEY"):
-        raise RuntimeError("OPENAI_API_KEY is required only because this run contains open_end items")
+        raise RuntimeError(
+            "OPENAI_API_KEY is required only because this run contains open_end items"
+        )
 
-    eval_dir = create_run_directory(args.run_dir / "evaluations" / args.eval_id)
     started_at = datetime.now().astimezone().isoformat()
     command = build_evaluator_command(
         atm_root=args.atm_root,
-        run_dir=args.run_dir,
+        run_dir=command_run_dir,
         eval_dir=eval_dir,
         judge_model=args.judge_model,
         reasoning_effort=args.judge_reasoning_effort,
@@ -130,6 +171,10 @@ def main() -> int:
                 "model": args.judge_model,
                 "reasoning_effort": args.judge_reasoning_effort,
             },
+            "evaluation_scope": (
+                "deterministic_only" if args.deterministic_only else "all"
+            ),
+            "evaluated_count": len(ground_truth),
             "command": command,
             "started_at": started_at,
             "finished_at": datetime.now().astimezone().isoformat(),

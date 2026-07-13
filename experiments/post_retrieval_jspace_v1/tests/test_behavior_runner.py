@@ -14,6 +14,7 @@ from behavior.evaluate import (
     build_evaluator_command,
     build_evaluator_environment,
     requires_llm_judge,
+    select_deterministic_pairs,
 )
 
 
@@ -64,6 +65,22 @@ def test_judge_key_is_required_only_for_open_end() -> None:
 
     assert requires_llm_judge(deterministic) is False
     assert requires_llm_judge(mixed) is True
+
+
+def test_deterministic_subset_keeps_matching_predictions_only() -> None:
+    ground_truth = [
+        {"id": "n", "qtype": "number"},
+        {"id": "o", "qtype": "open_end"},
+        {"id": "l", "qtype": "list_recall"},
+    ]
+    predictions = [{"qa_id": "n"}, {"qa_id": "o"}, {"qa_id": "l"}]
+
+    selected_gt, selected_predictions = select_deterministic_pairs(
+        ground_truth, predictions
+    )
+
+    assert [row["id"] for row in selected_gt] == ["n", "l"]
+    assert [row["qa_id"] for row in selected_predictions] == ["n", "l"]
 
 
 def test_official_evaluator_command_uses_frozen_inference_inputs(tmp_path) -> None:
