@@ -20,8 +20,9 @@ import torch
 
 EXPERIMENT_ROOT = Path(__file__).resolve().parents[1]
 PROJECT_ROOT = EXPERIMENT_ROOT.parents[1]
-if str(EXPERIMENT_ROOT) not in sys.path:
-    sys.path.insert(0, str(EXPERIMENT_ROOT))
+if str(EXPERIMENT_ROOT) in sys.path:
+    sys.path.remove(str(EXPERIMENT_ROOT))
+sys.path.insert(0, str(EXPERIMENT_ROOT))
 
 from adapters.atm import ATMAdapter  # noqa: E402
 from adapters.hf_model import HFModelAdapter  # noqa: E402
