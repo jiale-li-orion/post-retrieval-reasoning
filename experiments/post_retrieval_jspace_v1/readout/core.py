@@ -14,6 +14,7 @@ def compute_paired_readouts(
     positions: Mapping[str, int],
     lens: Any,
     model: Any,
+    target_layer: int,
 ) -> list[dict[str, Any]]:
     generated = [name for name in positions if name.lower().startswith("generated")]
     if generated:
@@ -21,7 +22,10 @@ def compute_paired_readouts(
             f"generated positions are secondary and cannot enter primary readout: {generated}"
         )
     rows = []
-    for layer in lens.source_layers:
+    layers = [*lens.source_layers, target_layer]
+    position_items = list(positions.items())
+    position_indices = [index for _, index in position_items]
+    for layer in layers:
         if layer not in activations:
             raise ValueError(f"captured activation missing source layer {layer}")
         full = activations[layer]
@@ -31,18 +35,20 @@ def compute_paired_readouts(
             full = full[0]
         if full.ndim != 2:
             raise ValueError(f"layer {layer} activation must have shape [seq, d_model]")
-        for position_type, position_index in positions.items():
-            residual = full[position_index].float()
-            logit_logits = model.unembed(residual).float().cpu()
-            transported = lens.transport(residual, layer)
-            j_logits = model.unembed(transported).float().cpu()
+        residuals = full[position_indices].float()
+        logit_batch = model.unembed(residuals).float().cpu()
+        is_final = layer == target_layer
+        transported = residuals if is_final else lens.transport(residuals, layer)
+        j_batch = model.unembed(transported).float().cpu()
+        for row_index, (position_type, position_index) in enumerate(position_items):
             rows.append(
                 {
                     "layer": layer,
                     "position_type": position_type,
                     "position_index": position_index,
-                    "j_logits": j_logits,
-                    "logit_logits": logit_logits,
+                    "readout_kind": "final_identity" if is_final else "jacobian",
+                    "j_logits": j_batch[row_index],
+                    "logit_logits": logit_batch[row_index],
                 }
             )
     return rows

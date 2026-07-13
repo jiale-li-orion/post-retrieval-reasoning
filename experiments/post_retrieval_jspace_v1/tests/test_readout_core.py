@@ -23,6 +23,7 @@ def test_j_and_logit_readouts_share_the_exact_captured_activation() -> None:
     activations = {
         0: torch.tensor([[1.0, 2.0], [3.0, 4.0]]),
         1: torch.tensor([[5.0, 6.0], [7.0, 8.0]]),
+        2: torch.tensor([[9.0, 10.0], [11.0, 12.0]]),
     }
     lens = FakeLens()
 
@@ -31,13 +32,18 @@ def test_j_and_logit_readouts_share_the_exact_captured_activation() -> None:
         positions={"P_q": 0, "P_a0": 1},
         lens=lens,
         model=FakeModel(),
+        target_layer=2,
     )
 
-    assert len(rows) == 4
-    assert lens.seen[0][1].tolist() == [1.0, 2.0]
+    assert len(rows) == 6
+    assert lens.seen[0][1].tolist() == [[1.0, 2.0], [3.0, 4.0]]
     first = rows[0]
     assert first["logit_logits"].tolist() == [1.0, 2.0]
     assert first["j_logits"].tolist() == [11.0, 12.0]
+    final = rows[-1]
+    assert final["layer"] == 2
+    assert final["readout_kind"] == "final_identity"
+    assert final["j_logits"].tolist() == final["logit_logits"].tolist()
 
 
 def test_readout_rejects_generated_positions_in_primary_call() -> None:
@@ -47,6 +53,7 @@ def test_readout_rejects_generated_positions_in_primary_call() -> None:
             positions={"generated_1": 0},
             lens=FakeLens(),
             model=FakeModel(),
+            target_layer=2,
         )
     except ValueError as exc:
         assert "generated" in str(exc)

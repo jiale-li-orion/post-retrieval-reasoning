@@ -1,7 +1,12 @@
 import pytest
 import torch
 
-from readout.metrics import candidate_entropy, rank_and_hits, summarize_trajectory
+from readout.metrics import (
+    candidate_entropy,
+    rank_and_hits,
+    summarize_target,
+    summarize_trajectory,
+)
 
 
 def test_rank_and_hits_use_one_based_competition_rank() -> None:
@@ -31,3 +36,30 @@ def test_trajectory_without_emergence_is_explicit() -> None:
 
     assert summary["first_emergence_layer"] is None
     assert summary["persistence"] == 0.0
+
+
+def test_target_summary_uses_best_single_token_alias() -> None:
+    result = summarize_target(
+        torch.tensor([0.0, 4.0, 3.0, 2.0]),
+        single_token_ids=[2, 1],
+        token_set_ids=[1, 2],
+        top_k=2,
+    )
+
+    assert result["eligible_primary"] is True
+    assert result["best_token_id"] == 1
+    assert result["rank"] == 1
+    assert result["token_set_coverage"] == 1.0
+
+
+def test_multitoken_target_reports_coverage_without_primary_rank() -> None:
+    result = summarize_target(
+        torch.tensor([0.0, 4.0, 3.0, 2.0]),
+        single_token_ids=[],
+        token_set_ids=[1, 3],
+        top_k=2,
+    )
+
+    assert result["eligible_primary"] is False
+    assert result["rank"] is None
+    assert result["token_set_coverage"] == 0.5
