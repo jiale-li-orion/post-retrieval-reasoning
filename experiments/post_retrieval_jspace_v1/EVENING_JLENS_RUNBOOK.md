@@ -41,14 +41,14 @@ Qwen3-VL-2B n256: complete, selected
 Qwen3-VL-2B n512: complete
 Qwen3-VL-2B stability: passed
 Qwen3-8B n256: complete, exploratory; nested stability not run
-Qwen2.5-7B: paused at atomic prompt-64 checkpoint
+Qwen2.5-7B: n256 resumed from atomic prompt-64 checkpoint
 DeepSeek-R1-Distill-Llama-8B: not fit
 Qwen3-VL-8B: not fit
 ```
 
-当前 GPU 队列没有活动进程。Qwen3-VL-2B C3-C6 behavior inference 已全部
-完成 31/31。下一步优先完成其 judge、decision-program 人工冻结和
-phrase/sequence readout 设计；未获人工批准前不要启动新模型 fit。
+当前后台任务是 `tmux: jlens-qwen2p5-n256-resume`。它从 prompt 64 恢复，
+首个恢复样本 prompt 65 用时 105 秒。Qwen3-VL-2B C3-C6 behavior inference
+已全部完成 31/31。未获人工批准前不要在 Qwen2.5 之外启动新模型 fit。
 
 ## 3. 已完成的 Qwen3-VL-2B Stability Gate
 

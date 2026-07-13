@@ -265,3 +265,6 @@ experimental contract.
 - The partial Qwen3-8B Hard C0 preflight is invalid for E1 because native
   reasoning exhausted the answer budget before emitting a final answer. Its
   reasoning-output contract must be frozen before a new run.
+- Qwen2.5-7B n256 J-lens fitting resumed from its atomic prompt-64 checkpoint
+  as the only approved background fit. Prompt 65 completed in 105 seconds;
+  other new model fits remain paused pending review.

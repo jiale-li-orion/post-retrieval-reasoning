@@ -33,6 +33,8 @@ authority or execution queue.
   and secondary judge agreement remain incomplete.
 - Gate B: not passed
 - Gate C: in progress; Qwen3-VL-2B calibration stability passed
+- Qwen2.5-7B n256 J-lens: resumed from the atomic prompt-64 checkpoint in
+  background tmux `jlens-qwen2p5-n256-resume`; prompt 65 completed in 105 s.
 - E2-E4: blocked until explicit human approval after Gate C
 
 Gate A verified state as of 2026-07-12:
@@ -64,8 +66,8 @@ Gate A verified state as of 2026-07-12:
   `0.9999695`, held-out top-25 overlap median is `0.96`, and the frozen
   stability gate passed. The n256 lens is the selected first ATM readout lens.
 - Qwen3-8B completed an n256 calibration lens, but it has not passed a nested
-  stability gate and remains exploratory. Qwen2.5-7B is paused at the atomic
-  prompt-64 checkpoint while the first ATM readout closes the scientific loop.
+  stability gate and remains exploratory. Qwen2.5-7B resumed its n256 fit from
+  the atomic prompt-64 checkpoint after the first ATM diagnostic closed.
 - A two-question Hard C0/C1 readout smoke completed across 28 layers and all
   `P_evidence_end_i`, `P_q`, and `P_a0` positions. It confirmed exact paired
   J/logit output and also confirmed that the automatic targets for those two
@@ -227,8 +229,8 @@ experiments/post_retrieval_jspace_v1/scripts/run_jlens_stability.sh \
 ```
 
 Qwen3-VL-2B passed the frozen stability gate and selected n256. Qwen3-8B has
-an exploratory n256 lens but no nested stability result; Qwen2.5-7B is paused
-at prompt 64. Remaining fits are intentionally paused until the current ATM
+an exploratory n256 lens but no nested stability result; Qwen2.5-7B is the one
+approved active continuation from prompt 64. Other fits remain paused until the current ATM
 behavior/readout review authorizes model expansion. The commands below are
 reference commands, not the current next action:
 

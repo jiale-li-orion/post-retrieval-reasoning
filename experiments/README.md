@@ -118,5 +118,6 @@ controlled SGM evidence
    尾行和温控参数。
 3. 人工审核并冻结 Hard 31 decision programs。目前仅 9/31 题具有 A/B 类
    机制 target，必须先设计 phrase/sequence readout extension。
-4. Gate C review 前暂停新增模型拟合和正式 trajectory；Qwen3-8B 的行为
-   preflight 还需先冻结 reasoning-output contract。
+4. Qwen2.5-7B n256 已从 prompt-64 checkpoint 恢复；除此之外，Gate C
+   review 前不启动新增模型拟合或正式 trajectory。Qwen3-8B 的行为 preflight
+   还需先冻结 reasoning-output contract。
