@@ -23,7 +23,7 @@ protocol.
 - Gate A: passed on 2026-07-12
 - Phase 2 canonical VA cache: preflight passed; formal cache not generated
 - Gate B: not started
-- Gate C: not started
+- Gate C: in progress; Qwen3-VL-2B calibration stability passed
 - E2-E4: blocked until explicit human approval after Gate C
 
 Gate A verified state as of 2026-07-12:
@@ -50,10 +50,23 @@ Gate A verified state as of 2026-07-12:
 - The WikiText-103 source revision and five model-specific 512-window corpora
   are frozen and hash-registered. Their first 256 rows are the nested stability
   subsets. No lens fit has completed yet.
-- The first primary fit, Qwen3-VL-2B on the 256-window subset, completed from
-  code commit `1d20bda` with 256 prompts, 27 source layers, and a frozen lens
-  hash. Its nested 512-window fit is running; all other models remain gated on
-  the resulting stability report.
+- Qwen3-VL-2B completed both nested fits. Its matrix-cosine median is
+  `0.9999695`, held-out top-25 overlap median is `0.96`, and the frozen
+  stability gate passed. The n256 lens is the selected first ATM readout lens.
+- Qwen3-8B completed an n256 calibration lens, but it has not passed a nested
+  stability gate and remains exploratory. Qwen2.5-7B is paused at the atomic
+  prompt-64 checkpoint while the first ATM readout closes the scientific loop.
+- A two-question Hard C0/C1 readout smoke completed across 28 layers and all
+  `P_evidence_end_i`, `P_q`, and `P_a0` positions. It confirmed exact paired
+  J/logit output and also confirmed that the automatic targets for those two
+  questions are all multi-token; token-set coverage remains secondary.
+- ATM Full and Hard use disjoint QA identifiers. Hard C1 therefore uses the
+  independently frozen 194-row `oracle-hard/local-v1` annotation cache, not
+  the 1,457-row Full cache. All 194 Hard evidence pairs and SGM hashes match.
+- The Hard 31 decision-program review packet is generated under
+  `/home/orion/research_artifacts/decision_program_review/hard31-v1/`.
+  Formal trajectories remain blocked until every program is human-reviewed
+  and marked `frozen`.
 - Five model-specific sets of 32 held-out stability prompts are frozen at
   stream offset 512. The judge-free matrix-cosine and final-position top-25
   overlap evaluator is implemented and tested.

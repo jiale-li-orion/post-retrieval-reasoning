@@ -143,3 +143,22 @@ held-out prompts and never included in either fit. At every source layer, the
 n256 and n512 lenses are compared at the final token position of each held-out
 prompt. Top-25 set overlap is aggregated by the median over all
 `prompt × layer` pairs.
+
+## 8. Hard Verbal-Annotation Cache
+
+ATM Full and Hard are separate QA collections rather than a nested identifier
+subset. Hard C1 must use the independently generated `oracle-hard` cache. Its
+frozen contract is 194 `(qa_id, evidence_id)` rows with annotation SHA256
+`11f78d25f1142fa4839ab58452141129b3f431707d8f43e56c672339a1436eeb`.
+Using the Full cache for Hard is invalid even though both caches use the same
+Verbal-R3 model, prompt, and decoding contract.
+
+## 9. Multi-Token Readout Boundary
+
+The first ATM smoke confirmed that automatic gold targets can be entirely
+multi-token. Token-set top-k coverage is retained only as a secondary basic
+metric. Primary vanilla J-lens rank and margin require frozen single-token
+aliases. Hard decision-program review must additionally freeze useful operands,
+entities, phrase aliases, and decoys. If derived targets remain predominantly
+multi-token, the pre-registered next branch is concept-set aggregation followed
+by phrase/sequence functional lens; first-token rank is not an allowed proxy.
