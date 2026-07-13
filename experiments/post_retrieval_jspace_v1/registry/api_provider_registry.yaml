@@ -16,8 +16,7 @@ providers:
     max_token_field: max_tokens
 
   - id: kimi_k25
-    model_env: KIMI_MODEL
+    model: kimi-k2.5
     base_url_env: KIMI_BASE_URL
     api_key_env: KIMI_API_KEY
     max_token_field: max_tokens
-
