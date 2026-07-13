@@ -1,0 +1,31 @@
+{
+  "cache_id": "local-v1",
+  "status": "complete",
+  "project_commit": "de4918464b89dbb9924394ef16b6ffb6b5e7be99",
+  "scope": "oracle-hard",
+  "limit": null,
+  "seed": 0,
+  "record_count": 194,
+  "model": {
+    "repository": "0k9d0h1/reranker3b-sft",
+    "revision": "cdf46c85892ebb715cbd6a0b582af35ad5caa96b",
+    "local_path": "/home/orion/research_data/reranker3b-sft",
+    "file_manifest_sha256": "f15bbf00b6800800cd769b97b55c03dd5af7adc3f544a51d92e1248ab58926ee"
+  },
+  "decoding": {
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "max_new_tokens": 1024
+  },
+  "prompt_source": "other_repo_references/VerbalR3/utils/reranker_server.py",
+  "prompt_sha256": "ac2d19460bc55dd6d36a1164b047bc423e8e18bc9d91e49e54c9975b739d80d0",
+  "config_sha256": "618e2519928456e9772d38f2203dfeaf5b9eab56b3da02f6604f74659a7dc8cb",
+  "dataset_sha256": {
+    "full": "ab6eaa9df62fb4162e0f5eecd98768a7e3ae721e32d2db2cf227ff41e3295762",
+    "hard": "acd35f2a172a9741d970d2cf21184ff0af8d79a8bf59967fc8aa33d619f6af4a"
+  },
+  "work_sha256": "51bedce4eabcda0c7aad8961f607d690db59bcdc5f105a8980cd0e2969d741e4",
+  "annotations_sha256": "11f78d25f1142fa4839ab58452141129b3f431707d8f43e56c672339a1436eeb",
+  "started_at": "2026-07-12T22:10:43.377141+08:00",
+  "finished_at": "2026-07-12T23:35:00.930356+08:00"
+}
