@@ -54,3 +54,15 @@ Its first prompt completed in 150 seconds, matching the `dim_batch=2` probe,
 while the process used approximately 19.3 GiB according to `nvidia-smi` and
 drew approximately 406 W. This first-prompt parity is the operational gate that
 distinguishes the recovered run from the failed residency-thrashing run.
+
+## RP-002: Qwen2.5-7B 4090 Resource Probe
+
+Date: 2026-07-13
+
+Before its formal n256 fit, Qwen2.5-7B-Instruct completed a one-prompt probe
+with BF16 weights, all 27 source layers, a 256-token window, and
+`dim_batch=4`. The prompt completed in 105.38 seconds. Peak allocated memory
+was 18.91 GiB and peak reserved memory was 19.13 GiB; the GPU drew
+approximately 444 W without a new residency error. The formal model-specific
+configuration therefore uses `dim_batch=4`, with an estimated n256 duration
+of approximately 7.5 hours.

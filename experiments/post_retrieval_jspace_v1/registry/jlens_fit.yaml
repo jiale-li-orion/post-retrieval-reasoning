@@ -11,6 +11,8 @@ artifact_dtype: float16
 model_overrides:
   qwen3_8b_ms:
     dim_batch: 2
+  qwen2_5_7b_instruct:
+    dim_batch: 4
 stability:
   nested_counts: [256, 512]
   evaluation_prompt_offset: 512
