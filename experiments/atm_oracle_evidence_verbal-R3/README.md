@@ -1,6 +1,12 @@
 # ATM-Bench Verbal Annotation 实验
 
-正式协议见 [`PROTOCOL.md`](PROTOCOL.md)。实验固定 ATM-Bench 的 Oracle/NIAH evidence，只测试在 SGM 中加入 Verbal-R3 annotation 后的回答表现。
+该目录是早期 Verbal Annotation pipeline 和可复用接口，不再是顶层正式实验
+协议。当前协议、condition contract、canonical cache 与正式运行状态统一由
+[`../post_retrieval_jspace_v1/`](../post_retrieval_jspace_v1/) 管理。
+
+本模块固定 ATM-Bench 的 Oracle/NIAH evidence，只测试在 SGM 中加入
+Verbal-R3 annotation 后的回答表现；不测 retrieval 或 top-k。这里的旧运行
+命令用于模块复现和 smoke，不应直接作为当前正式 E1 运行入口。
 
 ## 代码结构
 

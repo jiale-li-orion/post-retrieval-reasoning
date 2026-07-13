@@ -239,3 +239,29 @@ refuse to run until all 31 decision programs are explicitly marked `frozen` by
 human review. If the expressibility audit finds that fewer than 70% of Hard
 questions have at least one A/B mechanism-relevant target, the next required
 branch is phrase or concept-set support, not first-token substitution.
+
+## 12. Observed Implementation State (2026-07-13)
+
+This section records implementation outcomes and does not modify the frozen
+experimental contract.
+
+- Machine enrichment completed for all 31 Hard decision-program drafts. The
+  current editable packet is
+  `/home/orion/research_artifacts/decision_program_review/hard31-v2-enriched-review/`.
+- The target expressibility audit found at least one A/B mechanism-relevant
+  target for 9/31 questions (`29.03%`). Counts over all drafted targets are
+  A=21, B=0, C=141, D=91, E=88, and F=33. The pre-registered phrase/sequence
+  extension is therefore required before formal trajectories.
+- No decision program is frozen. Formal gold, operand, intermediate, decoy,
+  and abstention trajectories remain blocked.
+- Qwen3-VL-2B Hard C3-C6 control inference completed 31/31 rows per condition.
+  Evaluation and `open_end` judge stages remain separate and pending.
+- The local canonical VA cache is paused at 2,727 complete rows and remains
+  resumable. This row count is operational state, not a frozen scientific
+  artifact hash.
+- Complete GPT-5-mini evaluations of the legacy MiMo V2.5 Hard SGM/Raw Oracle
+  predictions are reference-only behavior supplements. They are not formal API
+  VA conditions and do not enter paired mechanism claims.
+- The partial Qwen3-8B Hard C0 preflight is invalid for E1 because native
+  reasoning exhausted the answer budget before emitting a final answer. Its
+  reasoning-output contract must be frozen before a new run.

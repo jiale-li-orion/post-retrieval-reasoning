@@ -1,8 +1,8 @@
 # J-lens 夜间运行手册
 
-本文档用于服务器 GPU 空闲时继续运行 J-lens calibration。所有命令都在远程
-WSL 服务器执行，不在本地笔记本执行。J-lens 不使用 answer judge，也不需要
-配置任何 API key。
+本文档用于检查和恢复已批准的 J-lens calibration。所有命令都在远程 WSL
+服务器执行，不在本地笔记本执行。J-lens 不使用 answer judge，也不需要配置
+任何 API key。当前没有获准自动启动的新 fit；不要把本手册当成夜间批量队列。
 
 ## 1. 登录与进入项目
 
@@ -34,16 +34,23 @@ experiments/post_retrieval_jspace_v1/scripts/check_jlens_status.sh
 - `status=complete`：lens 和 manifest 已完整落盘；
 - `Latest progress`：最近完成到第几个 prompt。
 
-当前正在运行的任务应为：
+截至 2026-07-13 的冻结状态：
 
 ```text
-qwen3_vl_2b_instruct / wikitext103-n512-v1
+Qwen3-VL-2B n256: complete, selected
+Qwen3-VL-2B n512: complete
+Qwen3-VL-2B stability: passed
+Qwen3-8B n256: complete, exploratory; nested stability not run
+Qwen2.5-7B: paused at atomic prompt-64 checkpoint
+DeepSeek-R1-Distill-Llama-8B: not fit
+Qwen3-VL-8B: not fit
 ```
 
-只要它仍显示为 `running`，不要启动其他 GPU 实验。运行脚本自身也会检测并
-拒绝并发。
+当前 GPU 队列没有活动进程。Qwen3-VL-2B C3-C6 behavior inference 已全部
+完成 31/31。下一步优先完成其 judge、decision-program 人工冻结和
+phrase/sequence readout 设计；未获人工批准前不要启动新模型 fit。
 
-## 3. Qwen3-VL-2B n512 完成后运行 Stability Gate
+## 3. 已完成的 Qwen3-VL-2B Stability Gate
 
 确认以下两个 fit 都显示 `status=complete`：
 
@@ -52,7 +59,9 @@ qwen3_vl_2b_instruct/wikitext103-n256-v2
 qwen3_vl_2b_instruct/wikitext103-n512-v1
 ```
 
-然后执行：
+该 gate 已完成，结果为 matrix cosine median `0.9999695`、top-25 overlap
+median `0.96`，因此首轮 ATM readout 选择 n256。只有需要验证产物完整性时才
+重新读取报告；不要覆盖原目录。复现命令为：
 
 ```bash
 experiments/post_retrieval_jspace_v1/scripts/run_jlens_stability.sh \
@@ -87,16 +96,16 @@ matrix cosine median >= 0.98
 top-25 overlap median >= 0.90
 ```
 
-选择规则：
+冻结选择规则为：
 
 - `gate_pass: true`：其余模型使用 `N=256`；
 - `gate_pass: false`：其余模型使用 `N=512`；
 - stability 命令报错或字段缺失：停止，不自行选择 N。
 
-## 4. 依次运行其余四个模型
+## 4. 其余模型当前暂停
 
-以下命令中的 `N` 必须替换为上一节确定的 `256` 或 `512`。每次只运行一个
-命令，前一个完成后再次执行状态检查，再运行下一个。
+以下命令仅供 Gate C review 批准扩模型后使用。当前不得执行。获批后 `N`
+使用 256，并且每次只运行一个命令。
 
 ### Qwen3-8B-ms
 
@@ -126,9 +135,10 @@ experiments/post_retrieval_jspace_v1/scripts/run_jlens_fit.sh \
   qwen3_vl_8b_instruct N wikitext103-nN-v1
 ```
 
-建议先运行三个 7B/8B 文本模型，最后运行 Qwen3-VL-8B。8B 模型的正式
-Jacobian fit 尚未做完整资源测量；若发生 CUDA OOM，停止并保留日志，不要改成
-4-bit，不要减层，不要自行修改 `dim_batch`。
+Qwen3-8B 已通过一提示资源 probe，并使用 `dim_batch=2` 完成 n256；它还没有
+n512 或 nested stability。Qwen2.5-7B 使用 `dim_batch=4`，现有 prompt-64
+checkpoint 必须恢复而非重算。其他模型若发生 CUDA OOM，停止并保留日志，
+不要改成 4-bit、减层或自行修改协议参数。
 
 ## 5. 运行中查看进度
 
@@ -202,7 +212,7 @@ tmux attach -t jlens
 model weights: BF16
 source layers: final target 之前的全部 residual layers
 final layer readout: identity
-dim_batch: 8
+dim_batch: 8 (Qwen3-8B override: 2; Qwen2.5-7B override: 4)
 max_seq_len: 256
 skip_first: 16
 checkpoint_every: 8 prompts

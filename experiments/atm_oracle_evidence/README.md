@@ -1,6 +1,30 @@
-# ATM-Bench Oracle Evidence 实验记录
+# ATM-Bench Oracle Evidence 历史 Pilot
 
-## 实验结果
+该目录保留 MiMo V2.5 在 ATM-Bench Hard 上的 SGM/Raw oracle predictions、
+早期 DeepSeek judge 和 failure analysis。它不是当前正式实验线；完整
+GPT-5-mini 补评结果是该 pilot 的当前权威评分记录。
+
+## 当前权威评分
+
+两组冻结 predictions 均使用 ATM 官方 evaluator，`open_end` 使用
+GPT-5-mini、`reasoning_effort=minimal`，无 fallback。完整快照位于：
+
+```text
+/home/orion/research_artifacts/frozen_behavior/mimo-v25-legacy-oracle-v1/
+```
+
+| 指标 | SGM Oracle | Raw Oracle | Delta |
+|------|-----------:|-----------:|------:|
+| ATM 总分 | 44.08% | 58.11% | +14.03 |
+| list_recall ATM | 72.20% | 91.78% | +19.58 |
+| number ATM | 16.67% | 16.67% | 0 |
+| open_end ATM | 30.77% | 46.15% | +15.38 |
+
+两组均完成 31/31，其中各含 13 道 `open_end`；无 API failure、fallback 或
+模型标识不一致。仓库内旧 `eval/atm_gpt-5-mini.json` 只覆盖 18 道确定性题，
+不能作为完整评分使用。
+
+## 早期 DeepSeek Pilot
 
 MiMo-V2.5 在 ATM-Bench-Hard（31 题）上的 Oracle Evidence 对比，judge: DeepSeek V4 Flash。
 
@@ -12,17 +36,17 @@ MiMo-V2.5 在 ATM-Bench-Hard（31 题）上的 Oracle Evidence 对比，judge: D
 | number ATM | 16.7% | 16.7% | 0 |
 | open_end ATM | 23.1% | 61.5% | +38.4 |
 
-### 关键发现
+### 当时的观察
 
-1. **view 压缩是 open_end 的主要瓶颈**：SGM 的 batch_fields 缺少 event_name、conference_name 等字段，模型只能输出时间戳 ID 而不是会议名。Raw 给原图后 open_end 从 23.1% 跳到 61.5%。
+1. **SGM/Raw 差异集中在 open_end 与 list_recall**：具体字段缺失只能作为 failure-case 假设，不能仅凭 aggregate 分数断言主因。
 2. **list_recall 也有显著提升**：Raw 能看到原图所以召回更全（91.8% vs 72.2%）。
-3. **number ATM 完全没变**：不管给原图还是压缩字段，数值推理都是 16.7%。这是纯粹的 decoder 瓶颈——模型不会加法、不会日期推导。
+3. **number ATM 完全没变**：不管给原图还是压缩字段，数值题都是 16.7%。这提示 post-access evaluation failure，但不能仅凭该结果排除 view insufficiency。
 
-### 对论文框架的验证
+### 在当前论文中的用途
 
-SGM 的失败同时包含：
-- **view-use failure**（open_end、list_recall）：证据存在但 view 丢失了关键字段
-- **decoder-use failure**（number）：view 充分但模型无法执行聚合计算
+这组 pilot 用于提出并筛选 view insufficiency、binding/composition failure 和
+decoder-use failure 假设，不作为这些机制的验证。正式机制诊断在
+`../post_retrieval_jspace_v1/` 中进行。
 
 ## 目录结构
 

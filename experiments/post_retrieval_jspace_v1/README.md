@@ -11,24 +11,23 @@ Read these documents in order:
 1. `../../FINAL_EXPERIMENTAL_PROTOCOL_v1.0.md`
 2. `../../EXPERIMENT_DESIGN_AND_EXECUTION_PLAN_v1.0.md`
 3. `PROTOCOL_ADDENDUM_v1.0.md`
-4. `OPENCODE_SETUP.md`
 
 If the addendum conflicts with either v1.0 document, the addendum governs the
 items it explicitly changes. Everything else remains frozen by the final
-protocol.
+protocol. `OPENCODE_SETUP.md` is a completed historical handoff, not an active
+authority or execution queue.
 
 ## Current Stage
 
 - Phase 0: code/model/data bootstrap complete
 - Gate A: passed on 2026-07-12
-- Phase 2 canonical VA cache: `canonical-e1/local-v1` is running locally with
-  resume and a 5-second cooling interval. The cache is append-only and remains
-  outside Git. The interval was raised from 3 seconds after the notebook GPU
+- Phase 2 canonical VA cache: `canonical-e1/local-v1` is paused locally at
+  2,727 complete JSONL rows. It is append-only and resumable. The last active
+  configuration used a 5-second cooling interval after the notebook GPU
   approached the 82 C thermal stop line.
-- E1 open-weight control inference: Qwen3-VL-2B Hard C3-C5 is complete and C6
-  is running on the remote 4090 as the final item in a fail-fast serial queue.
-  These NIAH controls reuse the exact generation path of the frozen
-  Qwen3-VL-2B C0/C1 runs and require neither VA nor a judge.
+- E1 open-weight control inference: Qwen3-VL-2B Hard C3-C6 is complete at
+  31/31 rows per condition. These NIAH controls reuse the exact generation
+  path of the frozen Qwen3-VL-2B C0/C1 runs. Their judge stage is still pending.
 - Qwen3-VL-2B Hard C0/C1 primary judge: complete as a Phase 1 behavior
   closure. This is not yet Gate B because the full E1 matrix, API extensions,
   and secondary judge agreement remain incomplete.
@@ -58,8 +57,9 @@ Gate A verified state as of 2026-07-12:
   `Qwen2.5-7B-Instruct`, `Qwen3-VL-2B-Instruct`, and
   `Qwen3-VL-8B-Instruct`; it supersedes the earlier Mistral slot.
 - The WikiText-103 source revision and five model-specific 512-window corpora
-  are frozen and hash-registered. Their first 256 rows are the nested stability
-  subsets. No lens fit has completed yet.
+  were frozen and hash-registered at Gate A. Their first 256 rows are the
+  nested stability subsets; lens results completed after that Gate A snapshot
+  are listed immediately below.
 - Qwen3-VL-2B completed both nested fits. Its matrix-cosine median is
   `0.9999695`, held-out top-25 overlap median is `0.96`, and the frozen
   stability gate passed. The n256 lens is the selected first ATM readout lens.
@@ -84,10 +84,10 @@ Gate A verified state as of 2026-07-12:
 - ATM Full and Hard use disjoint QA identifiers. Hard C1 therefore uses the
   independently frozen 194-row `oracle-hard/local-v1` annotation cache, not
   the 1,457-row Full cache. All 194 Hard evidence pairs and SGM hashes match.
-- The Hard 31 decision-program review packet is generated under
-  `/home/orion/research_artifacts/decision_program_review/hard31-v1/`.
-  Formal trajectories remain blocked until every program is human-reviewed
-  and marked `frozen`.
+- The original Hard-31 packet under
+  `/home/orion/research_artifacts/decision_program_review/hard31-v1/` is
+  superseded by the enriched v2 review packet listed below. Neither version is
+  frozen.
 - Five model-specific sets of 32 held-out stability prompts are frozen at
   stream offset 512. The judge-free matrix-cosine and final-position top-25
   overlap evaluator is implemented and tested.
@@ -124,11 +124,12 @@ Gate A verified state as of 2026-07-12:
 
 ## Machine Roles
 
-- Remote WSL `/home/lab/lab` with RTX 4090: the only code-writing environment;
-  open-weight behavior, canonical Verbal Annotation cache, J-lens fitting,
-  readout, and later causal experiments.
-- Local notebook: checks out a frozen commit and runs API answerers and the
-  official ATM judge only. API keys stay in local environment variables.
+- Remote WSL `/home/lab/lab` with RTX 4090: primary open-weight execution
+  environment for behavior inference, J-lens fitting/readout, and later causal
+  experiments.
+- Local notebook: maintains the synchronized experiment branch and runs API
+  answerers, the official ATM judge, and the thermally throttled canonical VA
+  cache. API keys stay in local environment variables.
 - GitHub branch: `experiment/post-retrieval-jspace-v1`.
 
 Large data, model weights, predictions, annotation caches, lens artifacts, and
@@ -219,15 +220,17 @@ cd /home/lab/lab/post-retrieval-reasoning
 # Read-only status.
 experiments/post_retrieval_jspace_v1/scripts/check_jlens_status.sh
 
-# After both Qwen3-VL-2B fits are complete.
+# Reproduce the already completed Qwen3-VL-2B stability report only when needed.
 experiments/post_retrieval_jspace_v1/scripts/run_jlens_stability.sh \
   qwen3_vl_2b_instruct wikitext103-n256-v2 wikitext103-n512-v1 \
   stability-n256-n512-v1
 ```
 
-The stability report decides whether the remaining models use 256 or 512
-prompts. Substitute the approved count for `N` below and run one command at a
-time:
+Qwen3-VL-2B passed the frozen stability gate and selected n256. Qwen3-8B has
+an exploratory n256 lens but no nested stability result; Qwen2.5-7B is paused
+at prompt 64. Remaining fits are intentionally paused until the current ATM
+behavior/readout review authorizes model expansion. The commands below are
+reference commands, not the current next action:
 
 ```bash
 experiments/post_retrieval_jspace_v1/scripts/run_jlens_fit.sh \

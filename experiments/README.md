@@ -6,30 +6,37 @@
 
 | ID | 状态 | 作用 | 是否论文主实验 | 可信度 |
 |---|---|---|---|---|
-| `atm_oracle_evidence` | 已完成 | ATM-Bench Hard 上的 SGM vs Raw oracle pilot，用来定位 view-use / decoder-use failure | 否，作为动机和误差分析素材 | 可复用，但不是正式主结果 |
-| `atm_oracle_evidence_verbal-R3` | 可复用模块 | 生成 query-conditioned Verbal Annotation；供正式实验线复用 | 否，不再独立承担主实验 | 代码已检查，尚需解耦 canonical cache |
-| `post_retrieval_jspace_v1` | Phase 0 | E1 行为图谱、J-lens/J-space tracing、bridge 与 gated causal repair | 是 | v1.0 协议已冻结，环境准备中 |
+| `atm_oracle_evidence` | 已完成（历史 pilot） | ATM-Bench Hard 上的 SGM vs Raw oracle 对照，用来定位 view-use / decoder-use failure | 否，作为动机和误差分析素材 | predictions 可复用；当前以 GPT-5-mini 补评结果为准 |
+| `atm_oracle_evidence_verbal-R3` | 可复用模块 | 生成 query-conditioned Verbal Annotation；供正式实验线复用 | 否，不再独立承担主实验 | 官方 prompt/interface 已核对；canonical cache 由正式实验线管理 |
+| `post_retrieval_jspace_v1` | Phase 1 已闭合，Gate C 进行中 | E1 行为图谱、J-lens/J-space tracing、bridge 与 gated causal repair | 是 | Qwen3-VL-2B C0/C1 行为锚点与首个稳定 lens 已完成 |
 
 ## 已完成结果
 
-`atm_oracle_evidence` 已跑完：
+`atm_oracle_evidence` 已跑完。完整 GPT-5-mini 官方协议补评是当前主记录；
+早期 DeepSeek 结果仅保留为 secondary pilot：
 
-| Run | Split | Answerer | Evidence | Judge | ATM | EM |
-|---|---|---|---|---|---:|---:|
-| `mimo_v25_sgm_hard` | Hard 31 | MiMo V2.5 | SGM oracle | DeepSeek V4 Flash | 40.85 | 19.35 |
-| `mimo_v25_raw_hard` | Hard 31 | MiMo V2.5 | Raw oracle | DeepSeek V4 Flash | 64.56 | 38.71 |
+| Run | Evidence | Judge | ATM | number | list_recall | open_end |
+|---|---|---|---:|---:|---:|---:|
+| `mimo_v25_sgm_hard` | SGM oracle | GPT-5-mini | 44.08 | 16.67 | 72.20 | 30.77 |
+| `mimo_v25_raw_hard` | Raw oracle | GPT-5-mini | 58.11 | 16.67 | 91.78 | 46.15 |
+
+两组均覆盖 Hard 31/31，其中各含 13 道 `open_end`；无 judge failure 或
+fallback。冻结结果位于
+`/home/orion/research_artifacts/frozen_behavior/mimo-v25-legacy-oracle-v1/`，
+不提交完整 predictions。
 
 关键观察：
 
-- Raw 相比 SGM 在 `open_end` 和 `list_recall` 上提升明显，说明 SGM view 丢掉了一部分决策所需信息。
+- Raw 相比 SGM 在 `open_end` 和 `list_recall` 上提升明显，说明 SGM view 可能丢掉了一部分决策所需信息；该 pilot 不能单独定位每道题的因果机制。
 - `number` 在 Raw 和 SGM 下都是 16.7%，说明一部分失败不是 evidence access，而是 decoder/evaluation 能力问题。
 - 这组结果用于形成理论假设和 failure taxonomy，不作为最终 Verbal Annotation 主实验结论。
 
 ## 当前正式实验
 
-`post_retrieval_jspace_v1` 是当前主线。第一实施周期按 Gate A、B、C
-推进，并在 Gate C 强制停止人工 review。旧 VA pipeline 只作为该主线的
-external evidence intervention 模块。
+`post_retrieval_jspace_v1` 是当前主线。Gate A 已通过，Qwen3-VL-2B Hard
+C0/C1 的 GPT-5-mini 行为闭环已完成，C3-C6 NIAH control inference 均完成
+31/31。Gate B 尚未通过；第一实施周期仍在 Gate C 停止并等待人工 review。
+旧 VA pipeline 只作为该主线的 external evidence intervention 模块。
 
 其中 VA 子实验保持：
 
@@ -103,9 +110,13 @@ controlled SGM evidence
 - `experiments/atm_oracle_evidence/.venv`
 - 空的 `notes/`、`eval/`、`reports/`、`runs/` 占位目录
 
-## 下一步
+## 当前待办
 
-1. OpenCode 按 `post_retrieval_jspace_v1/OPENCODE_SETUP.md` 准备远程环境和资产。
-2. Codex 验收 setup report 后实现 WP0-WP3，并通过 Gate A。
-3. 生成 canonical VA cache，完成 E1 与 Gate B。
-4. 完成 target、J-lens baseline 与 Gate C review bundle 后停止。
+1. 对已冻结的 Qwen3-VL-2B C3-C6 predictions 分阶段执行 ATM evaluator 与
+   GPT-5-mini `open_end` judge，不重跑 inference。
+2. canonical VA cache 从本地 2727 条完整记录继续生成；恢复前先复核唯一键、
+   尾行和温控参数。
+3. 人工审核并冻结 Hard 31 decision programs。目前仅 9/31 题具有 A/B 类
+   机制 target，必须先设计 phrase/sequence readout extension。
+4. Gate C review 前暂停新增模型拟合和正式 trajectory；Qwen3-8B 的行为
+   preflight 还需先冻结 reasoning-output contract。

@@ -1,5 +1,10 @@
 # OpenCode Setup Handoff
 
+> Historical setup artifact. Gate A passed on 2026-07-12 and this handoff is
+> complete. Do not rerun downloads, recreate environments, or treat the tasks
+> below as the current execution queue. Current state is maintained in
+> `README.md`; scientific constraints remain in the protocol and addendum.
+
 ## Scope
 
 OpenCode performs environment, authentication, repository, model, and dataset
