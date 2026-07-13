@@ -21,8 +21,18 @@ protocol.
 
 - Phase 0: code/model/data bootstrap complete
 - Gate A: passed on 2026-07-12
-- Phase 2 canonical VA cache: preflight passed; formal cache not generated
-- Gate B: not started
+- Phase 2 canonical VA cache: `canonical-e1/local-v1` is running locally with
+  resume and a 5-second cooling interval. The cache is append-only and remains
+  outside Git. The interval was raised from 3 seconds after the notebook GPU
+  approached the 82 C thermal stop line.
+- E1 open-weight control inference: Qwen3-VL-2B Hard C3-C5 is complete and C6
+  is running on the remote 4090 as the final item in a fail-fast serial queue.
+  These NIAH controls reuse the exact generation path of the frozen
+  Qwen3-VL-2B C0/C1 runs and require neither VA nor a judge.
+- Qwen3-VL-2B Hard C0/C1 primary judge: complete as a Phase 1 behavior
+  closure. This is not yet Gate B because the full E1 matrix, API extensions,
+  and secondary judge agreement remain incomplete.
+- Gate B: not passed
 - Gate C: in progress; Qwen3-VL-2B calibration stability passed
 - E2-E4: blocked until explicit human approval after Gate C
 
@@ -89,6 +99,28 @@ Gate A verified state as of 2026-07-12:
   blocked until the drafts are reviewed and frozen.
 - API inference for MiMo V2.5, MiniMax M3, and Kimi K2.5 is implemented as a
   resumable, judge-free local stage restricted to Hard C1/C7-C10.
+- GPT-5-mini primary judging for the frozen Qwen3-VL-2B Hard C0/C1 predictions
+  completed with fallback disabled and no failed rows. C0 ATM is `0.3484`; C1
+  ATM is `0.2007`. The decline comes entirely from `list_recall`. The paired
+  behavior report is tracked at
+  `reports/behavior_pair_qwen3vl2b_hard_c0_c1_primary_v2/`.
+- Hard-31 decision-program enrichment is complete. The editable review packet
+  is under
+  `/home/orion/research_artifacts/decision_program_review/hard31-v2-enriched-review/`.
+  Its Qwen3-VL-2B expressibility audit found A/B mechanism targets for only
+  9/31 questions (`29.0%`), so the pre-registered phrase/sequence extension is
+  triggered. Formal gold/operand/intermediate trajectories remain blocked until
+  all 31 entries are human-reviewed and marked `frozen` and the extension is
+  designed.
+- Legacy MiMo V2.5 Hard Oracle SGM and Raw predictions now have complete
+  GPT-5-mini primary evaluations in a frozen local snapshot. Their ATM scores
+  are `0.4408` and `0.5811`, respectively; both evaluations cover 31/31 rows
+  with no judge failure or fallback.
+- A Qwen3-8B Hard C0 preflight was stopped after eight rows because native
+  reasoning repeatedly consumed the full 1,000-token answer budget before a
+  final answer was emitted. The partial artifact is invalid for formal E1 and
+  must not be resumed until the reasoning-output contract is frozen; see
+  `BEHAVIOR_INCIDENTS.md`.
 
 ## Machine Roles
 

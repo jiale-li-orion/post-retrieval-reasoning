@@ -1,9 +1,17 @@
+from types import SimpleNamespace
+
 from targets.builder import (
     build_decision_program_draft,
     build_target_rows,
     build_target_strings,
     tokenize_aliases,
 )
+from targets.enrich_decision_programs import (
+    decision_program_response_format,
+    merge_enrichment,
+    request_parsed_enrichment,
+)
+from targets.audit_expressibility import classify_text_target
 
 
 class FakeTokenizer:
@@ -45,6 +53,133 @@ def test_decision_program_is_explicitly_unreviewed() -> None:
     assert draft["review_status"] == "draft"
     assert draft["required_evidence_ids"] == ["e1"]
     assert draft["derived_targets"] == ["answer_0"]
+
+
+def test_enriched_program_remains_unreviewed_and_preserves_frozen_fields() -> None:
+    original = {
+        "qa_id": "q1",
+        "qtype": "number",
+        "review_status": "draft",
+        "required_evidence_ids": ["e1"],
+        "final_answer": "3",
+        "targets": [{"target_id": "answer_0"}],
+    }
+    enrichment = {
+        "required_evidence_ids": ["e1"],
+        "entities": [{"name": "hotel", "evidence_ids": ["e1"]}],
+        "attributes": [],
+        "operands": [{"operand_id": "o1", "value": "1", "evidence_ids": ["e1"]}],
+        "operators": [{"operator": "sum", "inputs": ["o1"], "output": "i1"}],
+        "intermediates": [{"intermediate_id": "i1", "value": "3"}],
+        "bindings": [],
+        "decoys": [],
+        "evidence_provenance": [{"evidence_id": "e1", "supports": ["o1"]}],
+    }
+
+    result = merge_enrichment(original, enrichment, oracle_evidence_ids={"e1"})
+
+    assert result["qa_id"] == "q1"
+    assert result["final_answer"] == "3"
+    assert result["targets"] == original["targets"]
+    assert result["review_status"] == "draft_enriched"
+    assert result["operands"][0]["operand_id"] == "o1"
+
+
+def test_enrichment_normalizes_provenance_mapping() -> None:
+    original = {
+        "qa_id": "q1",
+        "qtype": "open_end",
+        "review_status": "draft",
+        "required_evidence_ids": ["e1"],
+        "final_answer": "x",
+        "targets": [],
+    }
+    enrichment = {
+        "required_evidence_ids": ["e1"],
+        "entities": [],
+        "attributes": [],
+        "operands": [],
+        "operators": [],
+        "intermediates": [],
+        "bindings": [],
+        "decoys": [],
+        "evidence_provenance": {"e1": ["answer"]},
+    }
+
+    result = merge_enrichment(original, enrichment, oracle_evidence_ids={"e1"})
+
+    assert result["evidence_provenance"] == [
+        {"evidence_id": "e1", "supports": ["answer"]}
+    ]
+
+
+def test_expressibility_distinguishes_single_token_alias_and_phrase() -> None:
+    tokenizer = FakeTokenizer()
+
+    assert classify_text_target("hotel", tokenizer, sequence_level=False) == "A"
+    assert classify_text_target("Hotel", tokenizer, sequence_level=False) == "B"
+    assert classify_text_target("long phrase", tokenizer, sequence_level=False) == "C"
+    assert classify_text_target("long phrase", tokenizer, sequence_level=True) == "D"
+
+
+def test_decision_program_response_format_requires_all_fields() -> None:
+    response_format = decision_program_response_format()
+
+    assert response_format["type"] == "json_schema"
+    assert set(response_format["schema"]["required"]) == {
+        "required_evidence_ids",
+        "entities",
+        "attributes",
+        "operands",
+        "operators",
+        "intermediates",
+        "bindings",
+        "decoys",
+        "evidence_provenance",
+    }
+
+
+def test_enrichment_retries_malformed_structured_output() -> None:
+    valid = {
+        "required_evidence_ids": ["e1"],
+        "entities": [],
+        "attributes": [],
+        "operands": [],
+        "operators": [],
+        "intermediates": [],
+        "bindings": [],
+        "decoys": [],
+        "evidence_provenance": [],
+    }
+
+    class Responses:
+        def __init__(self):
+            self.calls = 0
+
+        def create(self, **kwargs):
+            self.calls += 1
+            self.last_kwargs = kwargs
+            text = '{"required_evidence_ids": ["e1"]' if self.calls == 1 else __import__("json").dumps(valid)
+            return SimpleNamespace(output_text=text, model="gpt", usage=None)
+
+    responses = Responses()
+    client = SimpleNamespace(responses=responses)
+
+    response, enrichment, failures = request_parsed_enrichment(
+        client,
+        model="gpt",
+        prompt="prompt",
+        oracle_evidence_ids={"e1"},
+        max_retries=2,
+        delay=0,
+    )
+
+    assert response.model == "gpt"
+    assert enrichment == valid
+    assert responses.calls == 2
+    assert responses.last_kwargs["max_output_tokens"] == 8000
+    assert failures[0]["error_type"] == "ValueError"
+    assert len(failures[0]["output_sha256"]) == 64
 
 
 def test_target_rows_record_copyability_and_each_model_tokenization() -> None:

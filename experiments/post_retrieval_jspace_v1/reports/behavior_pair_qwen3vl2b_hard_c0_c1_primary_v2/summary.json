@@ -1,0 +1,91 @@
+{
+  "report_id": "qwen3vl2b-hard-c0-c1-primary-v2",
+  "status": "complete_primary_judge",
+  "qa_count": 31,
+  "C0": {
+    "count": 31,
+    "mean": 0.34838709677419355,
+    "perfect": 10
+  },
+  "C1": {
+    "count": 31,
+    "mean": 0.20068238213399503,
+    "perfect": 5
+  },
+  "by_qtype": {
+    "list_recall": {
+      "C0": {
+        "count": 12,
+        "mean": 0.9,
+        "perfect": 10
+      },
+      "C1": {
+        "count": 12,
+        "mean": 0.5184294871794871,
+        "perfect": 5
+      }
+    },
+    "number": {
+      "C0": {
+        "count": 6,
+        "mean": 0.0,
+        "perfect": 0
+      },
+      "C1": {
+        "count": 6,
+        "mean": 0.0,
+        "perfect": 0
+      }
+    },
+    "open_end": {
+      "C0": {
+        "count": 13,
+        "mean": 0.0,
+        "perfect": 0
+      },
+      "C1": {
+        "count": 13,
+        "mean": 0.0,
+        "perfect": 0
+      }
+    }
+  },
+  "transition_counts": {
+    "stable_failure": 21,
+    "degradation": 5,
+    "stable_success": 5
+  },
+  "behavior_stratum_counts": {
+    "stable_non_abstention": 19,
+    "error_to_abstain": 3,
+    "partial_to_abstain": 1,
+    "correct_to_abstain": 3,
+    "non_abstention_degradation": 2,
+    "stable_abstention": 3
+  },
+  "exact_unknown_transition_counts": {
+    "N->N": 21,
+    "N->U": 8,
+    "U->U": 2
+  },
+  "atm_abstention_transition_counts": {
+    "N->N": 21,
+    "N->U": 7,
+    "U->U": 3
+  },
+  "negative_delta_count": 6,
+  "positive_delta_count": 0,
+  "c1_exact_unknown_count": 10,
+  "c1_atm_abstention_count": 10,
+  "broad_only_review_count": 1,
+  "mean_prompt_token_delta": 510.7096774193548,
+  "inputs": {
+    "c0_predictions_sha256": "5904069c9c245b1ff24247c0cfcedebbb2b9c4555634c581c0adfab687ae0a7c",
+    "c1_predictions_sha256": "b9f709404a40aa8332cb47aca1d2d033eb26e1e493549e23d65ac630200f4a42",
+    "c0_atm_sha256": "d4e93fcae242926ee2fefe31d4a5936f77507ce3075cb503b25049bb2ab26a5a",
+    "c1_atm_sha256": "6e1b4858659283829f453763cb9c5b643b5a423008710581501c81b7cd6a6afa",
+    "annotation_cache_sha256": "11f78d25f1142fa4839ab58452141129b3f431707d8f43e56c672339a1436eeb"
+  },
+  "paired_items_sha256": "548cf3b7230df3450d14b00265fcffe2c6c3400721b722ef1f77f98c210197ed",
+  "boundary": "Primary judge is complete. Broad-only abstention rows require explicit human review before final behavior claims."
+}

@@ -1,4 +1,5 @@
 import pytest
+from types import SimpleNamespace
 
 from behavior.run_behavior import (
     build_prediction_row,
@@ -13,9 +14,11 @@ from adapters.atm import ATMItem
 from behavior.evaluate import (
     build_evaluator_command,
     build_evaluator_environment,
+    failed_judge_rows,
     requires_llm_judge,
     select_deterministic_pairs,
 )
+from behavior.judge_preflight import normalize_accuracy, response_record
 
 
 def test_gate_a_runner_rejects_unimplemented_condition() -> None:
@@ -92,6 +95,9 @@ def test_official_evaluator_command_uses_frozen_inference_inputs(tmp_path) -> No
         eval_dir=eval_dir,
         judge_model="gpt-5-mini",
         reasoning_effort="minimal",
+        fallback_model="",
+        max_retries=3,
+        request_delay=10.0,
     )
 
     assert command[1].endswith("memqa/utils/evaluator/evaluate_qa.py")
@@ -104,7 +110,47 @@ def test_official_evaluator_command_uses_frozen_inference_inputs(tmp_path) -> No
     assert command[command.index("--output-dir") + 1] == str(eval_dir)
     assert command[command.index("--judge-model") + 1] == "gpt-5-mini"
     assert command[command.index("--judge-reasoning-effort") + 1] == "minimal"
+    assert command[command.index("--judge-fallback-model") + 1] == ""
+    assert command[command.index("--judge-fallback-after-retries") + 1] == "0"
+    assert command[command.index("--judge-max-retries") + 1] == "3"
+    assert command[command.index("--max-workers") + 1] == "1"
 
+
+def test_failed_judge_rows_rejects_transport_failures_and_fallbacks() -> None:
+    rows = [
+        {"id": "ok", "qtype": "open_end", "judge_model": "gpt-5-mini:stable"},
+        {"id": "failed", "qtype": "open_end", "failed": True},
+        {"id": "fallback", "qtype": "open_end", "fallback_model_used": True},
+    ]
+    assert [row["id"] for row in failed_judge_rows(rows, "gpt-5-mini:stable")] == [
+        "failed",
+        "fallback",
+    ]
+
+
+def test_judge_preflight_records_returned_model_and_usage_without_secret() -> None:
+    response = SimpleNamespace(
+        id="resp-1",
+        model="gpt-5-mini-2026-06-01",
+        output_text='{"accuracy": true, "explanation": "match"}',
+        usage=SimpleNamespace(
+            model_dump=lambda: {"input_tokens": 10, "output_tokens": 5}
+        ),
+    )
+
+    row = response_record(response, requested_model="gpt-5-mini:stable", latency=1.2)
+
+    assert row["requested_model"] == "gpt-5-mini:stable"
+    assert row["returned_model"] == "gpt-5-mini-2026-06-01"
+    assert row["usage"]["input_tokens"] == 10
+    assert row["latency_seconds"] == 1.2
+    assert "api_key" not in row
+
+
+def test_judge_preflight_accepts_official_string_boolean() -> None:
+    assert normalize_accuracy(True) is True
+    assert normalize_accuracy("true") is True
+    assert normalize_accuracy("false") is False
 
 def test_official_evaluator_environment_exposes_atm_package(tmp_path) -> None:
     env = build_evaluator_environment(

@@ -176,3 +176,66 @@ aliases. Hard decision-program review must additionally freeze useful operands,
 entities, phrase aliases, and decoys. If derived targets remain predominantly
 multi-token, the pre-registered next branch is concept-set aggregation followed
 by phrase/sequence functional lens; first-token rank is not an allowed proxy.
+
+## 10. Phase 1 Judge Closure for Qwen3-VL-2B Hard C0/C1
+
+The v2.1 Phase 1 judge run is restricted to the already frozen
+Qwen3-VL-2B Hard C0/C1 predictions. It does not rerun inference and does not
+modify prediction artifacts.
+
+Primary judge settings:
+
+- endpoint: local `.api_run` EchoFlow Responses API proxy;
+- requested model alias: `gpt-5-mini:stable`;
+- returned model observed in smoke and formal rows: `gpt-5-mini`;
+- reasoning effort: `minimal`;
+- fallback: disabled;
+- workers: 1;
+- failed API rows are not converted into wrong answers. Any failed, fallback,
+  or wrong-model row makes the evaluation manifest incomplete.
+
+The completed primary behavior report is tracked at
+`reports/behavior_pair_qwen3vl2b_hard_c0_c1_primary_v2/`. The frozen prediction
+hashes are:
+
+- C0 predictions:
+  `5904069c9c245b1ff24247c0cfcedebbb2b9c4555634c581c0adfab687ae0a7c`;
+- C1 predictions:
+  `b9f709404a40aa8332cb47aca1d2d033eb26e1e493549e23d65ac630200f4a42`.
+
+Observed scores:
+
+- C0 ATM mean: `0.3484`;
+- C1 ATM mean: `0.2007`;
+- `list_recall`: `0.9000 -> 0.5184`;
+- `number`: `0.0000 -> 0.0000`;
+- `open_end`: `0.0000 -> 0.0000`.
+
+The paired behavior strata are:
+
+```text
+stable_non_abstention: 19
+error_to_abstain: 3
+partial_to_abstain: 1
+correct_to_abstain: 3
+non_abstention_degradation: 2
+stable_abstention: 3
+```
+
+This report is a behavior anchor only. It does not establish an internal
+mechanism, does not complete Gate B, and does not authorize formal trajectory
+claims before the Hard-31 decision programs are human-reviewed and frozen.
+
+## 11. Hard-31 Decision-Program Gate
+
+The original Hard-31 review packet remains an unreviewed draft. A new
+machine-enriched draft packet is generated under the artifact root with
+structured-output requests to `gpt-5-mini:stable`. It may populate required
+evidence, entities, attributes, operands, operators, intermediates, bindings,
+decoys, and evidence provenance, but it is still only a draft.
+
+Formal gold, operand, intermediate, decoy, and abstention trajectories must
+refuse to run until all 31 decision programs are explicitly marked `frozen` by
+human review. If the expressibility audit finds that fewer than 70% of Hard
+questions have at least one A/B mechanism-relevant target, the next required
+branch is phrase or concept-set support, not first-token substitution.

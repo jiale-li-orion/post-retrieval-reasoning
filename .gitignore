@@ -96,6 +96,7 @@ api_keys/
 .env
 .env.*
 .lab_login
+.api_run
 
 # --- Local experiment artifacts and caches ---
 research_artifacts/

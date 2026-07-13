@@ -53,6 +53,9 @@ def build_evaluator_command(
     eval_dir: Path,
     judge_model: str,
     reasoning_effort: str,
+    fallback_model: str,
+    max_retries: int,
+    request_delay: float,
 ) -> list[str]:
     return [
         sys.executable,
@@ -72,7 +75,34 @@ def build_evaluator_command(
         judge_model,
         "--judge-reasoning-effort",
         reasoning_effort,
+        "--judge-fallback-model",
+        fallback_model,
+        "--judge-fallback-after-retries",
+        "0",
+        "--judge-max-retries",
+        str(max_retries),
+        "--request-delay",
+        str(request_delay),
+        "--max-workers",
+        "1",
     ]
+
+
+def failed_judge_rows(
+    rows: list[dict[str, Any]], requested_model: str
+) -> list[dict[str, Any]]:
+    failures = []
+    for row in rows:
+        if str(row.get("qtype", "")).lower() != "open_end":
+            continue
+        if (
+            row.get("failed")
+            or row.get("error")
+            or row.get("fallback_model_used")
+            or str(row.get("judge_model", "")) != requested_model
+        ):
+            failures.append(row)
+    return failures
 
 
 def build_evaluator_environment(
@@ -91,6 +121,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--eval-id", required=True)
     parser.add_argument("--judge-model", default=DEFAULT_JUDGE_MODEL)
     parser.add_argument("--judge-reasoning-effort", default=DEFAULT_REASONING_EFFORT)
+    parser.add_argument("--judge-max-retries", type=int, default=3)
+    parser.add_argument("--request-delay", type=float, default=10.0)
     parser.add_argument("--deterministic-only", action="store_true")
     parser.add_argument(
         "--atm-root",
@@ -145,6 +177,9 @@ def main() -> int:
         eval_dir=eval_dir,
         judge_model=args.judge_model,
         reasoning_effort=args.judge_reasoning_effort,
+        fallback_model="",
+        max_retries=args.judge_max_retries,
+        request_delay=args.request_delay,
     )
     subprocess.run(
         command,
@@ -153,10 +188,23 @@ def main() -> int:
         check=True,
     )
 
+    judge_failures: list[dict[str, Any]] = []
+    if needs_judge:
+        model_tag = "".join(
+            char if char.isalnum() or char in "-_" else "_"
+            for char in args.judge_model
+        )
+        atm_path = eval_dir / f"atm_{model_tag}.json"
+        if not atm_path.is_file():
+            raise FileNotFoundError(f"official ATM output missing: {atm_path}")
+        judge_failures = failed_judge_rows(
+            json.loads(atm_path.read_text(encoding="utf-8")), args.judge_model
+        )
+
     manifest = sanitize_manifest(
         {
             "eval_id": args.eval_id,
-            "status": "complete",
+            "status": "incomplete" if judge_failures else "complete",
             "project_commit": _git_commit(PROJECT_ROOT),
             "atm_commit": _git_commit(args.atm_root),
             "inference_run": str(args.run_dir.resolve()),
@@ -179,13 +227,14 @@ def main() -> int:
             "started_at": started_at,
             "finished_at": datetime.now().astimezone().isoformat(),
             "outputs": _output_hashes(eval_dir),
+            "judge_failure_ids": [str(row.get("id")) for row in judge_failures],
         }
     )
     (eval_dir / "eval_manifest.json").write_text(
         json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
     print(eval_dir)
-    return 0
+    return 2 if judge_failures else 0
 
 
 def _git_commit(root: Path) -> str:
