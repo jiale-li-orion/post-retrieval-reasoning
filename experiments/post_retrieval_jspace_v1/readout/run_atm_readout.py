@@ -54,6 +54,21 @@ def validate_programs_frozen(
         raise ValueError(f"decision programs are not frozen: {draft}")
 
 
+def merge_target_rows(
+    automatic: list[dict[str, Any]], programs: list[dict[str, Any]]
+) -> dict[str, dict[str, Any]]:
+    """Use human-reviewed Hard targets over automatic Full targets."""
+    by_id = {str(row["qa_id"]): row for row in automatic}
+    by_id.update(
+        {
+            str(row["qa_id"]): row
+            for row in programs
+            if isinstance(row.get("targets"), list)
+        }
+    )
+    return by_id
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--model-id", required=True)
@@ -108,9 +123,9 @@ def main() -> int:
     validate_programs_frozen(
         programs, qa_ids, allow_draft=args.allow_draft_programs
     )
-    targets_by_id = {
-        str(row["qa_id"]): row for row in _load_jsonl(args.targets)
-    }
+    targets_by_id = merge_target_rows(
+        _load_jsonl(args.targets), programs
+    )
     missing_targets = [qa_id for qa_id in qa_ids if qa_id not in targets_by_id]
     if missing_targets:
         raise ValueError(f"target manifest missing QA IDs: {missing_targets}")
