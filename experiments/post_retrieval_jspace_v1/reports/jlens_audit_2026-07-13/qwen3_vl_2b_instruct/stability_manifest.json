@@ -1,0 +1,25 @@
+{
+  "evaluation_id": "stability-n256-n512-v1",
+  "status": "complete",
+  "project_commit": "de4918464b89dbb9924394ef16b6ffb6b5e7be99",
+  "model": {
+    "id": "qwen3_vl_2b_instruct",
+    "source": "huggingface",
+    "repository": "Qwen/Qwen3-VL-2B-Instruct",
+    "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+    "local_path": "/home/lab/lab/research_data/Qwen3-VL-2B-Instruct",
+    "file_manifest_sha256": "c0bd7f8073b7cdf6416ab9b2af9764e31db8d632ab90916372b949b6e3533069",
+    "architecture": "Qwen3VLForConditionalGeneration",
+    "dtype": "bfloat16",
+    "reasoning_capable": false,
+    "slot_protocol": "direct",
+    "quantized": false
+  },
+  "lens_256_sha256": "ec827d7487a40a7bea23f1ff4ecb42cad552a9df2941aa783a4a9201b3bab36f",
+  "lens_512_sha256": "1767aec3b8ce2beef7e4523807838b73a45a57e62de2bc4caf2430712a5666b3",
+  "prompts_sha256": "0f3a8e11657326e58443cfc9365ba5bcb1deb12812afb108444cc20a94a077f0",
+  "position": "last_token",
+  "top_k": 25,
+  "report_sha256": "0df154d8453b60852d84e24dc0b2d5ba82418a30d08c0879dbce451f2954968e",
+  "finished_at": "2026-07-12T19:22:56.508937+08:00"
+}
