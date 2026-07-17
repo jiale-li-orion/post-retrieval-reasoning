@@ -8,6 +8,7 @@
 |---|---|---|---|---|
 | `atm_oracle_evidence` | 已完成（历史 pilot） | ATM-Bench Hard 上的 SGM vs Raw oracle 对照，用来定位 view-use / decoder-use failure | 否，作为动机和误差分析素材 | predictions 可复用；当前以 GPT-5-mini 补评结果为准 |
 | `atm_oracle_evidence_verbal-R3` | 可复用模块 | 生成 query-conditioned Verbal Annotation；供正式实验线复用 | 否，不再独立承担主实验 | 官方 prompt/interface 已核对；canonical cache 由正式实验线管理 |
+| `atm_hard31_solvability_audit` | 已完成 evidence-only 审计与冻结模型回答复查，待人工逐题确认 | 审计官方 SGM Oracle 的 Question+Evidence 是否足以推出 gold | 否，属于 benchmark validity gate | 31/31 完整证据已冻结；复查后 C+D+E=12/31，并发现 Oracle-ID 复制捷径、prompt 输出合同干扰与 judge 理由异常 |
 | `post_retrieval_jspace_v1` | Phase 1 已闭合，Gate C 进行中 | E1 行为图谱、J-lens/J-space tracing、bridge 与 gated causal repair | 是 | Qwen3-VL-2B C0/C1 行为锚点与首个稳定 lens 已完成 |
 
 ## 已完成结果

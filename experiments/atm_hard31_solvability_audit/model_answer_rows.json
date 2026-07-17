@@ -1,0 +1,893 @@
+{
+  "summary": {
+    "dataset": "ATM-Bench Hard 31",
+    "audit_counts": {
+      "A": 10,
+      "E": 6,
+      "D": 3,
+      "C": 3,
+      "B": 9
+    },
+    "class_mean_atm_score": {
+      "A": {
+        "qwen3vl2b_sgm": 0.6,
+        "mimo_v25_sgm": 0.8424,
+        "mimo_v25_raw": 0.9757
+      },
+      "B": {
+        "qwen3vl2b_sgm": 0.3111,
+        "mimo_v25_sgm": 0.4444,
+        "mimo_v25_raw": 0.6667
+      },
+      "C": {
+        "qwen3vl2b_sgm": 0.3333,
+        "mimo_v25_sgm": 0.2051,
+        "mimo_v25_raw": 0.3077
+      },
+      "D": {
+        "qwen3vl2b_sgm": 0.0,
+        "mimo_v25_sgm": 0.0,
+        "mimo_v25_raw": 0.0
+      },
+      "E": {
+        "qwen3vl2b_sgm": 0.1667,
+        "mimo_v25_sgm": 0.1042,
+        "mimo_v25_raw": 0.2222
+      }
+    },
+    "finding_count": 8,
+    "source_runs": {
+      "qwen3vl2b_sgm": {
+        "prediction_path": "/home/orion/research_artifacts/frozen_behavior/qwen3vl2b-hard-c0-c1-v1/C0/predictions.jsonl",
+        "prediction_sha256": "5904069c9c245b1ff24247c0cfcedebbb2b9c4555634c581c0adfab687ae0a7c",
+        "evaluation_path": "/home/orion/research_artifacts/frozen_behavior/qwen3vl2b-hard-c0-c1-v1/C0/evaluations/atm-primary-gpt5mini-stable-v1/atm_gpt-5-mini_stable.json",
+        "evaluation_sha256": "d4e93fcae242926ee2fefe31d4a5936f77507ce3075cb503b25049bb2ab26a5a"
+      },
+      "mimo_v25_sgm": {
+        "prediction_path": "/home/orion/research_artifacts/frozen_behavior/mimo-v25-legacy-oracle-v1/sgm/predictions.jsonl",
+        "prediction_sha256": "eb6be94d8eaa92a90fd2d17ceeba0ecb4e8d6f1644ebfbe78410eda00a153f9b",
+        "evaluation_path": "/home/orion/research_artifacts/frozen_behavior/mimo-v25-legacy-oracle-v1/sgm/evaluations/atm-primary-gpt5mini-stable-v1/atm_gpt-5-mini_stable.json",
+        "evaluation_sha256": "d44a232d8759c71102e16bef7e106eb7a42d5f6a39fe827df774ead8550fa746"
+      },
+      "mimo_v25_raw": {
+        "prediction_path": "/home/orion/research_artifacts/frozen_behavior/mimo-v25-legacy-oracle-v1/raw/predictions.jsonl",
+        "prediction_sha256": "4db3f2603b333fb441a20766028c28fce73c62ea894055078ede4bdbca30db8f",
+        "evaluation_path": "/home/orion/research_artifacts/frozen_behavior/mimo-v25-legacy-oracle-v1/raw/evaluations/atm-primary-gpt5mini-stable-v1/atm_gpt-5-mini_stable.json",
+        "evaluation_sha256": "e7a2bcf51fdab3c8157d1ae1a8996bf1a5104c740f39ffcc968beaf12a153943"
+      }
+    },
+    "interpretation_rule": "Model answers are diagnostic observations, not labels of solvability. A correct score cannot repair missing semantics, and a wrong score does not by itself prove that an item is unsolvable."
+  },
+  "rows": [
+    {
+      "index": 1,
+      "id": "c53f6cbe-01f4-4870-8946-f761dcf1ceba",
+      "class": "A",
+      "qtype": "list_recall",
+      "question": "I really like the steel bridge in Porto. Can you help me find all the images and videos I took during my visit?",
+      "gold_answer": "20250225_173637, 20250223_132602, 20250223_130249, 20250225_141559, 20250225_141720, 20250225_142539, 20250225_150659, 20250225_184511",
+      "answers": {
+        "qwen3vl2b_sgm": {
+          "answer": "20250223_130249, 20250223_132602, 20250225_141559, 20250225_141720, 20250225_142539, 20250225_150659, 20250225_173637, 20250225_184511",
+          "atm_score": 1.0,
+          "judge_explanation": null
+        },
+        "mimo_v25_sgm": {
+          "answer": "20250223_130249, 20250223_132602, 20250225_141720, 20250225_142539, 20250225_150659, 20250225_173637, 20250225_184511",
+          "atm_score": 0.875,
+          "judge_explanation": null
+        },
+        "mimo_v25_raw": {
+          "answer": "20250223_130249, 20250223_132602, 20250225_141720, 20250225_142539, 20250225_150659, 20250225_173637, 20250225_184511",
+          "atm_score": 0.875,
+          "judge_explanation": null
+        }
+      },
+      "finding": null
+    },
+    {
+      "index": 2,
+      "id": "20242c87-f8d7-4d10-a8d0-b0d7e525b64b",
+      "class": "E",
+      "qtype": "number",
+      "question": "How much did I pay for the second hotel in my recent trip to Portugal?",
+      "gold_answer": "434.97",
+      "answers": {
+        "qwen3vl2b_sgm": {
+          "answer": "202502200013",
+          "atm_score": 0.0,
+          "judge_explanation": null
+        },
+        "mimo_v25_sgm": {
+          "answer": "445.26 EUR",
+          "atm_score": 0.0,
+          "judge_explanation": null
+        },
+        "mimo_v25_raw": {
+          "answer": "Unknown",
+          "atm_score": 0.0,
+          "judge_explanation": null
+        }
+      },
+      "finding": null
+    },
+    {
+      "index": 3,
+      "id": "de07dd6e-ac2f-4517-a084-e193a3d93601",
+      "class": "D",
+      "qtype": "open_end",
+      "question": "During my NeurIPS 2023 North America trip (prior to returning home), list all cities I visited along with the specific dates associated with each location, and provide the total number of cities visited.",
+      "gold_answer": "During your NeurIPS 2023 North America trip (before returning home on 2024-01-01), you visited 5 cities in total: Houston (layovers on 2023-12-09 and 2023-12-15), New Orleans (2023-12-09 to 2023-12-15), Boston (2023-12-15 to 2023-12-19), Cambridge, MA (2023-12-15 to 2023-12-19), and Toronto (2023-12-19 to 2023-12-31).",
+      "answers": {
+        "qwen3vl2b_sgm": {
+          "answer": "London, United Kingdom, 2023-12-09  \nNew Orleans, Louisiana, 2023-12-09  \nKenner, Louisiana, 2023-12-15  \nHouston, Texas, 2023-12-15  \nBoston, Massachusetts, 2023-12-15  \nToronto, Ontario, 2023-12-19  \nMississauga, Ontario, 2023-12-31  \nPetersfield, Cambridgeshire, England, 2024-01-31\n\nTotal number of cities visited: 7",
+          "atm_score": 0.0,
+          "judge_explanation": "The prediction does not match the ground truth. The ground truth lists 5 cities with specific date ranges; the prediction lists different cities (including London, Kenner, Mississauga, Petersfield), different dates (and an extra 2024-01-31), and a different total (7 vs 5). Multiple dates and locations conflict, so accuracy is false."
+        },
+        "mimo_v25_sgm": {
+          "answer": "London: 2023-12-09, New Orleans: 2023-12-09, Houston: 2023-12-15, Boston: 2023-12-15, Cambridge: 2023-12-15, Toronto: 2023-12-19, Mississauga: 2023-12-31. Total cities: 7.",
+          "atm_score": 0.0,
+          "judge_explanation": "The prediction does list cities and dates but conflicts with the ground truth: it adds London and Mississauga (not in ground truth), changes Houston and New Orleans dates (swapped layover vs stay), and reports 7 cities instead of 5. Because the prediction does not match the ground truth details, accuracy is false."
+        },
+        "mimo_v25_raw": {
+          "answer": "London, 2023-12-09; New Orleans, 2023-12-09; Houston, 2023-12-15; Boston, 2023-12-15; Cambridge, 2023-12-15; Toronto, 2023-12-19; Mississauga, 2023-12-31; 8",
+          "atm_score": 0.0,
+          "judge_explanation": "The prediction does list cities and dates but conflicts with the ground truth: it adds London and Mississauga (not in ground truth), has wrong Houston dates (should be layovers on 2023-12-09 and 2023-12-15 but prediction lists only 2023-12-15), and reports 8 cities instead of the ground-truth 5. Because of these mismatches and extra items, accuracy is false."
+        }
+      },
+      "finding": {
+        "effect": "reclassify_B_to_D",
+        "note": "三种回答都纳入 gold 排除的 transit/airport cities；输入没有一致的 visited-city ontology。"
+      }
+    },
+    {
+      "index": 4,
+      "id": "778461cd-4755-498f-b77b-43cc791b42c2",
+      "class": "C",
+      "qtype": "number",
+      "question": "How many days have I stayed in France from 2024 to 2025?",
+      "gold_answer": "10 days",
+      "answers": {
+        "qwen3vl2b_sgm": {
+          "answer": "Unknown",
+          "atm_score": 0.0,
+          "judge_explanation": null
+        },
+        "mimo_v25_sgm": {
+          "answer": "Unknown",
+          "atm_score": 0.0,
+          "judge_explanation": null
+        },
+        "mimo_v25_raw": {
+          "answer": "Unknown",
+          "atm_score": 0.0,
+          "judge_explanation": null
+        }
+      },
+      "finding": null
+    },
+    {
+      "index": 5,
+      "id": "c5eafc63-5b0b-43c8-b192-6381e5a8226e",
+      "class": "E",
+      "qtype": "number",
+      "question": "How much did I pay for my hotel during my recent trip to Portugal?",
+      "gold_answer": "€842.97",
+      "answers": {
+        "qwen3vl2b_sgm": {
+          "answer": "20250310_202208,202502110008,202502200013",
+          "atm_score": 0.0,
+          "judge_explanation": null
+        },
+        "mimo_v25_sgm": {
+          "answer": "445.26 EUR",
+          "atm_score": 0.0,
+          "judge_explanation": null
+        },
+        "mimo_v25_raw": {
+          "answer": "408.00 EUR and 445.26 EUR",
+          "atm_score": 0.0,
+          "judge_explanation": null
+        }
+      },
+      "finding": null
+    },
+    {
+      "index": 6,
+      "id": "580a4fee-8595-4453-8368-f52eec0a3954",
+      "class": "A",
+      "qtype": "list_recall",
+      "question": "Help me recall the image ids from Teayan Yuese (茶颜悦色) during my visit to Changsha.",
+      "gold_answer": "20230403_114939, 20230403_114911, 20230401_115135",
+      "answers": {
+        "qwen3vl2b_sgm": {
+          "answer": "20230401_115135, 20230403_114911, 20230403_114939",
+          "atm_score": 1.0,
+          "judge_explanation": null
+        },
+        "mimo_v25_sgm": {
+          "answer": "20230401_115135, 20230403_114911",
+          "atm_score": 0.6666666666666666,
+          "judge_explanation": null
+        },
+        "mimo_v25_raw": {
+          "answer": "20230401_115135, 20230403_114911, 20230403_114939",
+          "atm_score": 1.0,
+          "judge_explanation": null
+        }
+      },
+      "finding": null
+    },
+    {
+      "index": 7,
+      "id": "53ea4267-419b-4769-817c-add406463462",
+      "class": "A",
+      "qtype": "list_recall",
+      "question": "I remember attending a talk on LLM inference, discussing compute-bound and memory-bound during NeurIPS conference. Recall the media ids of the slides.",
+      "gold_answer": "20231210_123349, 20231210_124112, 20231210_124201, 20231210_124255,\n20231210_124635, 20231210_124834, 20231210_125002, 20231210_125339,\n20231210_125556, 20231210_125641, 20231210_125807, 20231210_125832,\n20231210_130147, 20231210_131358.",
+      "answers": {
+        "qwen3vl2b_sgm": {
+          "answer": "20231210_123349, 20231210_124112, 20231210_124201, 20231210_124255, 20231210_124635, 20231210_124834, 20231210_125002, 20231210_125339, 20231210_125556, 20231210_125641, 20231210_125807, 20231210_125832, 20231210_130147, 20231210_131358",
+          "atm_score": 1.0,
+          "judge_explanation": null
+        },
+        "mimo_v25_sgm": {
+          "answer": "20231210_123349, 20231210_124112, 20231210_124201, 20231210_124255, 20231210_124635, 20231210_124834, 20231210_125002, 20231210_125339, 20231210_125556, 20231210_125641, 20231210_125807, 20231210_125832, 20231210_130147, 20231210_131358",
+          "atm_score": 1.0,
+          "judge_explanation": null
+        },
+        "mimo_v25_raw": {
+          "answer": "20231210_123349, 20231210_124112, 20231210_124201, 20231210_124255, 20231210_124635, 20231210_124834, 20231210_125002, 20231210_125339, 20231210_125556, 20231210_125641, 20231210_125807, 20231210_125832, 20231210_130147, 20231210_131358",
+          "atm_score": 1.0,
+          "judge_explanation": null
+        }
+      },
+      "finding": null
+    },
+    {
+      "index": 8,
+      "id": "a294b202-3353-4fc4-be18-7abd2a36962c",
+      "class": "B",
+      "qtype": "open_end",
+      "question": "How many nights have I stayed in Glasgow during my visits, and in which specific years did those stays occur?",
+      "gold_answer": "6 nights in total. 1 night in 2022, 5 nights in 2024.",
+      "answers": {
+        "qwen3vl2b_sgm": {
+          "answer": "2, 2022, 2024, 2024, 2024, 2024",
+          "atm_score": 0.0,
+          "judge_explanation": "The prediction lists six items: '2' and five years (one 2022 and four 2024). That does not match the ground truth (total 6 nights: 1 night in 2022 and 5 nights in 2024). The prediction implies one entry '2' (invalid) and only four 2024 entries, so it conflicts with the ground truth counts and years."
+        },
+        "mimo_v25_sgm": {
+          "answer": "3 nights in 2022, 4 nights in 2024",
+          "atm_score": 0.0,
+          "judge_explanation": "The prediction does answer the question (gives counts by year), but its numbers conflict with the ground truth. Ground truth: 1 night (2022) and 5 nights (2024) totaling 6. Prediction: 3 (2022) and 4 (2024) totaling 7 — neither per-year nor total match, so accuracy is false."
+        },
+        "mimo_v25_raw": {
+          "answer": "2 nights in 2022, 1 night in 2024.",
+          "atm_score": 0.0,
+          "judge_explanation": "The prediction does answer the question format (number of nights and years) but conflicts with the ground truth numbers. Ground truth: 1 night in 2022 and 5 nights in 2024 (total 6). Prediction: 2 nights in 2022 and 1 night in 2024 (total 3), which does not match. Therefore accuracy is false."
+        }
+      },
+      "finding": null
+    },
+    {
+      "index": 9,
+      "id": "bb50a272-b5c8-4f0e-8fb5-530b16d73cd9",
+      "class": "A",
+      "qtype": "open_end",
+      "question": "During my NeurIPS 2023 trip, I travelled for a period of time. What were the start and end dates of the trip, and what was the total duration from departure until returning home?",
+      "gold_answer": "You departed on 9 December 2023 and returned on 1 January 2024, making the total duration of your NeurIPS 2023 trip 24 days (inclusive).",
+      "answers": {
+        "qwen3vl2b_sgm": {
+          "answer": "2023-12-09, 2024-01-01, 31 days",
+          "atm_score": 0.0,
+          "judge_explanation": "The prediction gives start and end dates that match the ground truth (2023-12-09 and 2024-01-01) but reports a duration of 31 days, which conflicts with the ground truth duration of 24 days (inclusive). Because the duration does not match exactly, accuracy is false."
+        },
+        "mimo_v25_sgm": {
+          "answer": "Start date: 2023-12-09, End date: 2024-01-01, Total duration: 24 days.",
+          "atm_score": 1.0,
+          "judge_explanation": "The prediction directly answers the question with dates matching the ground truth exactly and the duration equals 24 days inclusive. All values align with the ground truth."
+        },
+        "mimo_v25_raw": {
+          "answer": "December 9, 2023 to January 1, 2024, 24 days",
+          "atm_score": 1.0,
+          "judge_explanation": "Prediction states the same start and end dates and gives 24 days, matching the ground truth exactly (dates and inclusive duration agree). Therefore accuracy is true."
+        }
+      },
+      "finding": null
+    },
+    {
+      "index": 10,
+      "id": "afa4bf6a-c459-4173-9de9-2aac6183a4a7",
+      "class": "C",
+      "qtype": "list_recall",
+      "question": "I remember several moments when Grace was hiding in strange places, or being sneaky and peeking at me with her body partially hidden. I’d like to make a collection of those moments. Which photos or videos captured that?",
+      "gold_answer": "20250509_232753, 20250509_232802, 20250509_232737, 20250221_002518, 20250221_002514, 20250119_000631, 20241117_115411, 20241117_115422, 20241004_213143, 20240715_125140, 20240715_125144, 20250511_120224, 20250606_231452",
+      "answers": {
+        "qwen3vl2b_sgm": {
+          "answer": "20240715_125140, 20240715_125144, 20241004_213143, 20241117_115411, 20241117_115422, 20250119_000631, 20250221_002514, 20250221_002518, 20250509_232737, 20250509_232753, 20250509_232802, 20250511_120224, 20250606_231452",
+          "atm_score": 1.0,
+          "judge_explanation": null
+        },
+        "mimo_v25_sgm": {
+          "answer": "20240715_125140, 20240715_125144, 20241117_115411, 20250119_000631, 20250221_002514, 20250221_002518, 20250509_232737, 20250509_232802",
+          "atm_score": 0.6153846153846154,
+          "judge_explanation": null
+        },
+        "mimo_v25_raw": {
+          "answer": "20240715_125140, 20240715_125144, 20241117_115411, 20241117_115422, 20250119_000631, 20250221_002514, 20250221_002518, 20250509_232737, 20250509_232753, 20250509_232802, 20250511_120224, 20250606_231452",
+          "atm_score": 0.9230769230769231,
+          "judge_explanation": null
+        }
+      },
+      "finding": {
+        "effect": "supports_C_but_exposes_oracle_id_shortcut",
+        "note": "Qwen 直接输出全部 13 个 Oracle evidence IDs 获得 1.0；这不要求解析 Grace 与 cat 的身份映射。"
+      }
+    },
+    {
+      "index": 11,
+      "id": "baec8204-c6ca-4c9a-bd82-7145e2126659",
+      "class": "E",
+      "qtype": "list_recall",
+      "question": "I remember a day when I was walking outside and the weather suddenly became very bad, with heavy hail. Can you help me recall the slow-motion videos I took that day? Report the video ID.",
+      "gold_answer": "20230307_161006",
+      "answers": {
+        "qwen3vl2b_sgm": {
+          "answer": "Unknown",
+          "atm_score": 0.0,
+          "judge_explanation": null
+        },
+        "mimo_v25_sgm": {
+          "answer": "Unknown",
+          "atm_score": 0.0,
+          "judge_explanation": null
+        },
+        "mimo_v25_raw": {
+          "answer": "20230307_161006, 20230307_161017, 20230307_161038",
+          "atm_score": 0.3333333333333333,
+          "judge_explanation": null
+        }
+      },
+      "finding": null
+    },
+    {
+      "index": 12,
+      "id": "429b218c-086e-4f77-905e-2951ad92f5d8",
+      "class": "B",
+      "qtype": "open_end",
+      "question": "Which hotels have I stayed at in Glasgow, and on what dates?",
+      "gold_answer": "Z Hotel Glasgow: June 23–24, 2022\n\nDoubleTree by Hilton Glasgow Central: November 23–24, 2024\n\nHilton Glasgow: November 24–28, 2024",
+      "answers": {
+        "qwen3vl2b_sgm": {
+          "answer": "evidence1,evidence2,evidence3,evidence5",
+          "atm_score": 0.0,
+          "judge_explanation": "The prediction 'evidence1,evidence2,evidence3,evidence5' does not list hotels or dates and therefore does not answer the question. It fails to match the ground truth details about the three hotels and their exact dates, so accuracy is false."
+        },
+        "mimo_v25_sgm": {
+          "answer": "The Z Hotel Glasgow (June 23-24, 2022), Hilton Glasgow (November 24-27, 2024), DoubleTree by Hilton Glasgow Central (November 23-24, 2024)",
+          "atm_score": 0.0,
+          "judge_explanation": "The prediction lists the three hotels and dates, but Hilton Glasgow dates do not match ground truth: prediction says Nov 24–27, 2024 while ground truth is Nov 24–28, 2024. Numbers/dates must match exactly, so accuracy is false."
+        },
+        "mimo_v25_raw": {
+          "answer": "The Z Hotel Glasgow (June 23-24, 2022), Hilton Glasgow (November 24-28, 2024), DoubleTree by Hilton Glasgow Central (November 23-24, 2024).",
+          "atm_score": 1.0,
+          "judge_explanation": "The prediction lists the three hotels and dates exactly matching the ground truth entries (same hotels and identical date ranges). It answers the question and aligns fully with the ground truth."
+        }
+      },
+      "finding": null
+    },
+    {
+      "index": 13,
+      "id": "4028b70f-061e-4627-839e-9252ac387157",
+      "class": "B",
+      "qtype": "number",
+      "question": "How much did I spend on dental care in 2022?",
+      "gold_answer": "£190",
+      "answers": {
+        "qwen3vl2b_sgm": {
+          "answer": "20220906_134413,20220916_154434,20220924_194144",
+          "atm_score": 0.0,
+          "judge_explanation": null
+        },
+        "mimo_v25_sgm": {
+          "answer": "£190.00",
+          "atm_score": 1.0,
+          "judge_explanation": null
+        },
+        "mimo_v25_raw": {
+          "answer": "£190.00",
+          "atm_score": 1.0,
+          "judge_explanation": null
+        }
+      },
+      "finding": null
+    },
+    {
+      "index": 14,
+      "id": "ef912ea0-634f-4c1f-88d5-9e0543708258",
+      "class": "B",
+      "qtype": "list_recall",
+      "question": "Can you help me recall the photos I took during my lunch at Fancett?",
+      "gold_answer": "20250221_133131, 20250221_135227, 20250221_142725",
+      "answers": {
+        "qwen3vl2b_sgm": {
+          "answer": "20250221_133131, 20250221_135227, 20250221_142725",
+          "atm_score": 1.0,
+          "judge_explanation": null
+        },
+        "mimo_v25_sgm": {
+          "answer": "20250221_133131, 20250221_135227, 20250221_142725",
+          "atm_score": 1.0,
+          "judge_explanation": null
+        },
+        "mimo_v25_raw": {
+          "answer": "20250221_133131, 20250221_135227, 20250221_142725",
+          "atm_score": 1.0,
+          "judge_explanation": null
+        }
+      },
+      "finding": null
+    },
+    {
+      "index": 15,
+      "id": "888b4502-9c70-413a-8c06-69e7e97a16b2",
+      "class": "B",
+      "qtype": "list_recall",
+      "question": "I remember visiting a dessert shop in Guangzhou multiple times. The shop had several hundred items on its menu. Please retrieve all photos taken during those visits.",
+      "gold_answer": "20230327_205909, 20230327_210005, 20240819_205823, 20240819_205827, 20240819_210159",
+      "answers": {
+        "qwen3vl2b_sgm": {
+          "answer": "20230327_205909, 20230327_210005, 20240819_205823, 20240819_205827, 20240819_210159",
+          "atm_score": 1.0,
+          "judge_explanation": null
+        },
+        "mimo_v25_sgm": {
+          "answer": "20230327_205909, 20230327_210005, 20240819_205823, 20240819_205827, 20240819_210159",
+          "atm_score": 1.0,
+          "judge_explanation": null
+        },
+        "mimo_v25_raw": {
+          "answer": "20230327_205909, 20230327_210005, 20240819_205823, 20240819_205827, 20240819_210159",
+          "atm_score": 1.0,
+          "judge_explanation": null
+        }
+      },
+      "finding": null
+    },
+    {
+      "index": 16,
+      "id": "30ad0a48-89ef-46c4-a388-a3c872bd16b8",
+      "class": "A",
+      "qtype": "open_end",
+      "question": "Today is July, 1 2025, Help me recall all the acadamic conference I went to in the past two years. (Leave out one-day seminars/workshops)",
+      "gold_answer": "NeurIPS 2023, UKIS 2024, ACL 2024, ECCV 2024, ECAI 2024, BMVC 2024, ROBOVIS 2025, WWW 2025",
+      "answers": {
+        "qwen3vl2b_sgm": {
+          "answer": "20231210_111815, 20240701_120945, 20240811_150248, 20240930_132654, 20241021_153837, 20241127_193516, 20250223_100830, 20250428_114056",
+          "atm_score": 0.0,
+          "judge_explanation": "The prediction provides only timestamps, not conference names. It does not map to the ground-truth conference list, so it fails to answer the question. Therefore accuracy is false."
+        },
+        "mimo_v25_sgm": {
+          "answer": "20231210_111815, 20240701_120945, 20240811_150248, 20240930_132654, 20241021_153837, 20241127_193516, 20250223_100830, 20250428_114056",
+          "atm_score": 0.0,
+          "judge_explanation": "Prediction lists timestamps rather than conference names, so it does not answer the question. It fails to match the ground-truth list of conference names and thus does not cover the required information."
+        },
+        "mimo_v25_raw": {
+          "answer": "NeurIPS 2023, UKIS 2024, ACL 2024, ECCV 2024, ECAI 2024, BMVC 2024, ROBOVIS 2025, WWW 2025",
+          "atm_score": 1.0,
+          "judge_explanation": "The prediction exactly lists the same conferences as the ground truth in the same order. It directly answers the request to recall conferences (excluding one-day events). Therefore it matches the ground truth."
+        }
+      },
+      "finding": {
+        "effect": "official_prompt_output_contract_interference",
+        "note": "Qwen 与 MiMo SGM 对 open_end 的会议名称问题输出 evidence IDs，而 MiMo Raw 输出会议名并答对；官方 prompt 的 recall/list-items 规则与 qtype 所需自然语言答案冲突，SGM 中显著的 ID 字段进一步放大了这一干扰。"
+      }
+    },
+    {
+      "index": 17,
+      "id": "62e3fe3f-f301-47f1-9773-396920861220",
+      "class": "D",
+      "qtype": "open_end",
+      "question": "How many times have I visited Newcastle?",
+      "gold_answer": "Only one time.",
+      "answers": {
+        "qwen3vl2b_sgm": {
+          "answer": "2",
+          "atm_score": 0.0,
+          "judge_explanation": "The prediction directly answers the question but conflicts with the ground truth. Ground truth states one visit; prediction says two. Under rules, numbers must match exactly, so accuracy is false."
+        },
+        "mimo_v25_sgm": {
+          "answer": "2",
+          "atm_score": 0.0,
+          "judge_explanation": "The prediction does answer the question but states '2', which contradicts the ground truth 'Only one time.' Numbers must match exactly per instructions, so accuracy is false."
+        },
+        "mimo_v25_raw": {
+          "answer": "Unknown",
+          "atm_score": 0.0,
+          "judge_explanation": "The prediction 'Unknown' does not answer the question 'How many times have I visited Newcastle?' The ground truth states 'Only one time.' Because the prediction contradicts/provides no matching information, accuracy is false."
+        }
+      },
+      "finding": null
+    },
+    {
+      "index": 18,
+      "id": "92e4edaa-5b26-44a5-80d2-91acf53b3b9c",
+      "class": "B",
+      "qtype": "open_end",
+      "question": "Which Portuguese restaurant did I really like during my visit, and why?",
+      "gold_answer": "Abadia do Porto, you went there twice during your visit.",
+      "answers": {
+        "qwen3vl2b_sgm": {
+          "answer": "Evidence 1, 2, and 3 all refer to the same location, Abadia do Porto in Porto, Portugal, and describe different meals. Evidence 1 shows a charcuterie board, bread, wine, and orange juice, which is a typical table setting for a meal. Evidence 2 shows a plate of stewed beans and rice, which is a traditional Portuguese dish. Evidence 3 shows a traditional Portuguese meal with a pot of *caldo verde*, clams, rice, and vegetables, which is a hearty and comforting meal. The evidence does not provide any information about which restaurant was liked. Therefore, the answer is Unknown.",
+          "atm_score": 0.0,
+          "judge_explanation": "The prediction does not state a liked restaurant; it concludes 'Unknown' despite referencing Abadia do Porto multiple times. Ground truth says you really liked Abadia do Porto and visited twice. The prediction conflicts with the ground truth, so accuracy is false."
+        },
+        "mimo_v25_sgm": {
+          "answer": "Abadia do Porto, for its warm, intimate atmosphere and traditional Portuguese cuisine.",
+          "atm_score": 1.0,
+          "judge_explanation": "The prediction answers the question by naming Abadia do Porto and giving a plausible reason. Ground truth states Abadia do Porto and that you went there twice; the prediction matches the restaurant but omits the specific detail about visiting twice. Because it does not contradict ground truth and covers the key item, but misses the 'went there twice' fact, accuracy is considered true under rule 2.4 (allowed to provide more/less info as long as not contradicting)."
+        },
+        "mimo_v25_raw": {
+          "answer": "Abadia do Porto. The evidence shows multiple visits (Feb 22 and Feb 27) with a variety of traditional Portuguese dishes, including cured meats, rice, stews, and seafood, indicating a positive experience.",
+          "atm_score": 1.0,
+          "judge_explanation": "The prediction directly answers the question naming Abadia do Porto and gives supporting evidence (multiple visits on Feb 22 and Feb 27 and varied traditional dishes), which matches the ground truth that you went there twice. The details align and do not conflict with the ground truth."
+        }
+      },
+      "finding": null
+    },
+    {
+      "index": 19,
+      "id": "9a051aa3-a6b6-4e10-bb40-785cde684ad8",
+      "class": "C",
+      "qtype": "number",
+      "question": "After I arrived in Santiago, I wasn't able to get an Uber. Then, I queued for taxi for quite a while, how long did I wait before finally getting a taxi?",
+      "gold_answer": "About 1 hour.",
+      "answers": {
+        "qwen3vl2b_sgm": {
+          "answer": "23,00 EUR",
+          "atm_score": 0.0,
+          "judge_explanation": null
+        },
+        "mimo_v25_sgm": {
+          "answer": "Unknown",
+          "atm_score": 0.0,
+          "judge_explanation": null
+        },
+        "mimo_v25_raw": {
+          "answer": "Unknown",
+          "atm_score": 0.0,
+          "judge_explanation": null
+        }
+      },
+      "finding": null
+    },
+    {
+      "index": 20,
+      "id": "b6b46633-47a1-4fd6-88c4-42a7677d7fc5",
+      "class": "B",
+      "qtype": "open_end",
+      "question": "Which hotels did I stay at in Greater Cairo during my most recent visit?",
+      "gold_answer": "Novotel Cairo Airport, Conrad Cairo and Hilton Pyramids Golf",
+      "answers": {
+        "qwen3vl2b_sgm": {
+          "answer": "20240730_024914, 20240730_203024, 20240731_102216",
+          "atm_score": 0.0,
+          "judge_explanation": "The prediction lists three timestamps (file-like strings) rather than hotel names. It does not answer which hotels were stayed at and therefore does not match the ground truth hotels. Accuracy is false."
+        },
+        "mimo_v25_sgm": {
+          "answer": "Novotel Cairo Airport, Sofitel Cairo",
+          "atm_score": 0.0,
+          "judge_explanation": "The prediction lists two hotels but does not match the ground truth list of three hotels. It includes Novotel Cairo Airport (matches) but replaces Conrad Cairo and Hilton Pyramids Golf with Sofitel Cairo, which conflicts with the ground truth. Therefore the prediction does not match."
+        },
+        "mimo_v25_raw": {
+          "answer": "Novotel Cairo Airport, Sofitel Cairo",
+          "atm_score": 0.0,
+          "judge_explanation": "The prediction lists Novotel Cairo Airport (matches) and Sofitel Cairo (not in ground truth). Ground truth lists three hotels: Novotel Cairo Airport, Conrad Cairo, and Hilton Pyramids Golf. The prediction omits Conrad and Hilton Pyramids Golf and adds Sofitel, so it does not match the ground truth."
+        }
+      },
+      "finding": null
+    },
+    {
+      "index": 21,
+      "id": "7665e37d-29a0-4450-8d03-6539122a6b3f",
+      "class": "D",
+      "qtype": "open_end",
+      "question": "I recall visiting a dessert shop in Guangzhou on multiple occasions. The shop had an extensive menu, with several hundred items available. On what exact dates did I last visit this dessert shop? What is the name of the shop?",
+      "gold_answer": "The dessert shop is 百花传统甜品店.\nThe most recent visit dates were 27 March 2023 and 19 August 2024.",
+      "answers": {
+        "qwen3vl2b_sgm": {
+          "answer": "2024-08-19, Baihua Traditional Dessert Shop",
+          "atm_score": 0.0,
+          "judge_explanation": "The prediction gives one of the two ground-truth visit dates (2024-08-19) and an English name for the shop but omits the earlier date (27 March 2023) and the exact Chinese shop name. Because it does not fully match the ground truth, accuracy is false."
+        },
+        "mimo_v25_sgm": {
+          "answer": "Unknown",
+          "atm_score": 0.0,
+          "judge_explanation": "The prediction 'Unknown' does not answer the question asking for the shop name and exact last visit dates. Ground truth gives a specific name and two dates, so the model output conflicts with that (fails to provide the required information)."
+        },
+        "mimo_v25_raw": {
+          "answer": "Based on the evidence provided:\n\n1.  **Shop Name**: Evidence 3 shows the storefront with the sign \"BAIHUA TRADITIONAL DESSERT SHOP\" (百花传统甜品店).\n2.  **Last Visit Date**: The evidence contains timestamps for visits on 2023-03-27 (Evidence 1 and 2) and 2024-08-19 (Evidence 3). The latest date is 2024-08-19.\n\n**Answer**: 2024-08-19, Baihua Traditional Dessert Shop",
+          "atm_score": 0.0,
+          "judge_explanation": "The prediction names the shop correctly (百花传统甜品店) but gives only one of the two most recent visit dates (returned 2024-08-19 but omitted 2023-03-27). Ground truth lists both 27 March 2023 and 19 August 2024, so the prediction does not fully match."
+        }
+      },
+      "finding": {
+        "effect": "reclassify_B_to_D",
+        "note": "模型识别两次访问后仍将 last visit 解释为最近一次；gold 却要求两次日期。"
+      }
+    },
+    {
+      "index": 22,
+      "id": "e44b102b-d7e2-4a4f-bdc6-464529910081",
+      "class": "A",
+      "qtype": "list_recall",
+      "question": "Can you help me recall all the photos I took during meals on my trip to Cornwall?",
+      "gold_answer": "20230416_114842, 20230416_191938, 20230416_191943,\n20230417_133726, 20230418_121232, 20230418_184523,\n20230419_130151, 20230419_130159, 20230419_134456,\n20230419_194245, 20230419_195920, 20230419_200149,\n20230419_200211, 20230419_200232, 20230419_200302,\n20230419_200441, 20230419_200455.",
+      "answers": {
+        "qwen3vl2b_sgm": {
+          "answer": "20230416_114842, 20230416_191938, 20230416_191943, 20230417_133726, 20230418_121232, 20230418_184523, 20230419_130151, 20230419_130159, 20230419_134456, 20230419_194245, 20230419_195920, 20230419_200149, 20230419_200211, 20230419_200232, 20230419_200302, 20230419_200441, 20230419_200455",
+          "atm_score": 1.0,
+          "judge_explanation": null
+        },
+        "mimo_v25_sgm": {
+          "answer": "20230416_114842, 20230416_191938, 20230416_191943, 20230417_133726, 20230418_121232, 20230418_184523, 20230419_130151, 20230419_130159, 20230419_134456, 20230419_200149, 20230419_200211, 20230419_200232, 20230419_200302, 20230419_200441, 20230419_200455",
+          "atm_score": 0.8823529411764706,
+          "judge_explanation": null
+        },
+        "mimo_v25_raw": {
+          "answer": "20230416_114842, 20230416_191938, 20230416_191943, 20230417_133726, 20230418_121232, 20230418_184523, 20230419_130151, 20230419_130159, 20230419_134456, 20230419_194245, 20230419_200211, 20230419_200232, 20230419_200302, 20230419_200441, 20230419_200455",
+          "atm_score": 0.8823529411764706,
+          "judge_explanation": null
+        }
+      },
+      "finding": null
+    },
+    {
+      "index": 23,
+      "id": "2a976a38-20f4-4eaa-870b-03955fc612e8",
+      "class": "E",
+      "qtype": "number",
+      "question": "I am reimbursing my ECAI 2024 trip. What was the total cost of my taxi rides during the trip?",
+      "gold_answer": "€62.8",
+      "answers": {
+        "qwen3vl2b_sgm": {
+          "answer": "23.00, 9.10, 35.00, 10.80, 9.50",
+          "atm_score": 0.0,
+          "judge_explanation": null
+        },
+        "mimo_v25_sgm": {
+          "answer": "23.00 EUR, 9.50 EUR",
+          "atm_score": 0.0,
+          "judge_explanation": null
+        },
+        "mimo_v25_raw": {
+          "answer": "62.75 EUR",
+          "atm_score": 0.0,
+          "judge_explanation": null
+        }
+      },
+      "finding": null
+    },
+    {
+      "index": 24,
+      "id": "6c73ad56-d84c-48b7-a7d4-bbc2ffd80c79",
+      "class": "A",
+      "qtype": "list_recall",
+      "question": "Can you help me find all the memory pieces related to St Michael’s Mount? Report the ids.",
+      "gold_answer": "20230418_135743, 20230418_135752, 20230418_135850, 20230418_195315, 20230418_195319, 20230418_195350, 20230418_135852.",
+      "answers": {
+        "qwen3vl2b_sgm": {
+          "answer": "20230418_135743, 20230418_135752, 20230418_135850, 20230418_135852, 20230418_195315, 20230418_195319, 20230418_195350",
+          "atm_score": 1.0,
+          "judge_explanation": null
+        },
+        "mimo_v25_sgm": {
+          "answer": "20230418_135743, 20230418_135752, 20230418_135850, 20230418_135852, 20230418_195315, 20230418_195319, 20230418_195350",
+          "atm_score": 1.0,
+          "judge_explanation": null
+        },
+        "mimo_v25_raw": {
+          "answer": "20230418_135743, 20230418_135752, 20230418_135850, 20230418_135852, 20230418_195315, 20230418_195319, 20230418_195350",
+          "atm_score": 1.0,
+          "judge_explanation": null
+        }
+      },
+      "finding": null
+    },
+    {
+      "index": 25,
+      "id": "7b24dbf3-dbe0-4382-9e9c-996cf614657e",
+      "class": "A",
+      "qtype": "open_end",
+      "question": "Which European countries have I visted?",
+      "gold_answer": "United Kingdom, Spain, Portugal, Hungary, France, Italy.",
+      "answers": {
+        "qwen3vl2b_sgm": {
+          "answer": "20220917_134113, 20240930_180605, 20241021_134620, 20250208_123453, 20250223_132602, 20250407_201317",
+          "atm_score": 0.0,
+          "judge_explanation": "The prediction lists filenames/timestamps, not country names. It does not answer which European countries were visited, so it fails to match the ground truth list of countries. Therefore accuracy is false."
+        },
+        "mimo_v25_sgm": {
+          "answer": "England, Italy, Spain, France, Portugal, Hungary",
+          "atm_score": 1.0,
+          "judge_explanation": "The prediction lists England, Italy, Spain, France, Portugal, Hungary. Ground truth lists United Kingdom, Spain, Portugal, Hungary, France, Italy. England is part of the United Kingdom, so the sets match semantically. Order differs but that's allowed. Therefore the prediction matches the ground truth."
+        },
+        "mimo_v25_raw": {
+          "answer": "United Kingdom, Italy, Spain, France, Portugal, Hungary",
+          "atm_score": 1.0,
+          "judge_explanation": "The prediction lists the same six countries as the ground truth, just in a different order. All ground-truth items are present and there are no extras or omissions, so it matches exactly."
+        }
+      },
+      "finding": {
+        "effect": "official_prompt_output_contract_interference",
+        "note": "Qwen 对 open_end 的国家问题输出 evidence IDs，MiMo 则输出国家并答对。"
+      }
+    },
+    {
+      "index": 26,
+      "id": "716095fa-6f76-4f19-95e4-3c8bf079fbdd",
+      "class": "E",
+      "qtype": "list_recall",
+      "question": "Help me recall all of my sheep related photo ids in Newcastle.",
+      "gold_answer": "20230905_144627, 20230905_152531, 20230906_155344, 20230906_121455, 20230906_121206, 20230905_153627, 20230905_153314, 20230905_152605",
+      "answers": {
+        "qwen3vl2b_sgm": {
+          "answer": "20230905_144627, 20230905_152531, 20230905_152605, 20230905_153314, 20230905_153627, 20230906_121206, 20230906_121455, 20230906_155344",
+          "atm_score": 1.0,
+          "judge_explanation": null
+        },
+        "mimo_v25_sgm": {
+          "answer": "20230905_144627, 20230905_152531, 20230905_152605, 20230906_121206, 20230906_155344",
+          "atm_score": 0.625,
+          "judge_explanation": null
+        },
+        "mimo_v25_raw": {
+          "answer": "20230905_144627, 20230905_152531, 20230905_152605, 20230905_153314, 20230905_153627, 20230906_121206, 20230906_121455, 20230906_155344",
+          "atm_score": 1.0,
+          "judge_explanation": null
+        }
+      },
+      "finding": {
+        "effect": "supports_E_but_exposes_oracle_id_shortcut",
+        "note": "Qwen SGM 和 MiMo Raw 复制全部 8 个 Oracle IDs 获得 1.0，但若干 SGM 项并未暴露 sheep 语义。"
+      }
+    },
+    {
+      "index": 27,
+      "id": "b8e85e9d-6701-4f66-885e-bdfabf03f7cd",
+      "class": "A",
+      "qtype": "list_recall",
+      "question": "Today is June 1, 2025. I’ve enjoyed collecting conference badges over the past two years. Can you help me recall all the photos of my badges from that period? Show me the image ids.",
+      "gold_answer": "20231210_111815, 20240701_120945, 20240811_150248, 20240930_132654, 20250428_114056, 20250428_114126, 20241003_184216",
+      "answers": {
+        "qwen3vl2b_sgm": {
+          "answer": "20231210_111815, 20240701_120945, 20240811_150248, 20240930_132654, 20241003_184216, 20250428_114056, 20250428_114126",
+          "atm_score": 1.0,
+          "judge_explanation": null
+        },
+        "mimo_v25_sgm": {
+          "answer": "20231210_111815, 20240701_120945, 20240811_150248, 20240930_132654, 20241003_184216, 20250428_114056, 20250428_114126",
+          "atm_score": 1.0,
+          "judge_explanation": null
+        },
+        "mimo_v25_raw": {
+          "answer": "20231210_111815, 20240701_120945, 20240811_150248, 20240930_132654, 20241003_184216, 20250428_114056, 20250428_114126",
+          "atm_score": 1.0,
+          "judge_explanation": null
+        }
+      },
+      "finding": null
+    },
+    {
+      "index": 28,
+      "id": "0f7fcf11-8516-4756-b791-6e76e8065b14",
+      "class": "E",
+      "qtype": "open_end",
+      "question": "Which cities have I visited in France?",
+      "gold_answer": "Marseille, Apt, Pertuis, La Seyne-sur-Mer, Cassis, Toulon, Aubagne, Marignane, Istres, Paris",
+      "answers": {
+        "qwen3vl2b_sgm": {
+          "answer": "20240708_170032, 20240711_121848, 20240711_125806, 20240712_101712, 20240712_142629, 20240713_144451, 20240713_192657, 20240713_193044, 20240713_224255, 20250208_125156",
+          "atm_score": 0.0,
+          "judge_explanation": "The prediction lists timestamps/filenames, not city names. It does not provide the cities in the ground truth. Therefore it fails to answer the question and does not match the ground truth list of cities."
+        },
+        "mimo_v25_sgm": {
+          "answer": "Marignane, Puyvert, Pertuis, La Seyne-sur-Mer, Cassis, Aubagne, Paris",
+          "atm_score": 0.0,
+          "judge_explanation": "The prediction lists several cities but omits Marseille, Toulon, Istres, and Apt from the ground truth, and includes Puyvert which is not in the ground truth. Because it misses multiple true cities and adds an extra, it does not match the ground truth."
+        },
+        "mimo_v25_raw": {
+          "answer": "Marignane, Apt, Pertuis, La Seyne-sur-Mer, Cassis, Aubagne, Paris",
+          "atm_score": 0.0,
+          "judge_explanation": "The prediction lists many of the ground-truth cities but omits Marseille, Toulon, Istres and includes no extra cities. Because several ground-truth cities are missing, the prediction does not fully match the ground truth."
+        }
+      },
+      "finding": null
+    },
+    {
+      "index": 29,
+      "id": "17b8b612-213a-4ab3-87f9-356b8cf0d7e5",
+      "class": "B",
+      "qtype": "open_end",
+      "question": "During my recent trip to Egypt, I remember staying at some Sofitel-branded hotels and having a very good experience. Could you remind me which hotels these were?\nI also recall taking a nice timelapse at one of the hotels, could you help me identify which hotel it was taken at and the ID of that timelapse?",
+      "gold_answer": "The Sofitel hotels you stayed at were Sofitel Winter Palace Luxor and Sofitel Legend Old Cataract Aswan.\nThe timelapse was taken at Sofitel Winter Palace Luxor, and the ID of the timelapse is 20240801_201540.",
+      "answers": {
+        "qwen3vl2b_sgm": {
+          "answer": "Sofitel Legend Winter Palace Hotel, 0, Kornish Al Nile Street, Luxor City, Luxor, 85951, Egypt  \nSofitel Legend Old Cataract Aswan Hotel, 81511, Al Fanadq Street, Taqouk Mountain, Aswan, 81529, Egypt  \n\n20240731_155548, 20240801_201540",
+          "atm_score": 0.0,
+          "judge_explanation": "The prediction lists two Sofitel properties: one is named incorrectly as 'Sofitel Legend Winter Palace Hotel' instead of 'Sofitel Winter Palace Luxor' (name mismatch) but includes Old Cataract Aswan correctly. It also provides three timelapse IDs; only one of them (20240801_201540) matches the ground truth. Because of the incorrect hotel name and extra/unverified timelapse IDs, the prediction does not fully match the ground truth."
+        },
+        "mimo_v25_sgm": {
+          "answer": "Sofitel Legend Winter Palace Hotel, Sofitel Legend Old Cataract Aswan Hotel; 20240801_201540",
+          "atm_score": 0.0,
+          "judge_explanation": "The prediction misnames one hotel: it lists \"Sofitel Legend Winter Palace\" instead of the correct \"Sofitel Winter Palace Luxor\" (adding \"Legend\" and altering name). It correctly includes Sofitel Legend Old Cataract Aswan and the timelapse ID matches. Because one hotel name is incorrect, accuracy is false."
+        },
+        "mimo_v25_raw": {
+          "answer": "Sofitel Legend Winter Palace Hotel, Sofitel Legend Old Cataract Aswan Hotel; 20240801_201540",
+          "atm_score": 0.0,
+          "judge_explanation": "The prediction lists 'Sofitel Legend Winter Palace Hotel' which conflicts with the ground truth 'Sofitel Winter Palace Luxor' (name mismatch). It correctly includes 'Sofitel Legend Old Cataract Aswan' and the timelapse ID matches. Because one hotel name does not match exactly, accuracy is false."
+        }
+      },
+      "finding": {
+        "effect": "judge_explanation_anomaly_not_reclassified",
+        "note": "MiMo 使用证据中的 Sofitel Legend Winter Palace Hotel 名称并给出正确 ID；judge 将该证据内名称称为错误。不过回答没有显式说明 timelapse 属于哪家酒店，因此 false verdict 仍有独立依据。"
+      }
+    },
+    {
+      "index": 30,
+      "id": "361fef09-dbcc-4a68-aed2-187f9728b792",
+      "class": "A",
+      "qtype": "open_end",
+      "question": "I just returned from the first day of ECCV 2024. Help me gather all the interesting papers I discovered today and list their titles.",
+      "gold_answer": "Safe-CLIP removing NSFW Concepts from VLM,  Towards Surprising Video Comprehension, Learning Anomalies with Normality Prior for Unsupervised Video Anomaly Detection, 3x2: 3D Object Part Segmentation by 2D Semantic Correspondences, Camera Calibration using a Collimator System, DSMix: Distortion-Induced Sensitivity Map Based Pre-training for No-Reference Image Quality Assessment, EA-VTR: Event-Aware Video-Text Retrieval, PosterLlama: Bridging Design Ability of Language Model to Contents-Aware Layout Generation, CTRLorALTer: Conditional LoRAdapter for Efficient 0-Shot Control & Altering of T2I Models, PreciseControl: Enhancing Text-To-Image Diffusion Models with Fine-Grained Attribute Control, Efficient Pre-Training for Localized Instruction Generation of Videos, Commonly Interesting Images",
+      "answers": {
+        "qwen3vl2b_sgm": {
+          "answer": "20241001_171053, 20241001_173039, 20241001_174058, 20241001_175310, 20241001_180247, 20241001_181259, 20241001_182544, 20241001_183401, 20241001_184112, 20241001_184155, 20241001_184633, 20241001_184746",
+          "atm_score": 0.0,
+          "judge_explanation": "The prediction lists timestamps/IDs, not paper titles, so it fails to answer the request. It does not match any of the given ground-truth paper titles, therefore accuracy is false."
+        },
+        "mimo_v25_sgm": {
+          "answer": "Safe-CLIP: Removing NSFW Concepts from Vision-and-Language Models, Learning Anomalies with Normality Prior for Unsupervised Video Anomaly Detection, Towards Surprising Video Comprehension, 3x2: 3D Object Part Segmentation by 2D Semantic Correspondences, Camera Calibration using a Collimator System, DSMix: Distortion-Induced Sensitivity Map Based Pre-training for No-Reference Image Quality Assessment, EA-VTR: Event-Aware Video-Text Retrieval, PosterLlama: Bridging Design Ability of Language Model to Contents-Aware Layout Generation, CTRLorAltEr: Conditional LoRA Adapter for Efficient 0-Shot Control & Altering of T2I Models, PreciseControl: Enhancing Text-To-Image Diffusion Models with Fine-Grained Attribute Control, Efficient Pre-Training For Localized Instruction Generation Of Videos, Commonly Interesting Images",
+          "atm_score": 1.0,
+          "judge_explanation": "The prediction lists titles matching the user's request. Comparing to ground truth, all titles appear present and correspond closely. Minor differences are capitalization and small naming variants (e.g., 'Safe-CLIP: Removing NSFW Concepts from Vision-and-Language Models' vs 'Safe-CLIP removing NSFW Concepts from VLM', and 'CTRLorAltEr' vs 'CTRLorALTer'), but these do not change content. Therefore the prediction matches the ground truth."
+        },
+        "mimo_v25_raw": {
+          "answer": "Safe-CLIP: Removing NSFW Concepts from Vision-and-Language Models, Learning Anomalies with Normality Prior for Unsupervised Video Anomaly Detection, Towards Surprising Video Comprehension, 3x2: 3D Object Part Segmentation by 2D Semantic Correspondences, Camera Calibration using a Collimator System, DSMix: Distortion-Induced Sensitivity Map Based Pre-training for No-Reference Image Quality Assessment, EA-VTR: Event-Aware Video-Text Retrieval, PosterLlama: Bridging Design Ability of Language Model to Contents-Aware Layout Generation, CTRLorALTer: Conditional LoRAAdapter for Efficient 0-Shot Control & Altering of T2I Models, PreciseControl: Enhancing Text-To-Image Diffusion Models with Fine-Grained Attribute Control, Efficient Pre-Training For Localized Instruction Generation Of Videos, Commonly Interesting Images",
+          "atm_score": 1.0,
+          "judge_explanation": "The prediction lists the same papers as the ground truth with matching titles (minor punctuation/capitalization differences only). All ground-truth items are present and no extra items were added, so it matches."
+        }
+      },
+      "finding": {
+        "effect": "official_prompt_output_contract_interference",
+        "note": "Qwen 对 open_end 的论文标题问题输出 evidence IDs，MiMo 输出标题并答对。"
+      }
+    },
+    {
+      "index": 31,
+      "id": "30be4a0e-8708-42fe-9a21-c73254c78270",
+      "class": "B",
+      "qtype": "list_recall",
+      "question": "I remember Grace sitting with me during meals on several occasions, and I’d like to make a collection of those moments. Which photos or videos captured that?",
+      "gold_answer": "20241116_174018, 20241116_174026, 20241017_140703, 20240926_131909, 20240628_105911",
+      "answers": {
+        "qwen3vl2b_sgm": {
+          "answer": "20240628_105911, 20241017_140703, 20241116_174018, 20241116_174026",
+          "atm_score": 0.8,
+          "judge_explanation": null
+        },
+        "mimo_v25_sgm": {
+          "answer": "Unknown",
+          "atm_score": 0.0,
+          "judge_explanation": null
+        },
+        "mimo_v25_raw": {
+          "answer": "20240628_105911, 20240926_131909, 20241017_140703, 20241116_174018, 20241116_174026",
+          "atm_score": 1.0,
+          "judge_explanation": null
+        }
+      },
+      "finding": null
+    }
+  ]
+}
